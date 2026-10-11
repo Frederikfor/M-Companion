@@ -1,0 +1,267 @@
+<title>Acompañante de Ensayo</title>
+<style>
+/* Layout: iOS-style app shell, dark on purpose for stages; four tabs, live controls in the thumb zone */
+:root {
+  --bg: #000000;
+  --card: #1C1C1E;
+  --fill: #2C2C2E;
+  --seg: #48484A;
+  --line: #38383A;
+  --fg: #FFFFFF;
+  --muted: #98989F;
+  --chev: #5A5A5F;
+  --accent: #FF9F0A;
+  --accent-soft: rgba(255, 159, 10, 0.16);
+  --go: #30D158;
+  --stop: #FF453A;
+  --off: #39393D;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --tabbar: calc(56px + env(safe-area-inset-bottom, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 17px; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; touch-action: manipulation; }
+button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.screen { position: fixed; inset: 0 0 var(--tabbar) 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 24px; }
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; min-height: 100%; }
+h1 { margin: 8px 0 12px; font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: .37px; }
+.cap { padding: 12px 16px 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+.foot { margin: 0; padding: 0 16px; font-size: 13px; line-height: 18px; color: var(--muted); }
+.group { background: var(--card); border-radius: 12px; overflow: hidden; }
+.row { min-height: 44px; padding: 6px 16px; display: flex; align-items: center; gap: 8px; position: relative; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--line); }
+.row > .lbl { flex: 1; min-width: 0; }
+.row select { appearance: none; -webkit-appearance: none; background: transparent; border: 0; color: var(--muted); text-align: right; text-align-last: right; max-width: 62%; padding: 6px 0; font-size: 17px; }
+.chev { flex: none; width: 8px; height: 13px; }
+.row.col { flex-direction: column; align-items: stretch; padding-block: 11px; }
+.row.col .top { display: flex; justify-content: space-between; }
+input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-height: 28px; }
+.switch { flex: none; position: relative; width: 51px; height: 31px; border-radius: 16px; background: var(--off); transition: background .2s; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.25); transition: left .2s; }
+.switch[aria-checked="true"] { background: var(--go); }
+.switch[aria-checked="true"]::after { left: 22px; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 2px; border-radius: 9px; background: var(--fill); }
+.seg button, .seg label { height: 32px; border-radius: 7px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+.seg .on { background: var(--seg); font-weight: 600; }
+
+/* Tocar */
+#tab-tocar .wrap { gap: 0; }
+.now { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
+.now .song { min-width: 0; display: flex; flex-direction: column; }
+.now small { font-size: 13px; color: var(--muted); }
+#songtitle { font-size: 22px; line-height: 28px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pill { position: relative; height: 32px; padding: 0 12px; border-radius: 16px; background: var(--card); display: flex; align-items: center; font-size: 15px; font-weight: 600; }
+.pill select { position: absolute; inset: 0; opacity: 0; width: 100%; }
+#status { font-size: 12px; color: var(--muted); }
+.tempo { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.tempo .line { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+.round { width: 56px; height: 56px; border-radius: 28px; background: var(--card); display: flex; align-items: center; justify-content: center; }
+.round.sm { width: 44px; height: 44px; border-radius: 22px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.bpmbox { display: flex; flex-direction: column; align-items: center; }
+#bpm { font-size: 88px; line-height: 92px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
+#bpmunit { font-size: 15px; color: var(--muted); }
+.dots { display: flex; gap: 12px; justify-content: center; min-height: 16px; }
+.dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #3A3A3C; }
+.dot.strong { border-color: #8E8E93; }
+.dot.now { background: var(--accent); border-color: var(--accent); }
+#barinfo { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; min-height: 20px; }
+#tap { height: 44px; padding: 0 20px; border-radius: 22px; color: var(--accent); font-size: 17px; font-weight: 600; }
+.padcard { margin-top: 20px; padding: 12px; border-radius: 16px; background: var(--card); display: flex; flex-direction: column; gap: 10px; }
+.padcard .head { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 15px; min-height: 28px; }
+.padcard .head button { display: flex; align-items: center; gap: 6px; color: var(--muted); min-height: 32px; }
+.chords { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.chords button { height: 48px; border-radius: 10px; background: var(--fill); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.chords b { font-size: 15px; font-weight: 600; }
+.chords span { font-size: 10px; opacity: .6; }
+.chords button.on { background: var(--accent); color: #000000; }
+.chords.muted { opacity: .4; }
+.live { margin-top: auto; padding-top: 24px; display: flex; flex-direction: column; gap: 20px; }
+#sections { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; padding: 2px; border-radius: 12px; background: var(--card); }
+#sections button { height: 44px; border-radius: 10px; font-size: 14px; font-weight: 500; }
+#sections button.on { background: var(--seg); font-weight: 600; }
+#sections button.pending { box-shadow: inset 0 0 0 2px var(--accent); color: var(--accent); }
+.transport { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+.tbtn { height: 64px; border-radius: 16px; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 13px; font-weight: 600; }
+#fill { background: var(--accent-soft); color: var(--accent); }
+#fill.armed { background: var(--accent); color: #000000; }
+#play { width: 84px; height: 84px; border-radius: 42px; background: var(--go); color: #000000; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+#play .i-stop { display: none; }
+#play.stop { background: var(--stop); }
+#play.stop .i-stop { display: block; }
+#play.stop .i-play { display: none; }
+
+/* Canciones */
+.titlebar { display: flex; align-items: flex-end; justify-content: space-between; }
+.songs .song { display: flex; align-items: center; position: relative; }
+.songs .song + .song::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--line); }
+.songload { flex: 1; min-width: 0; min-height: 60px; padding: 8px 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
+.songload b { font-weight: 400; font-size: 17px; }
+.songload span { font-size: 13px; color: var(--muted); }
+.songdel { min-width: 56px; min-height: 44px; margin-right: 8px; color: var(--muted); border-radius: 8px; font-size: 15px; }
+.songdel[data-armed] { background: var(--stop); color: #FFFFFF; }
+.songs .hint { margin: 0; padding: 14px 16px; color: var(--muted); font-size: 15px; line-height: 20px; }
+.save { display: flex; gap: 8px; }
+.save input { flex: 1; min-width: 0; height: 44px; border: 0; border-radius: 10px; background: var(--card); padding: 0 12px; font-size: 17px; }
+.save input::placeholder { color: #8E8E93; }
+.save button { height: 44px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: #000000; font-weight: 600; }
+
+/* Sonido */
+.mix .row { gap: 12px; }
+.mix .row > button { flex: none; width: 96px; min-height: 32px; border-radius: 8px; text-align: left; padding-left: 0; color: var(--muted); }
+.mix .row > button.on { color: var(--fg); }
+#micread { font-size: 17px; font-variant-numeric: tabular-nums; }
+.alert { color: var(--stop); font-weight: 600; }
+.ok { color: var(--go); font-weight: 600; }
+.credits { font-size: 12px; }
+
+/* Tab bar */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(22, 22, 24, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #8E8E93; font-size: 10px; font-weight: 600; min-height: 44px; }
+.tab[aria-selected="true"] { color: var(--accent); }
+@media (max-height: 700px) { .tempo { margin-top: 12px; gap: 8px; } #bpm { font-size: 72px; line-height: 76px; } .padcard { margin-top: 12px; } .live { gap: 12px; padding-top: 12px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main>
+  <section class="screen" id="tab-tocar" aria-label="Tocar">
+    <div class="wrap">
+      <div class="now">
+        <button class="song" data-go="canciones" aria-label="Elegir canción">
+          <small>Canción · <span id="status">Detenido</span></small>
+          <span id="songtitle">Sin canción guardada</span>
+        </button>
+        <span class="pill"><span id="meterlbl">4/4</span><select id="meter" aria-label="Compás">
+          <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
+        </select></span>
+      </div>
+      <div class="tempo" aria-label="Tempo">
+        <div class="line">
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+            <button class="round" id="m1" aria-label="Bajar 1 BPM"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12"/></svg></button>
+            <button class="round sm" id="m5" aria-label="Bajar 5 BPM">−5</button>
+          </div>
+          <div class="bpmbox"><output id="bpm">72</output><span id="bpmunit">BPM (negra)</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+            <button class="round" id="p1" aria-label="Subir 1 BPM"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12M9 3v12"/></svg></button>
+            <button class="round sm" id="p5" aria-label="Subir 5 BPM">+5</button>
+          </div>
+        </div>
+        <div class="dots" id="dots"></div>
+        <div id="barinfo">Listo para empezar</div>
+        <button id="tap">Marcar tempo</button>
+      </div>
+      <div class="padcard" aria-label="Pad">
+        <div class="head"><b>Pad</b><button data-go="sonido"><span id="padinfo">Sol · Atmósfera</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button></div>
+        <div class="chords" id="chords"></div>
+      </div>
+      <div class="live" aria-label="Control en vivo">
+        <div id="sections" role="group" aria-label="Parte de la canción">
+          <button data-s="intro">Intro</button>
+          <button data-s="estrofa">Estrofa</button>
+          <button data-s="coro">Coro</button>
+          <button data-s="puente">Puente</button>
+          <button data-s="final">Final</button>
+        </div>
+        <div class="transport">
+          <button class="tbtn" id="fill"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16 9 6l4 8 2-4h3"/></svg><span id="filllbl">Remate</span></button>
+          <button id="play" aria-label="Tocar">
+            <svg class="i-play" width="30" height="30" viewBox="0 0 18 18" aria-hidden="true"><path d="M6 3.4v11.2c0 .6.7 1 1.2.6l8.4-5.6c.5-.3.5-1 0-1.3L7.2 2.8C6.7 2.4 6 2.8 6 3.4Z" fill="currentColor"/></svg>
+            <svg class="i-stop" width="28" height="28" viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="2" fill="currentColor"/></svg>
+          </button>
+          <button class="tbtn" id="next"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 5 8 6-8 6V5ZM17 5v12"/></svg>Siguiente parte</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-ritmo" aria-label="Ritmo" hidden>
+    <div class="wrap">
+      <h1>Ritmo</h1>
+      <div class="cap">Estilo</div>
+      <div class="group">
+        <label class="row"><span class="lbl">Estilo</span><select id="style"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <label class="row"><span class="lbl">Patrón de shaker</span><select id="shaker"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <label class="row"><span class="lbl">Sonido del shaker</span><select id="shksound"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+      </div>
+      <div class="cap">Interpretación</div>
+      <div class="group">
+        <div class="row col"><label class="top" for="human"><span>Toque humano</span><span id="humanval" style="color:var(--muted)">40 %</span></label><input type="range" id="human" min="0" max="100" value="40"></div>
+        <div class="row"><span class="lbl" id="lbl-count">Conteo de entrada</span><button class="switch" id="countin" role="switch" aria-checked="true" aria-labelledby="lbl-count"></button></div>
+        <label class="row"><span class="lbl">Remate automático</span><select id="autofill">
+          <option value="0">Apagado</option><option value="4">Cada 4 compases</option><option value="8" selected>Cada 8 compases</option>
+        </select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+      </div>
+      <div class="cap">Micrófono · beta</div>
+      <div class="group">
+        <div class="row"><span class="lbl" id="lbl-mic">Escuchar mi tempo</span><button class="switch" id="mic" role="switch" aria-checked="false" aria-labelledby="lbl-mic"></button></div>
+        <div class="row"><span class="lbl" id="lbl-follow">La base me sigue</span><button class="switch" id="follow" role="switch" aria-checked="false" aria-labelledby="lbl-follow"></button></div>
+        <div class="row"><span class="lbl" id="micread">—</span></div>
+      </div>
+      <p class="foot" id="micmsg">Te avisa si te aceleras o frenas respecto al tempo marcado.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-sonido" aria-label="Sonido" hidden>
+    <div class="wrap">
+      <h1>Sonido</h1>
+      <div class="cap">Pad</div>
+      <div class="group">
+        <label class="row"><span class="lbl">Tonalidad</span><select id="key"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <label class="row"><span class="lbl">Sonido del pad</span><select id="padtype"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <div class="row"><span class="lbl" id="lbl-fifths">Solo tónica y quinta</span><button class="switch" id="padmode" role="switch" aria-checked="false" aria-labelledby="lbl-fifths"></button></div>
+        <label class="row"><span class="lbl">Nombres de notas</span><select id="names"><option value="latin">Do Re Mi</option><option value="abc">C D E</option></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+      </div>
+      <p class="foot">Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde.</p>
+      <div class="cap">Mezcla</div>
+      <div class="group mix">
+        <div class="row"><button id="on-shaker" class="on" aria-label="Activar o silenciar percusión">Percusión</button><input type="range" id="v-shaker" min="0" max="100" value="60" aria-label="Volumen percusión"></div>
+        <div class="row"><button id="on-drums" class="on" aria-label="Activar o silenciar batería">Batería</button><input type="range" id="v-drums" min="0" max="100" value="75" aria-label="Volumen batería"></div>
+        <div class="row"><button id="on-pad" class="on" aria-label="Activar o silenciar pad">Pad</button><input type="range" id="v-pad" min="0" max="100" value="50" aria-label="Volumen pad"></div>
+      </div>
+      <p class="foot">Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.</p>
+      <p class="foot credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-canciones" aria-label="Canciones" hidden>
+    <div class="wrap">
+      <h1>Canciones</h1>
+      <div class="save"><input type="text" id="songname" placeholder="Nombre de la canción" aria-label="Nombre de la canción"><button id="savesong">Guardar</button></div>
+      <p class="foot">Guarda el tempo, compás, estilo, tono, pad y shaker actuales.</p>
+      <div class="cap">Mis canciones</div>
+      <div class="group songs" id="songs"></div>
+      <p class="foot">Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.</p>
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar" role="tablist" aria-label="Secciones">
+  <button class="tab" role="tab" data-tab="tocar" aria-selected="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="13" r="10"/><path d="M11 9v8l6-4-6-4Z" fill="currentColor"/></svg>Tocar</button>
+  <button class="tab" role="tab" data-tab="ritmo" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 13h2M8 8v10M12 5v16M16 9v8M20 11v4M22 13h1"/></svg>Ritmo</button>
+  <button class="tab" role="tab" data-tab="sonido" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4v18M13 4v18M20 4v18"/><circle cx="6" cy="16" r="2.4" fill="#161618"/><circle cx="13" cy="9" r="2.4" fill="#161618"/><circle cx="20" cy="14" r="2.4" fill="#161618"/></svg>Sonido</button>
+  <button class="tab" role="tab" data-tab="canciones" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 7h13M9 13h13M9 19h13"/><circle cx="4.5" cy="7" r="1" fill="currentColor"/><circle cx="4.5" cy="13" r="1" fill="currentColor"/><circle cx="4.5" cy="19" r="1" fill="currentColor"/></svg>Canciones</button>
+</nav>
+
+<script>
+(() => {
+  const show = (name) => {
+    document.querySelectorAll('.screen').forEach(s => { s.hidden = s.id !== 'tab-' + name; });
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+    try { localStorage.setItem('acomp-tab', name); } catch (e) {}
+  };
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
+  document.getElementById('songs').addEventListener('click', (e) => { if (e.target.closest('.songload')) show('tocar'); });
+  const meter = document.getElementById('meter');
+  const syncMeter = () => { document.getElementById('meterlbl').textContent = meter.value; };
+  meter.addEventListener('change', syncMeter);
+  new MutationObserver(syncMeter).observe(document.getElementById('bpmunit'), { childList: true, characterData: true, subtree: true });
+  let start = 'tocar';
+  try { start = localStorage.getItem('acomp-tab') || 'tocar'; } catch (e) {}
+  if (!document.getElementById('tab-' + start)) start = 'tocar';
+  show(start);
+})();
+</script>

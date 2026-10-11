@@ -1,0 +1,12 @@
+{
+  "name": "m-companion",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "python3 tools/build.py",
+    "test": "node tools/smoke-test.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.2"
+  }
+}
