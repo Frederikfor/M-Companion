@@ -172,15 +172,26 @@ Actuales: `auto`, `corcheas`, `semicorcheas`, `galope`, `contra`, `tresillo`, `n
 ### 5.5 Pads (`PADS`)
 ```js
 clave: {
-  name: 'Nombre visible',
+  group: 'Worship' | 'Oración y ministración' | 'Alabanza' | 'Himnos y gospel',  // agrupa la lista por momento del servicio
+  name: 'Nombre visible (pista corta)',
   layers: [[onda, [desafinación en cents…], semitonos de transposición, ganancia], …],
   cutoff: multiplicador de SEC_PAD, q: resonancia del filtro,
-  attack: s, release: s, vib: [profundidad en cents, Hz],
+  attack: s, release: s, vib: [Hz, profundidad en cents],
   hall: envío a la reverb larga (0..1.2),
-  voicing: 'triad' | 'add9' | 'open' | 'gospel7'
+  voicing: 'triad' | 'add9' | 'open' | 'gospel7' | 'sus2' | 'power',
+  air: [ganancia, Hz],                 // opcional: aire / respiración (ruido filtrado que ondula lento)
+  formant: [[Hz, Q, ganancia], …],     // opcional: filtra las capas como vocal "ah" (coro)
+  trem: [Hz, profundidad 0..1]         // opcional: trémolo de volumen (piano eléctrico)
 }
 ```
-Actuales: `atmos` (Atmósfera, estilo Elevation, por defecto), `calido`, `shimmer`, `cuerdas`, `organo`.
+| Grupo | Pads | Para qué momento |
+|---|---|---|
+| Worship | `atmos` (por defecto), `fundamento`, `aire`, `shimmer`, `amanecer` | adoración moderna; `amanecer` crece lento para puentes y clímax |
+| Oración y ministración | `oracion`, `quintas`, `cristal` | debajo de una oración o predicación, Santa Cena, llamado al altar; sin tercera o muy suaves |
+| Alabanza | `calido`, `analogico`, `teclas` | canciones movidas y baladas pop |
+| Himnos y gospel | `cuerdas`, `coro`, `organo` | himnos tradicionales y gospel |
+
+**Volumen parejo:** con la batería y la percusión apagadas, en Estrofa, cada pad nuevo debe medir entre −36 y −32 dB RMS en la salida (los pads oscuros pueden ir un poco más arriba, los brillantes un poco más abajo). Ajusta las ganancias de `layers` y `air`, no el volumen general.
 Modo `fifths` (*solo tónica y quinta*): toca tónica y quinta en varias octavas para que un solo pad sirva en toda la canción.
 Acordes disponibles: grados I, ii, iii, IV, V, vi de la tonalidad mayor (`DEGREES`). Mantén las ganancias bajas: el pad acompaña, no domina.
 
