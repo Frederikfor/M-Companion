@@ -174,7 +174,7 @@ Actuales: `auto`, `corcheas`, `semicorcheas`, `galope`, `contra`, `tresillo`, `n
 ```js
 clave: {
   group: 'Worship' | 'Oración y ministración' | 'Alabanza' | 'Himnos y gospel',  // agrupa la lista por momento del servicio
-  name: 'Palabra',                     // una palabra que describa el sonido
+  name: 'Supersaw',                    // término de síntesis; `en` igual
   layers: [[onda, [desafinación en cents…], semitonos de transposición, ganancia], …],
   cutoff: multiplicador de SEC_PAD, q: resonancia del filtro,
   attack: s, release: s, vib: [Hz, profundidad en cents],
@@ -185,14 +185,14 @@ clave: {
   trem: [Hz, profundidad 0..1]         // opcional: trémolo de volumen (piano eléctrico)
 }
 ```
-| Grupo | Pads (`clave` → nombre) | Sonido |
+| Grupo | Pads (`clave` → nombre) | Cómo suena / cómo está hecho |
 |---|---|---|
-| Worship | `atmos` → Atmósfera (por defecto), `fundamento` → Envolvente, `aire` → Aire, `shimmer` → Brillante, `amanecer` → Creciente | amplios con reverb larga; Creciente abre lento para puentes y clímax |
-| Oración y ministración | `oracion` → Oscuro, `quintas` → Profundo, `cristal` → Cristalino | suaves, sin tercera o tipo campana, para ir debajo de la voz hablada |
-| Alabanza | `calido` → Cálido, `analogico` → Analógico, `teclas` → Teclado | más presentes, para canciones movidas y baladas pop |
-| Himnos y gospel | `cuerdas` → Cuerdas, `coro` → Voces, `organo` → Órgano | instrumentos acústicos clásicos |
+| Worship | `atmos` → Supersaw (por defecto), `fundamento` → High-cut, `aire` → Breath, `shimmer` → Shimmer, `amanecer` → Swell | sierras desafinadas; filtro que corta agudos; capa de ruido tipo respiración; octavas altas; entrada lenta de volumen para puentes y clímax |
+| Oración y ministración | `oracion` → Sine, `quintas` → Power, `cristal` → Overtone | onda senoidal suave; tónica y quinta sin tercera; armónicos (octava y quinta) con trémolo |
+| Alabanza | `calido` → Triangle, `analogico` → Poly, `teclas` → E-Piano | onda triangular con sub; polisinte de sierra y cuadrada; piano eléctrico con trémolo |
+| Himnos y gospel | `cuerdas` → Ensemble, `coro` → Formant, `organo` → Drawbar | ensamble de cuerdas con vibrato; filtros de formante tipo voz "ah"; órgano de barras armónicas |
 
-**Nombres:** una sola palabra en español que describa el sonido (Oscuro, Brillante, Voces), sin referencias a artistas, canciones ni momentos. El momento del servicio va en `group`. Nunca cambies la `clave` de un pad existente: las canciones guardadas la usan. Cada pad lleva también `en` con su palabra en inglés (Dark, Bright, Choir…).
+**Nombres:** un término musical o de síntesis que diga cómo está hecho el sonido (Supersaw, High-cut, Formant, Drawbar), igual en los dos idiomas. Nada genérico (Profundo, Cálido) ni referencias a artistas, canciones o momentos; el momento del servicio va en `group`. Nunca cambies la `clave` de un pad existente: las canciones guardadas la usan.
 
 **Volumen parejo:** con la batería y la percusión apagadas, en Estrofa, cada pad nuevo debe medir entre −36 y −32 dB RMS en la salida (los pads oscuros pueden ir un poco más arriba, los brillantes un poco más abajo). Ajusta las ganancias de `layers` y `air`, no el volumen general.
 Modo `fifths` (*solo tónica y quinta*): toca tónica y quinta en varias octavas para que un solo pad sirva en toda la canción.
