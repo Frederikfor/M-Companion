@@ -135,7 +135,7 @@ Cada patrón es un texto con **un carácter por semicorchea**:
 ```js
 claveEstilo: {
   name: 'Nombre visible',       // español, corto
-  en: 'Visible name',           // inglés (obligatorio)
+  en: 'Warm Pad',               // inglés (obligatorio)
   meter: '4/4' | '3/4' | '6/8',
   swing: 0..0.7,                // retrasa la corchea de contratiempo (s % 4 === 2); no aplica en 6/8
   swing16: 0..0.4,              // opcional: retrasa cada semicorchea impar (feel soul/gospel)
@@ -174,7 +174,7 @@ Actuales: `auto`, `corcheas`, `semicorcheas`, `galope`, `contra`, `tresillo`, `n
 ```js
 clave: {
   group: 'Worship' | 'Oración y ministración' | 'Alabanza' | 'Himnos y gospel',  // agrupa la lista por momento del servicio
-  name: 'Supersaw',                    // término de síntesis; `en` igual
+  name: 'Pad cálido',                  // nombre comercial o de síntesis (ver tabla)
   layers: [[onda, [desafinación en cents…], semitonos de transposición, ganancia], …],
   cutoff: multiplicador de SEC_PAD, q: resonancia del filtro,
   attack: s, release: s, vib: [Hz, profundidad en cents],
@@ -185,14 +185,14 @@ clave: {
   trem: [Hz, profundidad 0..1]         // opcional: trémolo de volumen (piano eléctrico)
 }
 ```
-| Grupo | Pads (`clave` → nombre) | Cómo suena / cómo está hecho |
+| Grupo | Pads (`clave` → español / inglés) | Cómo está hecho |
 |---|---|---|
-| Worship | `atmos` → Supersaw (por defecto), `fundamento` → High-cut, `aire` → Breath, `shimmer` → Shimmer, `amanecer` → Swell | sierras desafinadas; filtro que corta agudos; capa de ruido tipo respiración; octavas altas; entrada lenta de volumen para puentes y clímax |
-| Oración y ministración | `oracion` → Sine, `quintas` → Power, `cristal` → Overtone | onda senoidal suave; tónica y quinta sin tercera; armónicos (octava y quinta) con trémolo |
-| Alabanza | `calido` → Triangle, `analogico` → Poly, `teclas` → E-Piano | onda triangular con sub; polisinte de sierra y cuadrada; piano eléctrico con trémolo |
-| Himnos y gospel | `cuerdas` → Ensemble, `coro` → Formant, `organo` → Drawbar | ensamble de cuerdas con vibrato; filtros de formante tipo voz "ah"; órgano de barras armónicas |
+| Worship | `atmos` → Supersaw (por defecto), `fundamento` → Pad cálido / Warm Pad, `aire` → Pad respiro / Breath Pad, `shimmer` → Shimmer, `amanecer` → Swell | sierras desafinadas; sierra filtrada oscura con soplo; capa de ruido tipo respiración; octavas altas; entrada lenta de volumen |
+| Oración y ministración | `oracion` → Senoidal / Sine, `quintas` → Quintas / Power 5th, `cristal` → Halo | onda senoidal suave; tónica y quinta sin tercera; armónicos con trémolo |
+| Alabanza | `calido` → Triangular / Triangle, `analogico` → Polisinte / Poly Synth, `teclas` → Rhodes | onda triangular con sub; polisinte de sierra y cuadrada; piano eléctrico con trémolo |
+| Himnos y gospel | `cuerdas` → Cuerdas / Strings, `coro` → Coro "Aah" / Choir Aahs, `organo` → Gospel B3 | ensamble de cuerdas con vibrato; filtros de formante tipo voz; órgano de barras armónicas |
 
-**Nombres:** un término musical o de síntesis que diga cómo está hecho el sonido (Supersaw, High-cut, Formant, Drawbar), igual en los dos idiomas. Nada genérico (Profundo, Cálido) ni referencias a artistas, canciones o momentos; el momento del servicio va en `group`. Nunca cambies la `clave` de un pad existente: las canciones guardadas la usan.
+**Nombres:** el nombre comercial con el que se conoce ese sonido en teclados (lista General MIDI, Yamaha, Nord, Casio) o el término de síntesis que diga cómo está hecho (Supersaw, Swell, Senoidal). Se traduce solo cuando hay un término común en español (Cuerdas, Quintas). Nada genérico (Profundo, Brillante) ni referencias a artistas o canciones; el momento del servicio va en `group`. Nunca cambies la `clave` de un pad existente: las canciones guardadas la usan.
 
 **Volumen parejo:** con la batería y la percusión apagadas, en Estrofa, cada pad nuevo debe medir entre −36 y −32 dB RMS en la salida (los pads oscuros pueden ir un poco más arriba, los brillantes un poco más abajo). Ajusta las ganancias de `layers` y `air`, no el volumen general.
 Modo `fifths` (*solo tónica y quinta*): toca tónica y quinta en varias octavas para que un solo pad sirva en toda la canción.
