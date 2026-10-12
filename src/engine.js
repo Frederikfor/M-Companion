@@ -20,67 +20,67 @@
   // One character per step: X strong, x normal, o soft, g ghost, . silence.
   // 4/4 = 16 sixteenths, 3/4 = 12 sixteenths, 6/8 = 12 sixteenths (two dotted-quarter pulses).
   const STYLES = {
-    balada44: { name: 'Balada / Adoración', meter: '4/4', swing: 0, secs: {
+    balada44: { name: 'Balada / Adoración', en: 'Ballad / Worship', meter: '4/4', swing: 0, secs: {
       intro:   { kick: 'x...............', shaker: 'o.x.o.x.o.x.o.x.' },
       estrofa: { kick: 'X.......x.......', rim: '....x.......x...', hat: 'x.o.x.o.x.o.x.o.', shaker: 'goxogoxogoxogoxo' },
       coro:    { kick: 'X.....x.X.x.....', snare: '....X.......X...', hat: 'X.x.X.x.X.x.X...', ohat: '..............x.', tamb: '....x.......x...', shaker: 'goXogoXogoXogoXo' },
       puente:  { kick: 'X.........x.....', snare: '........X.......', hat: 'x...x...x...x...', shaker: 'o.x.o.x.o.x.o.x.' } } },
-    pop44: { name: 'Pop / Alabanza movida', meter: '4/4', swing: 0, secs: {
+    pop44: { name: 'Pop / Alabanza movida', en: 'Pop / Upbeat praise', meter: '4/4', swing: 0, secs: {
       intro:   { kick: 'x...x...x...x...', shaker: 'goxogoxogoxogoxo' },
       estrofa: { kick: 'X...x...X...x...', snare: '....x.......x...', hat: 'x.x.x.x.x.x.x.x.', shaker: 'goxogoxogoxogoxo' },
       coro:    { kick: 'X...X...X...X...', snare: '....X.......X...', hat: 'x...x...x...x...', ohat: '..x...x...x...x.', tamb: 'x.x.x.x.x.x.x.x.', shaker: 'gxXxgxXxgxXxgxXx' },
       puente:  { kick: 'X...X...X...X...', shaker: 'o.x.o.x.o.x.o.x.' } } },
-    rock44: { name: 'Rock', meter: '4/4', swing: 0, secs: {
+    rock44: { name: 'Rock', en: 'Rock', meter: '4/4', swing: 0, secs: {
       intro:   { kick: 'X...............', hat: 'x.x.x.x.x.x.x.x.', shaker: 'o.x.o.x.o.x.o.x.' },
       estrofa: { kick: 'X.....x.X.......', snare: '....X.......X...', hat: 'x.x.x.x.x.x.x.x.', shaker: 'o.x.o.x.o.x.o.x.' },
       coro:    { kick: 'X.x...x.X.x.....', snare: '....X.......X...', ohat: 'X.x.X.x.X.x.X.x.', tamb: '....x.......x...', shaker: 'goXogoXogoXogoXo' },
       puente:  { kick: 'X.......X.......', snare: '........X.......', hat: 'x...x...x...x...', shaker: 'o.x.o.x.o.x.o.x.' } } },
-    latino44: { name: 'Latino (tumbao)', meter: '4/4', swing: 0, secs: {
+    latino44: { name: 'Latino (tumbao)', en: 'Latin (tumbao)', meter: '4/4', swing: 0, secs: {
       intro:   { conga: 'o..x..o.o..x..x.', shaker: 'x.oxx.oxx.oxx.ox' },
       estrofa: { kick: 'X..x....X..x....', rim: 'x..x..x...x.x...', conga: 'g..x..g.g..x..x.', shaker: 'x.oxx.oxx.oxx.ox' },
       coro:    { kick: 'X..x..X.X..x..X.', snare: '....X.......X...', hat: 'x.x.x.x.x.x.x.x.', conga: 'g..X..g.g..X..X.', tamb: '....x.......x...', shaker: 'X.oxX.oxX.oxX.ox' },
       puente:  { kick: 'X.......X.......', conga: 'x..x..x.........', shaker: 'o.x.o.x.o.x.o.x.' } } },
-    reggae44: { name: 'Reggae', meter: '4/4', swing: 0.3, secs: {
+    reggae44: { name: 'Reggae', en: 'Reggae', meter: '4/4', swing: 0.3, secs: {
       intro:   { rim: '........x.......', hat: '..x...x...x...x.', shaker: '..x...x...x...x.' },
       estrofa: { kick: '........X.......', rim: '........X.......', hat: 'x.x.x.x.x.x.x.x.', shaker: '..x...x...x...x.' },
       coro:    { kick: 'X...X...X...X...', rim: '....X.......X...', hat: 'x...x...x...x...', ohat: '..x...x...x...x.', shaker: 'goXogoXogoXogoXo' },
       puente:  { kick: '........X.......', rim: '........X.......', hat: 'x...x...x...x...', shaker: '..x...x...x...x.' } } },
-    shuffle44: { name: 'Shuffle / Gospel', meter: '4/4', swing: 0.667, secs: {
+    shuffle44: { name: 'Shuffle / Gospel', en: 'Shuffle / Gospel', meter: '4/4', swing: 0.667, secs: {
       intro:   { kick: 'x...............', shaker: 'X.o.X.o.X.o.X.o.' },
       estrofa: { kick: 'X.....x.X.....x.', snare: '....x.......x...', hat: 'x.o.x.o.x.o.x.o.', shaker: 'X.o.X.o.X.o.X.o.' },
       coro:    { kick: 'X.....x.X.x...x.', snare: '....X.......X...', ohat: 'X.x.X.x.X.x.X.x.', tamb: '....x.......x...', shaker: 'X.x.X.x.X.x.X.x.' },
       puente:  { kick: 'X.......X.......', snare: '........X.......', hat: 'x.o.x.o.x.o.x.o.', shaker: 'X.o.X.o.X.o.X.o.' } } },
-    vals34: { name: 'Vals', meter: '3/4', swing: 0, secs: {
+    vals34: { name: 'Vals', en: 'Waltz', meter: '3/4', swing: 0, secs: {
       intro:   { kick: 'x...........', shaker: 'x.o.x.o.x.o.' },
       estrofa: { kick: 'X...........', rim: '....x...x...', hat: 'x.o.x.o.x.o.', shaker: 'goxogoxogoxo' },
       coro:    { kick: 'X.....x.....', snare: '....X...X...', ohat: 'X.x.X.x.X.x.', tamb: '....x...x...', shaker: 'goXogoXogoXo' },
       puente:  { kick: 'X...........', snare: '........X...', hat: 'x...x...x...', shaker: 'x.o.x.o.x.o.' } } },
-    balada34: { name: 'Balada 3/4', meter: '3/4', swing: 0, secs: {
+    balada34: { name: 'Balada 3/4', en: 'Ballad 3/4', meter: '3/4', swing: 0, secs: {
       intro:   { kick: 'x...........', shaker: 'o.x.o.x.o.x.' },
       estrofa: { kick: 'X.....x.....', rim: '........x...', hat: 'x.x.x.x.x.x.', shaker: 'goxogoxogoxo' },
       coro:    { kick: 'X.....x.....', snare: '........X...', ohat: 'X.x.X.x.X.x.', tamb: '........x...', shaker: 'goXogoXogoXo' },
       puente:  { kick: 'X...........', snare: '........x...', hat: 'x...x...x...', shaker: 'o.x.o.x.o.x.' } } },
-    balada68: { name: 'Balada 6/8', meter: '6/8', swing: 0, secs: {
+    balada68: { name: 'Balada 6/8', en: 'Ballad 6/8', meter: '6/8', swing: 0, secs: {
       intro:   { kick: 'x...........', shaker: 'x.o.o.x.o.o.' },
       estrofa: { kick: 'X...........', rim: '......x.....', hat: 'x.o.o.x.o.o.', shaker: 'xgogogxgogog' },
       coro:    { kick: 'X.......x...', snare: '......X.....', ohat: 'X.x.x.X.x.x.', tamb: '......x.....', shaker: 'XgogoxXgogox' },
       puente:  { kick: 'X...........', snare: '......x.....', hat: 'x.....x.....', shaker: 'x.o.o.x.o.o.' } } },
-    marcha68: { name: 'Marcha 6/8 (más fuerte)', meter: '6/8', swing: 0, secs: {
+    marcha68: { name: 'Marcha 6/8 (más fuerte)', en: 'March 6/8 (stronger)', meter: '6/8', swing: 0, secs: {
       intro:   { kick: 'x...........', hat: 'x.x.x.x.x.x.', shaker: 'x.o.o.x.o.o.' },
       estrofa: { kick: 'X...x.......', snare: '......X.....', hat: 'x.x.x.x.x.x.', shaker: 'xgogogxgogog' },
       coro:    { kick: 'X...x.X...x.', snare: '......X.....', ohat: 'X.x.x.X.x.x.', tamb: 'x.x.x.x.x.x.', shaker: 'XgogoxXgogox' },
       puente:  { kick: 'X.....X.....', snare: '......x.....', hat: 'x.....x.....', shaker: 'x.o.o.x.o.o.' } } },
-    soulgospel44: { name: 'Soul Gospel', meter: '4/4', swing: 0, swing16: 0.35, secs: {
+    soulgospel44: { name: 'Soul Gospel', en: 'Soul Gospel', meter: '4/4', swing: 0, swing16: 0.35, secs: {
       intro:   { kick: 'x...............', clap: '....o.......o...', shaker: 'goxogoxogoxogoxo' },
       estrofa: { kick: 'X......x..x.....', rim: '....x.......x...', hat: 'x.xox.xox.xox.xo', shaker: 'goxogoxogoxogoxo' },
       coro:    { kick: 'X......x..X..x..', snare: '....X.......X...', clap: '....X.......X...', hat: 'x.xox.xox.xox.x.', ohat: '..............x.', tamb: '....x.......x...', shaker: 'gxXxgxXxgxXxgxXx' },
       puente:  { kick: 'X.........x.....', snare: '........X.......', hat: 'x.x.x.x.x.x.x.x.', shaker: 'o.x.o.x.o.x.o.x.' } } },
-    gospelworship44: { name: 'Gospel Worship', meter: '4/4', swing: 0, swing16: 0.15, secs: {
+    gospelworship44: { name: 'Gospel Worship', en: 'Gospel Worship', meter: '4/4', swing: 0, swing16: 0.15, secs: {
       intro:   { kick: 'X...............', clap: '....x.......x...', shaker: 'goxogoxogoxogoxo' },
       estrofa: { kick: 'X.....x...X.....', snare: '....x.......x...', clap: '....x.......x...', hat: 'x.x.x.x.x.x.x.x.', shaker: 'goxogoxogoxogoxo' },
       coro:    { kick: 'X.x...x...X.x...', snare: '....X.......X...', clap: '....X.......X...', hat: 'x...x...x...x...', ohat: '..x...x...x...x.', tamb: 'x.x.x.x.x.x.x.x.', shaker: 'gxXxgxXxgxXxgxXx' },
       puente:  { kick: 'X...X...X...X...', clap: '....x.......x...', shaker: 'o.x.o.x.o.x.o.x.' } } },
-    gospel68: { name: 'Soul Gospel 12/8', meter: '6/8', swing: 0, secs: {
+    gospel68: { name: 'Soul Gospel 12/8', en: 'Soul Gospel 12/8', meter: '6/8', swing: 0, secs: {
       intro:   { kick: 'x...........', clap: '......o.....', shaker: 'x.o.o.x.o.o.' },
       estrofa: { kick: 'X.........x.', rim: '......x.....', hat: 'x.o.o.x.o.o.', shaker: 'xgogogxgogog' },
       coro:    { kick: 'X.........x.', snare: '......X.....', clap: '......X.....', ohat: 'X.x.x.X.x.x.', tamb: 'x.x.x.x.x.x.', shaker: 'XgogoxXgogox' },
@@ -88,34 +88,126 @@
   };
   // Shaker patterns you can force over any style. simple = one 4/4 or 3/4 beat, comp = one 6/8 pulse.
   const SHAKERS = {
-    auto:         { name: 'Según estilo y parte' },
-    corcheas:     { name: 'Corcheas', simple: 'o.X.', comp: 'X.o.o.' },
-    semicorcheas: { name: 'Semicorcheas', simple: 'goXo', comp: 'Xgogog' },
-    galope:       { name: 'Galope', simple: 'X.xx', comp: 'X.xxo.' },
-    contra:       { name: 'Contratiempo', simple: '..X.', comp: '..x.x.' },
-    tresillo:     { name: 'Tresillo 3-3-2', simple: 'X..x..x.', comp: 'X..x..' },
-    negras:       { name: 'Solo en el pulso', simple: 'X...', comp: 'X.....' },
-    acento16:     { name: 'Semicorcheas, acento atrás', simple: 'gxoX', comp: 'gogoxX' },
-    shuffle:      { name: 'Shuffle', simple: 'X..x', comp: 'X.xX.x' }
+    auto:         { name: 'Según estilo y parte', en: 'By style and part' },
+    corcheas:     { name: 'Corcheas', en: 'Eighths', simple: 'o.X.', comp: 'X.o.o.' },
+    semicorcheas: { name: 'Semicorcheas', en: 'Sixteenths', simple: 'goXo', comp: 'Xgogog' },
+    galope:       { name: 'Galope', en: 'Gallop', simple: 'X.xx', comp: 'X.xxo.' },
+    contra:       { name: 'Contratiempo', en: 'Offbeat', simple: '..X.', comp: '..x.x.' },
+    tresillo:     { name: 'Tresillo 3-3-2', en: 'Tresillo 3-3-2', simple: 'X..x..x.', comp: 'X..x..' },
+    negras:       { name: 'Solo en el pulso', en: 'On the beat only', simple: 'X...', comp: 'X.....' },
+    acento16:     { name: 'Semicorcheas, acento atrás', en: 'Sixteenths, back accent', simple: 'gxoX', comp: 'gogoxX' },
+    shuffle:      { name: 'Shuffle', en: 'Shuffle', simple: 'X..x', comp: 'X.xX.x' }
   };
   const V = { X: 1, x: .75, o: .45, g: .25 };
   const DRUMS = ['kick', 'snare', 'rim', 'hat', 'ohat'];
   const SEC_DYN = { intro: .75, estrofa: .85, coro: 1, puente: .9, final: 1 };
   const SEC_SHK = { intro: .7, estrofa: .85, coro: 1, puente: .8, final: 1 };
   const SEC_PAD = { intro: 650, estrofa: 1000, coro: 2300, puente: 800, final: 2300 };
-  // Pad colours. layers: [wave, detune list in cents, semitone offset, gain]. cutoff multiplies the per-part brightness.
+  // Pad colours, grouped by the moment of the service they suit.
+  // layers: [wave, detune list in cents, semitone offset, gain]. cutoff multiplies the per-part brightness.
+  // Optional: air [gain, Hz] adds breathy filtered noise; formant [[Hz, Q, gain]…] shapes the layers like a choir "ah";
+  // trem [Hz, depth] adds a soft volume tremolo, like an electric piano.
   const PADS = {
-    atmos:   { name: 'Atmósfera (Elevation)', layers: [['sawtooth', [-9, 0, 9], 0, .022], ['sine', [0], 12, .018]], cutoff: 1, q: .7, attack: 2.2, release: 2.5, vib: [.25, 4], hall: .9, voicing: 'add9' },
-    calido:  { name: 'Cálido', layers: [['triangle', [-6, 6], 0, .05], ['sine', [0], -12, .04]], cutoff: .75, q: .5, attack: 1.2, release: 1.8, vib: [.2, 3], hall: .5, voicing: 'triad' },
-    shimmer: { name: 'Shimmer', layers: [['sine', [-4, 4], 12, .03], ['triangle', [0], 24, .01], ['sawtooth', [-10, 10], 0, .01]], cutoff: 1.6, q: .4, attack: 2.8, release: 3, vib: [.3, 5], hall: 1.2, voicing: 'open' },
-    cuerdas: { name: 'Cuerdas', layers: [['sawtooth', [-12, -4, 4, 12], 0, .016]], cutoff: .9, q: .6, attack: 1.4, release: 2, vib: [5, 6], hall: .7, voicing: 'triad' },
-    organo:  { name: 'Órgano gospel', layers: [['sine', [0], -12, .03], ['sine', [0], 0, .04], ['sine', [0], 12, .03], ['sine', [0], 19, .018], ['sine', [0], 24, .012]], cutoff: 3, q: .3, attack: .06, release: .35, vib: [6.3, 12], hall: .3, voicing: 'gospel7' }
+    atmos:     { group: 'Worship', name: 'Supersaw', en: 'Supersaw', layers: [['sawtooth', [-9, 0, 9], 0, .022], ['sine', [0], 12, .018]], cutoff: 1, q: .7, attack: 2.2, release: 2.5, vib: [.25, 4], hall: .9, voicing: 'add9' },
+    fundamento:{ group: 'Worship', name: 'Pad cálido', en: 'Warm Pad', layers: [['sawtooth', [-7, 7], 0, .013], ['triangle', [0], -12, .032], ['sine', [0], 12, .008]], cutoff: .7, q: .9, attack: 3, release: 3, vib: [.2, 3], hall: 1, voicing: 'sus2', air: [.032, 3500] },
+    aire:      { group: 'Worship', name: 'Pad respiro', en: 'Breath Pad', layers: [['triangle', [-5, 5], 0, .035], ['sine', [0], 12, .02]], cutoff: 1.2, q: .5, attack: 2.5, release: 3, vib: [.15, 4], hall: 1.1, voicing: 'open', air: [.12, 6000] },
+    shimmer:   { group: 'Worship', name: 'Shimmer', en: 'Shimmer', layers: [['sine', [-4, 4], 12, .03], ['triangle', [0], 24, .01], ['sawtooth', [-10, 10], 0, .01]], cutoff: 1.6, q: .4, attack: 2.8, release: 3, vib: [.3, 5], hall: 1.2, voicing: 'open' },
+    amanecer:  { group: 'Worship', name: 'Swell', en: 'Swell', layers: [['sawtooth', [-14, -5, 5, 14], 0, .036], ['sawtooth', [0], 12, .014]], cutoff: 1.4, q: 1.2, attack: 4, release: 3, vib: [.2, 4], hall: 1, voicing: 'add9' },
+    oracion:   { group: 'Oración y ministración', name: 'Senoidal', en: 'Sine', layers: [['sine', [-3, 3], 0, .025], ['triangle', [0], -12, .02]], cutoff: .5, q: .4, attack: 4, release: 4, vib: [.1, 3], hall: 1, voicing: 'sus2' },
+    quintas:   { group: 'Oración y ministración', name: 'Quintas', en: 'Power 5th', layers: [['sawtooth', [-6, 6], 0, .013], ['sine', [0], -12, .035]], cutoff: .6, q: .6, attack: 3, release: 3.5, vib: [.15, 3], hall: 1, voicing: 'power', air: [.028, 2500] },
+    cristal:   { group: 'Oración y ministración', name: 'Halo', en: 'Halo', layers: [['sine', [0], 12, .03], ['sine', [0], 19, .01], ['triangle', [0], 0, .021]], cutoff: 2.2, q: .3, attack: .4, release: 3, vib: [.2, 4.5], hall: 1.2, voicing: 'open', trem: [3.5, .15] },
+    calido:    { group: 'Alabanza', name: 'Triangular', en: 'Triangle', layers: [['triangle', [-6, 6], 0, .05], ['sine', [0], -12, .04]], cutoff: .75, q: .5, attack: 1.2, release: 1.8, vib: [.2, 3], hall: .5, voicing: 'triad' },
+    analogico: { group: 'Alabanza', name: 'Polisinte', en: 'Poly Synth', layers: [['sawtooth', [-12, 0, 12], 0, .029], ['square', [-6, 6], -12, .019]], cutoff: 1.1, q: 1.5, attack: .5, release: 1.2, vib: [.6, 6], hall: .5, voicing: 'triad' },
+    teclas:    { group: 'Alabanza', name: 'Rhodes', en: 'Rhodes', layers: [['sine', [0], 0, .039], ['triangle', [-3, 3], 12, .01]], cutoff: 1.5, q: .3, attack: .15, release: 1.2, vib: [.1, 2], hall: .5, voicing: 'add9', trem: [4.5, .3] },
+    cuerdas:   { group: 'Himnos y gospel', name: 'Cuerdas', en: 'Strings', layers: [['sawtooth', [-12, -4, 4, 12], 0, .016]], cutoff: .9, q: .6, attack: 1.4, release: 2, vib: [5, 6], hall: .7, voicing: 'triad' },
+    coro:      { group: 'Himnos y gospel', name: 'Coro "Aah"', en: 'Choir Aahs', layers: [['sawtooth', [-8, 0, 8], 0, .057]], cutoff: 2.5, q: .3, attack: 1.2, release: 2, vib: [5.5, 10], hall: .9, voicing: 'triad', formant: [[700, 6, 1], [1150, 8, .6], [2700, 10, .3]] },
+    organo:    { group: 'Himnos y gospel', name: 'Gospel B3', en: 'Gospel B3', layers: [['sine', [0], -12, .03], ['sine', [0], 0, .04], ['sine', [0], 12, .03], ['sine', [0], 19, .018], ['sine', [0], 24, .012]], cutoff: 3, q: .3, attack: .06, release: .35, vib: [6.3, 12], hall: .3, voicing: 'gospel7' }
   };
   const SHK_SETS = {
-    small:  { name: 'Shaker pequeño', down: ['shkH_Down_1', 'shkH_Down_2', 'shkL_Down_1', 'shkL_Down_2'], up: ['shkH_Up_1', 'shkH_Up_2', 'shkL_Up_1', 'shkL_Up_2'] },
-    large:  { name: 'Shaker grande', down: ['lshkDown_1', 'lshkDown_2', 'lshkHit_1', 'lshkHit_2'], up: ['lshkUp_1', 'lshkUp_2'] },
-    cabasa: { name: 'Cabasa', down: ['cabHit_1', 'cabHit_2'], up: ['cabRub_1', 'cabRub_2', 'cabRub_3'] }
+    small:  { name: 'Shaker pequeño', en: 'Small shaker', down: ['shkH_Down_1', 'shkH_Down_2', 'shkL_Down_1', 'shkL_Down_2'], up: ['shkH_Up_1', 'shkH_Up_2', 'shkL_Up_1', 'shkL_Up_2'] },
+    large:  { name: 'Shaker grande', en: 'Large shaker', down: ['lshkDown_1', 'lshkDown_2', 'lshkHit_1', 'lshkHit_2'], up: ['lshkUp_1', 'lshkUp_2'] },
+    cabasa: { name: 'Cabasa', en: 'Cabasa', down: ['cabHit_1', 'cabHit_2'], up: ['cabRub_1', 'cabRub_2', 'cabRub_3'] }
   };
+  // ---------- Language ----------
+  // Every visible text lives here. Data entries (STYLES, SHAKERS, PADS, SHK_SETS) carry their English name in `en`.
+  const I18N = {
+    es: {
+      title: 'Acompañante de Ensayo', 'tab.tocar': 'Tocar', 'tab.ritmo': 'Ritmo', 'tab.sonido': 'Sonido', 'tab.canciones': 'Canciones', tabbar: 'Secciones',
+      'song.choose': 'Elegir canción', 'song.label': 'Canción', 'song.none': 'Sin canción guardada', meter: 'Compás', tempo: 'Tempo',
+      'status.stopped': 'Detenido', 'status.playing': 'Tocando', 'status.loading': 'Cargando sonidos…',
+      'bpm.m1': 'Bajar 1 BPM', 'bpm.m5': 'Bajar 5 BPM', 'bpm.p1': 'Subir 1 BPM', 'bpm.p5': 'Subir 5 BPM',
+      'unit.simple': 'BPM (negra)', 'unit.comp': 'BPM (negra con punto)', ready: 'Listo para empezar', tap: 'Marcar tempo',
+      live: 'Control en vivo', sections: 'Parte de la canción',
+      'sec.intro': 'Intro', 'sec.estrofa': 'Estrofa', 'sec.coro': 'Coro', 'sec.puente': 'Puente', 'sec.final': 'Final',
+      fill: 'Remate', 'fill.active': 'Rematando…', 'fill.queued': 'En espera', play: 'Tocar', stop: 'Parar', next: 'Siguiente parte',
+      counting: 'Conteo de entrada…', bar: (n, part, left) => `Compás ${n} · ${part}` + (left ? ` · remate en ${left}` : ''),
+      style: 'Estilo', 'shaker.pattern': 'Patrón de shaker', 'shaker.sound': 'Sonido del shaker', feel: 'Interpretación', human: 'Toque humano',
+      countin: 'Conteo de entrada', autofill: 'Remate automático', 'autofill.0': 'Apagado', 'autofill.4': 'Cada 4 compases', 'autofill.8': 'Cada 8 compases',
+      'mic.cap': 'Micrófono · beta', 'mic.listen': 'Escuchar mi tempo', 'mic.follow': 'La base me sigue',
+      'mic.hint': 'Te avisa si te aceleras o frenas respecto al tempo marcado.',
+      'mic.error': '<span class="alert">No pude abrir el micrófono aquí.</span> Abre la app desde su dirección https o el archivo <b>acompanante.html</b> en Chrome y permite el micrófono.',
+      'mic.start': 'Escuchando. Toca unos compases para que mida tu tempo.', 'mic.wait': 'Escuchando…',
+      'mic.read': (det, set) => `Detecto <b>${det}</b> BPM · marcado ${set}`, 'mic.fast': 'Te estás acelerando', 'mic.slow': 'Te estás frenando',
+      'mic.adjusted': ' · ajusté el tempo', 'mic.suggest': ' · activa "La base me sigue" para que la base te siga', 'mic.ok': 'Vas a tempo.',
+      key: 'Tonalidad', 'key.opt': 'Tono', 'pad.sound': 'Sonido del pad', 'pad.fifths': 'Solo tónica y quinta', names: 'Nombres de notas',
+      'pad.fifths.foot': 'Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde.',
+      mix: 'Mezcla', 'ch.shaker': 'Percusión', 'ch.drums': 'Batería', 'mute.shaker': 'Activar o silenciar percusión', 'mute.drums': 'Activar o silenciar batería', 'mute.pad': 'Activar o silenciar pad',
+      'vol.shaker': 'Volumen percusión', 'vol.drums': 'Volumen batería', 'vol.pad': 'Volumen pad',
+      'mix.foot': 'Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.', app: 'App', lang: 'Idioma',
+      credits: 'Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.',
+      'song.name': 'Nombre de la canción', save: 'Guardar', 'save.foot': 'Guarda el tempo, compás, estilo, tono, pad y shaker actuales.', mysongs: 'Mis canciones',
+      'songs.foot': 'Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.',
+      'songs.empty': 'Todavía no hay canciones. Ajusta tempo, compás, estilo y tono, escribe el nombre y pulsa Guardar.',
+      del: 'Borrar', 'del.aria': (name) => 'Borrar ' + name,
+      groups: { 'Worship': 'Worship', 'Oración y ministración': 'Oración y ministración', 'Alabanza': 'Alabanza', 'Himnos y gospel': 'Himnos y gospel' }
+    },
+    en: {
+      title: 'Rehearsal Companion', 'tab.tocar': 'Play', 'tab.ritmo': 'Rhythm', 'tab.sonido': 'Sound', 'tab.canciones': 'Songs', tabbar: 'Sections',
+      'song.choose': 'Choose song', 'song.label': 'Song', 'song.none': 'No saved song', meter: 'Time signature', tempo: 'Tempo',
+      'status.stopped': 'Stopped', 'status.playing': 'Playing', 'status.loading': 'Loading sounds…',
+      'bpm.m1': 'Down 1 BPM', 'bpm.m5': 'Down 5 BPM', 'bpm.p1': 'Up 1 BPM', 'bpm.p5': 'Up 5 BPM',
+      'unit.simple': 'BPM (quarter note)', 'unit.comp': 'BPM (dotted quarter)', ready: 'Ready to start', tap: 'Tap tempo',
+      live: 'Live control', sections: 'Song part',
+      'sec.intro': 'Intro', 'sec.estrofa': 'Verse', 'sec.coro': 'Chorus', 'sec.puente': 'Bridge', 'sec.final': 'Ending',
+      fill: 'Fill', 'fill.active': 'Filling…', 'fill.queued': 'Queued', play: 'Play', stop: 'Stop', next: 'Next part',
+      counting: 'Count-in…', bar: (n, part, left) => `Bar ${n} · ${part}` + (left ? ` · fill in ${left}` : ''),
+      style: 'Style', 'shaker.pattern': 'Shaker pattern', 'shaker.sound': 'Shaker sound', feel: 'Feel', human: 'Human feel',
+      countin: 'Count-in', autofill: 'Auto fill', 'autofill.0': 'Off', 'autofill.4': 'Every 4 bars', 'autofill.8': 'Every 8 bars',
+      'mic.cap': 'Microphone · beta', 'mic.listen': 'Listen to my tempo', 'mic.follow': 'Backing follows me',
+      'mic.hint': 'Warns you if you speed up or slow down against the set tempo.',
+      'mic.error': '<span class="alert">Could not open the microphone here.</span> Open the app from its https address, or the <b>acompanante.html</b> file in Chrome, and allow the microphone.',
+      'mic.start': 'Listening. Play a few bars so it can measure your tempo.', 'mic.wait': 'Listening…',
+      'mic.read': (det, set) => `Hearing <b>${det}</b> BPM · set ${set}`, 'mic.fast': 'You are speeding up', 'mic.slow': 'You are slowing down',
+      'mic.adjusted': ' · tempo adjusted', 'mic.suggest': ' · turn on "Backing follows me" so the backing follows you', 'mic.ok': 'You are on tempo.',
+      key: 'Key', 'key.opt': 'Key', 'pad.sound': 'Pad sound', 'pad.fifths': 'Root and fifth only', names: 'Note names',
+      'pad.fifths.foot': 'With root and fifth only, one pad works for the whole song without changing chords.',
+      mix: 'Mix', 'ch.shaker': 'Percussion', 'ch.drums': 'Drums', 'mute.shaker': 'Mute or unmute percussion', 'mute.drums': 'Mute or unmute drums', 'mute.pad': 'Mute or unmute pad',
+      'vol.shaker': 'Percussion volume', 'vol.drums': 'Drums volume', 'vol.pad': 'Pad volume',
+      'mix.foot': 'Tap a channel name to mute it. On iPhone, turn off silent mode if there is no sound.', app: 'App', lang: 'Language',
+      credits: 'Free-to-use recordings (CC0): acoustic drums from freesound.org; shakers, cabasa, tambourine, conga and claps from the Versilian Community Sample Library.',
+      'song.name': 'Song name', save: 'Save', 'save.foot': 'Saves the current tempo, time signature, style, key, pad and shaker.', mysongs: 'My songs',
+      'songs.foot': 'Tap a song to load it. Tap ✕ twice to delete it.',
+      'songs.empty': 'No songs yet. Set the tempo, time signature, style and key, type a name and tap Save.',
+      del: 'Delete', 'del.aria': (name) => 'Delete ' + name,
+      groups: { 'Worship': 'Worship', 'Oración y ministración': 'Prayer & ministry', 'Alabanza': 'Praise', 'Himnos y gospel': 'Hymns & gospel' }
+    }
+  };
+  const T = (k, ...a) => { const v = (I18N[S.lang] || I18N.es)[k] ?? I18N.es[k] ?? k; return typeof v === 'function' ? v(...a) : v; };
+  const NM = (o) => (S.lang === 'en' && o.en) || o.name;
+  function applyLang() {
+    document.documentElement.lang = S.lang;
+    document.title = T('title');
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = T(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', T(el.dataset.i18nAria)));
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => el.setAttribute('placeholder', T(el.dataset.i18nPh)));
+    $('lang').value = S.lang;
+    $('songtitle').textContent = songTitle || T('song.none');
+    $('status').textContent = T(playing ? 'status.playing' : 'status.stopped');
+    $('play').setAttribute('aria-label', T(playing ? 'stop' : 'play'));
+    if (!playing) $('barinfo').textContent = T('ready');
+    if (!micOn) $('micmsg').textContent = T('mic.hint');
+    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); renderSongs();
+  }
   const firstStyle = (m) => Object.keys(STYLES).find(k => STYLES[k].meter === m);
 
   const S = {
@@ -123,13 +215,14 @@
     key: 7, names: 'latin', chord: 0, style: 'balada44', shaker: 'auto', human: 40, countIn: true,
     pad: 'atmos', padMode: 'chord', shkSound: 'small',
     layers: { shaker: { on: true, vol: 60 }, drums: { on: true, vol: 75 }, pad: { on: true, vol: 50 } },
-    follow: false
+    follow: false, lang: 'es'
   };
   try { Object.assign(S, JSON.parse(localStorage.getItem('acomp') || '{}'), { pending: null }); } catch (e) {}
   if (!STYLES[S.style] || STYLES[S.style].meter !== S.meter) S.style = firstStyle(S.meter);
   if (!SHAKERS[S.shaker]) S.shaker = 'auto';
   if (!PADS[S.pad]) S.pad = 'atmos';
   if (!SHK_SETS[S.shkSound]) S.shkSound = 'small';
+  if (!I18N[S.lang]) S.lang = 'es';
   const save = () => { try { localStorage.setItem('acomp', JSON.stringify(S)); } catch (e) {} };
 
   // ---------- Audio engine ----------
@@ -356,6 +449,8 @@
       case 'add9': return [sn(d) - 12, sn(d), sn(d + 4), sn(d + 2) + 12, d === 2 ? sn(d + 4) + 12 : sn(d + 1) + 12];
       case 'open': return [sn(d), sn(d + 4), sn(d) + 12, sn(d + 2) + 12];
       case 'gospel7': return [sn(d) - 12, sn(d + 2), sn(d + 4), sn(d + 6), sn(d) + 12];
+      case 'sus2': return [sn(d) - 12, sn(d), sn(d + 4), sn(d + 1) + 12, sn(d + 4) + 12];
+      case 'power': return [sn(d) - 12, sn(d), sn(d + 4), sn(d) + 12];
       default: return [sn(d) - 12, sn(d), sn(d + 2), sn(d + 4), sn(d) + 12];
     }
   }
@@ -381,6 +476,33 @@
     vib.frequency.value = P.vib[0]; vibG.gain.value = P.vib[1]; vib.connect(vibG); vib.start(t);
     const vg = ctx.createGain(); vg.gain.value = 0; vg.connect(padFilter);
     const oscs = [vib];
+    let dest = vg;
+    if (P.trem) {
+      const tg = ctx.createGain(); tg.gain.value = 1 - P.trem[1] / 2; tg.connect(vg);
+      const lfo = ctx.createOscillator(), depth = ctx.createGain();
+      lfo.frequency.value = P.trem[0]; depth.gain.value = P.trem[1] / 2;
+      lfo.connect(depth); depth.connect(tg.gain); lfo.start(t); oscs.push(lfo);
+      dest = tg;
+    }
+    if (P.formant) {
+      const pre = ctx.createGain();
+      for (const [f, q, g] of P.formant) {
+        const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
+        const fg = ctx.createGain(); fg.gain.value = g * 3;
+        pre.connect(bp); bp.connect(fg); fg.connect(dest);
+      }
+      dest = pre;
+    }
+    if (P.air) {
+      const n = ctx.createBufferSource(); n.buffer = noise; n.loop = true; n.playbackRate.value = 0.9 + Math.random() * 0.2;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = P.air[1]; bp.Q.value = 0.6;
+      const ag = ctx.createGain(); ag.gain.value = P.air[0];
+      const sway = ctx.createOscillator(), swayG = ctx.createGain();
+      sway.frequency.value = 0.13; swayG.gain.value = P.air[0] * 0.5;
+      sway.connect(swayG); swayG.connect(ag.gain);
+      n.connect(bp); bp.connect(ag); ag.connect(vg);
+      n.start(t, Math.random() * 0.9); sway.start(t); oscs.push(n, sway);
+    }
     padNotes().forEach((m, i) => {
       for (const [wave, dets, semi, gain] of P.layers) {
         for (const det of dets) {
@@ -388,7 +510,7 @@
           o.frequency.value = mtof(m + semi); o.detune.value = det + (Math.random() * 2 - 1) * 2;
           vibG.connect(o.detune);
           const g = ctx.createGain(); g.gain.value = gain * (i === 0 ? 1.2 : 1) / Math.sqrt(dets.length);
-          o.connect(g); g.connect(vg); o.start(t); oscs.push(o);
+          o.connect(g); g.connect(dest); o.start(t); oscs.push(o);
         }
       }
     });
@@ -416,7 +538,7 @@
     }
     if (counting) {
       if (s % M.dotEvery === 0) INST.click(t, M.strong.includes(s) ? 1 : .6);
-      uiQueue.push({ s, t, txt: 'Conteo de entrada…' });
+      uiQueue.push({ s, t, txt: T('counting') });
       return;
     }
     if (s === 0) {
@@ -473,8 +595,8 @@
       if (S.section === 'coro' && pat.kick && s === M.steps - 1 && Math.random() < 0.2 * h) hit('kick', tt, .45);
     }
     if (s === M.steps - 1 && fillActive) { fillActive = null; setTimeout(setFillUi, Math.max(0, (t - ctx.currentTime) * 1000 + 60)); }
-    const left = S.autoFill ? ` · remate en ${S.autoFill - ((phraseBar - 1) % S.autoFill)}` : '';
-    uiQueue.push({ s, t, txt: `Compás ${bar} · ${LABELS[S.section]}${left}` });
+    const left = S.autoFill ? S.autoFill - ((phraseBar - 1) % S.autoFill) : 0;
+    uiQueue.push({ s, t, txt: T('bar', bar, T('sec.' + S.section), left) });
   }
 
   function finishSong(t) {
@@ -497,7 +619,7 @@
   async function start() {
     initAudio();
     if (ctx.state !== 'running') await ctx.resume();
-    $('status').textContent = 'Cargando sonidos…';
+    $('status').textContent = T('status.loading');
     await loadSamples();
     playing = true; ending = false; step = 0; bar = 0; phraseBar = 0; fillActive = null; fillQueued = false; crashNext = false;
     counting = false; countBars = S.countIn ? 1 : 0;
@@ -507,8 +629,8 @@
     nextTime = ctx.currentTime + 0.08;
     timer = setInterval(tick, 25); tick();
     if (!S.countIn) padPlay();
-    $('play').classList.add('stop'); $('play').setAttribute('aria-label', 'Parar');
-    $('status').textContent = 'Tocando';
+    $('play').classList.add('stop'); $('play').setAttribute('aria-label', T('stop'));
+    $('status').textContent = T('status.playing');
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
   }
   function stop(soft) {
@@ -518,14 +640,13 @@
     ending = false; fillActive = null; fillQueued = false; counting = false; countBars = 0; uiQueue.length = 0;
     if (S.section === 'final') { S.section = 'estrofa'; }
     S.pending = null; refreshSections(); setFillUi();
-    $('play').classList.remove('stop'); $('play').setAttribute('aria-label', 'Tocar');
-    $('status').textContent = 'Detenido';
-    drawDots(-1); $('barinfo').textContent = 'Listo para empezar';
+    $('play').classList.remove('stop'); $('play').setAttribute('aria-label', T('play'));
+    $('status').textContent = T('status.stopped');
+    drawDots(-1); $('barinfo').textContent = T('ready');
     try { wakeLock?.release(); } catch (e) {}
   }
 
   // ---------- UI ----------
-  const LABELS = { intro: 'Intro', estrofa: 'Estrofa', coro: 'Coro', puente: 'Puente', final: 'Final' };
   function drawDots(curStep) {
     const M = METERS[S.meter];
     const n = M.steps / M.dotEvery;
@@ -559,7 +680,7 @@
       b.classList.toggle('pending', b.dataset.s === S.pending);
     });
   }
-  function setFillUi() { $('fill').classList.toggle('armed', fillQueued || !!fillActive); $('filllbl').textContent = fillActive ? 'Rematando…' : fillQueued ? 'En espera' : 'Remate'; }
+  function setFillUi() { $('fill').classList.toggle('armed', fillQueued || !!fillActive); $('filllbl').textContent = T(fillActive ? 'fill.active' : fillQueued ? 'fill.queued' : 'fill'); }
   function chooseSection(s) {
     if (!playing) { S.section = s === 'final' ? 'coro' : s; refreshSections(); padBright(); save(); return; }
     if (s === S.section && !S.pending) { fillQueued = true; setFillUi(); return; }
@@ -567,7 +688,7 @@
   }
   function buildKeys() {
     const k = $('key'); k.innerHTML = '';
-    NAMES[S.names].forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = 'Tono ' + n; k.appendChild(o); });
+    NAMES[S.names].forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = T('key.opt') + ' ' + n; k.appendChild(o); });
     k.value = S.key; $('names').value = S.names;
   }
   function buildChords() {
@@ -585,31 +706,35 @@
     const sel = $('style'); sel.innerHTML = '';
     for (const [id, st] of Object.entries(STYLES)) {
       if (st.meter !== S.meter) continue;
-      const o = document.createElement('option'); o.value = id; o.textContent = st.name; sel.appendChild(o);
+      const o = document.createElement('option'); o.value = id; o.textContent = NM(st); sel.appendChild(o);
     }
     if (!STYLES[S.style] || STYLES[S.style].meter !== S.meter) S.style = firstStyle(S.meter);
     sel.value = S.style;
   }
   function buildShakers() {
     const sel = $('shaker'); sel.innerHTML = '';
-    for (const [id, sh] of Object.entries(SHAKERS)) { const o = document.createElement('option'); o.value = id; o.textContent = sh.name; sel.appendChild(o); }
+    for (const [id, sh] of Object.entries(SHAKERS)) { const o = document.createElement('option'); o.value = id; o.textContent = NM(sh); sel.appendChild(o); }
     sel.value = S.shaker;
   }
   function setMeter(m) {
     S.meter = m; step = 0; fillActive = null;
     $('meter').value = m;
-    $('bpmunit').textContent = m === '6/8' ? 'BPM (negra con punto)' : 'BPM (negra)';
-    buildStyles(); drawDots(-1); save();
+    setUnit(); buildStyles(); drawDots(-1); save();
   }
+  function setUnit() { $('bpmunit').textContent = T(S.meter === '6/8' ? 'unit.comp' : 'unit.simple'); }
   function buildPadUi() {
     const sel = $('padtype'); sel.innerHTML = '';
-    for (const [id, P] of Object.entries(PADS)) { const o = document.createElement('option'); o.value = id; o.textContent = P.name; sel.appendChild(o); }
+    const groups = {};
+    for (const [id, P] of Object.entries(PADS)) {
+      if (!groups[P.group]) { groups[P.group] = document.createElement('optgroup'); groups[P.group].label = T('groups')[P.group] || P.group; sel.appendChild(groups[P.group]); }
+      const o = document.createElement('option'); o.value = id; o.textContent = NM(P); groups[P.group].appendChild(o);
+    }
     sel.value = S.pad;
     const shs = $('shksound'); shs.innerHTML = '';
-    for (const [id, x] of Object.entries(SHK_SETS)) { const o = document.createElement('option'); o.value = id; o.textContent = x.name; shs.appendChild(o); }
+    for (const [id, x] of Object.entries(SHK_SETS)) { const o = document.createElement('option'); o.value = id; o.textContent = NM(x); shs.appendChild(o); }
     shs.value = S.shkSound;
     $('padmode').setAttribute('aria-checked', String(S.padMode === 'fifths'));
-    $('padinfo').textContent = NAMES[S.names][S.key] + ' · ' + PADS[S.pad].name.replace(/ \(.*\)/, '');
+    $('padinfo').textContent = NAMES[S.names][S.key] + ' · ' + NM(PADS[S.pad]);
     $('chords').classList.toggle('muted', S.padMode === 'fifths');
   }
   function setCountUi() { $('countin').setAttribute('aria-checked', String(S.countIn)); }
@@ -621,20 +746,20 @@
   }
 
   // ---------- Song list (kept in this browser) ----------
-  let songs = [];
+  let songs = [], songTitle = null;
   try { songs = JSON.parse(localStorage.getItem('acomp-songs') || '[]'); } catch (e) {}
   const saveSongs = () => { try { localStorage.setItem('acomp-songs', JSON.stringify(songs)); } catch (e) {} };
   function renderSongs() {
     const box = $('songs'); box.innerHTML = '';
     if (!songs.length) {
       const p = document.createElement('p'); p.className = 'hint';
-      p.textContent = 'Todavía no hay canciones. Ajusta tempo, compás, estilo y tono, escribe el nombre y pulsa Guardar.';
+      p.textContent = T('songs.empty');
       box.appendChild(p); return;
     }
     songs.forEach((sg, i) => {
       const row = document.createElement('div'); row.className = 'song';
       const load = document.createElement('button'); load.className = 'songload';
-      const meta = `${sg.bpm} BPM · ${sg.meter} · ${STYLES[sg.style]?.name || ''} · Tono ${NAMES[S.names][sg.key]}`;
+      const meta = `${sg.bpm} BPM · ${sg.meter} · ${STYLES[sg.style] ? NM(STYLES[sg.style]) : ''} · ${T('key.opt')} ${NAMES[S.names][sg.key]}`;
       load.innerHTML = '<b></b><span></span>'; load.querySelector('b').textContent = sg.name; load.querySelector('span').textContent = meta;
       load.addEventListener('click', () => {
         setBpm(sg.bpm); setMeter(sg.meter);
@@ -642,12 +767,12 @@
         if (PADS[sg.pad]) S.pad = sg.pad; if (sg.padMode) S.padMode = sg.padMode; if (SHK_SETS[sg.shkSound]) S.shkSound = sg.shkSound;
         buildPadUi(); padSetup();
         buildStyles(); buildShakers(); buildKeys(); buildChords(); save(); padPlay();
-        $('songname').value = sg.name; $('songtitle').textContent = sg.name;
+        $('songname').value = sg.name; songTitle = sg.name; $('songtitle').textContent = sg.name;
       });
-      const del = document.createElement('button'); del.className = 'songdel'; del.textContent = '✕'; del.setAttribute('aria-label', 'Borrar ' + sg.name);
+      const del = document.createElement('button'); del.className = 'songdel'; del.textContent = '✕'; del.setAttribute('aria-label', T('del.aria', sg.name));
       del.addEventListener('click', () => {
         if (del.dataset.armed) { songs.splice(i, 1); saveSongs(); renderSongs(); }
-        else { del.dataset.armed = '1'; del.textContent = 'Borrar'; setTimeout(() => { delete del.dataset.armed; del.textContent = '✕'; }, 3000); }
+        else { del.dataset.armed = '1'; del.textContent = T('del'); setTimeout(() => { delete del.dataset.armed; del.textContent = '✕'; }, 3000); }
       });
       row.append(load, del); box.appendChild(row);
     });
@@ -658,7 +783,7 @@
     const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, shkSound: S.shkSound };
     const at = songs.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
     if (at >= 0) songs[at] = sg; else songs.push(sg);
-    saveSongs(); renderSongs(); $('songtitle').textContent = name;
+    saveSongs(); renderSongs(); songTitle = name; $('songtitle').textContent = name;
   });
 
   let taps = [];
@@ -694,7 +819,7 @@
   $('names').addEventListener('change', (e) => { S.names = e.target.value; save(); buildKeys(); buildChords(); renderSongs(); });
   ['shaker', 'drums', 'pad'].forEach(bindLayer);
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.closest?.('.pd')) return;
     const k = e.key.toLowerCase();
     if (k === ' ') { e.preventDefault(); playing ? stop() : start(); }
     else if (k === 'r') $('fill').click();
@@ -712,7 +837,7 @@
     try {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     } catch (e) {
-      $('micmsg').innerHTML = '<span class="alert">No pude abrir el micrófono aquí.</span> Abre el archivo descargado <b>acompanante.html</b> en Chrome y permite el micrófono.';
+      $('micmsg').innerHTML = T('mic.error');
       return;
     }
     const src = ctx.createMediaStreamSource(micStream);
@@ -722,7 +847,7 @@
     micTimer = setInterval(analyze, 10);
     estTimer = setInterval(estimate, 1000);
     micOn = true; $('mic').setAttribute('aria-checked', 'true');
-    $('micmsg').textContent = 'Escuchando. Toca unos compases para que mida tu tempo.';
+    $('micmsg').textContent = T('mic.start');
   }
   function micStop() {
     clearInterval(micTimer); clearInterval(estTimer);
@@ -750,7 +875,7 @@
     while (onsets.length && now - onsets[0] > 8) onsets.shift();
   }
   function estimate() {
-    if (onsets.length < 8) { $('micread').textContent = 'Escuchando…'; return; }
+    if (onsets.length < 8) { $('micread').textContent = T('mic.wait'); return; }
     let best = 0, bestScore = 0;
     for (let cand = S.bpm * 0.8; cand <= S.bpm * 1.2; cand += 0.5) {
       const half = 30 / cand;
@@ -766,16 +891,16 @@
     if (!best) return;
     const det = Math.round(best);
     const diff = (det - S.bpm) / S.bpm;
-    $('micread').innerHTML = `Detecto <b>${det}</b> BPM · marcado ${S.bpm}`;
+    $('micread').innerHTML = T('mic.read', det, S.bpm);
     if (Math.abs(diff) > 0.03) {
       driftCount++;
       if (driftCount >= 3) {
-        $('micmsg').innerHTML = `<span class="alert">${diff > 0 ? 'Te estás acelerando' : 'Te estás frenando'}</span>` + (S.follow ? ' · ajusté el tempo' : ' · activa "Seguir mi tempo" para que la base te siga');
+        $('micmsg').innerHTML = `<span class="alert">${T(diff > 0 ? 'mic.fast' : 'mic.slow')}</span>` + T(S.follow ? 'mic.adjusted' : 'mic.suggest');
         if (S.follow) { setBpm(S.bpm + Math.sign(det - S.bpm) * Math.min(3, Math.abs(det - S.bpm))); driftCount = 1; }
       }
     } else {
       driftCount = 0;
-      $('micmsg').innerHTML = '<span class="ok">Vas a tempo.</span>';
+      $('micmsg').innerHTML = `<span class="ok">${T('mic.ok')}</span>`;
     }
   }
   $('mic').addEventListener('click', () => micOn ? micStop() : micStart());
@@ -783,6 +908,8 @@
     S.follow = !S.follow; save();
     $('follow').setAttribute('aria-checked', String(S.follow));
   });
+
+  $('lang').addEventListener('change', (e) => { S.lang = e.target.value; save(); applyLang(); });
 
   // ---------- Boot ----------
   setBpm(S.bpm);
@@ -794,7 +921,7 @@
   $('autofill').value = String(S.autoFill);
   $('follow').setAttribute('aria-checked', String(S.follow));
   if (S.section === 'final') S.section = 'estrofa';
-  buildKeys(); buildChords(); refreshSections(); setFillUi(); renderSongs();
+  buildKeys(); buildChords(); refreshSections(); setFillUi(); renderSongs(); applyLang();
   window.acompLoaded = () => Object.keys(SB).length;
   requestAnimationFrame(frame);
 })();
