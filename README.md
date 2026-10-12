@@ -5,7 +5,7 @@ App web (PWA) que acompaña a un músico que toca solo: pone una base de **shake
 - **App en vivo:** https://frederikfor.github.io/M-Companion/
 - **Usuario principal:** cantante que toca guitarra y a veces piano, en servicios de iglesia (worship, gospel, baladas, latino).
 - **Plataforma:** iPhone (Safari, instalada en la pantalla de inicio), también cualquier navegador moderno de computadora o Android.
-- **Idioma de la interfaz:** español.
+- **Idioma de la interfaz:** español por defecto; inglés disponible en Sonido › App › Idioma.
 
 ---
 
@@ -44,7 +44,7 @@ Abre la misma dirección en Chrome, Edge o Safari. También puedes abrir `dist/a
 > 2. **Musicalidad antes que funciones.** El tiempo es sagrado: todo sonido se programa con el reloj de Web Audio (`ctx.currentTime`), nunca con `setTimeout`. Los cambios de parte entran en el siguiente compás. Los remates terminan justo antes del tiempo 1.
 > 3. **Sonido real y libre.** Solo muestras **CC0 / dominio público**, embebidas en el archivo. Siempre debe existir un respaldo sintético si una muestra falta.
 > 4. **Un solo archivo, sin dependencias en tiempo de ejecución.** Nada de frameworks, CDNs, fuentes externas ni peticiones de red desde la app.
-> 5. **Aspecto iOS oscuro, en español.** Usa los tokens de color y las reglas de la sección 5. Botones de al menos 44 px. Los controles en vivo viven abajo, al alcance del pulgar.
+> 5. **Aspecto iOS oscuro, en español e inglés.** Todo texto visible va en `I18N` (sección 5.12), nunca escrito directo en el código. Usa los tokens de color y las reglas de la sección 5. Botones de al menos 44 px. Los controles en vivo viven abajo, al alcance del pulgar.
 > 6. **Edita las fuentes, no lo generado.** Cambia `src/` o `samples/`, luego ejecuta `python3 tools/build.py` y `npm test`. Nunca edites `index.html`, `sw.js` ni `dist/` a mano.
 > 7. **Ve de lo general a lo específico** (design thinking + ágil): entiende qué necesita el músico, haz el cambio pequeño que lo resuelve, pruébalo, entrégalo. Si una petición choca con estas reglas, dilo y propone una alternativa que sí las respete.
 
@@ -135,6 +135,7 @@ Cada patrón es un texto con **un carácter por semicorchea**:
 ```js
 claveEstilo: {
   name: 'Nombre visible',       // español, corto
+  en: 'Visible name',           // inglés (obligatorio)
   meter: '4/4' | '3/4' | '6/8',
   swing: 0..0.7,                // retrasa la corchea de contratiempo (s % 4 === 2); no aplica en 6/8
   swing16: 0..0.4,              // opcional: retrasa cada semicorchea impar (feel soul/gospel)
@@ -191,7 +192,7 @@ clave: {
 | Alabanza | `calido` → Cálido, `analogico` → Analógico, `teclas` → Teclado | más presentes, para canciones movidas y baladas pop |
 | Himnos y gospel | `cuerdas` → Cuerdas, `coro` → Voces, `organo` → Órgano | instrumentos acústicos clásicos |
 
-**Nombres:** una sola palabra en español que describa el sonido (Oscuro, Brillante, Voces), sin referencias a artistas, canciones ni momentos. El momento del servicio va en `group`. Nunca cambies la `clave` de un pad existente: las canciones guardadas la usan.
+**Nombres:** una sola palabra en español que describa el sonido (Oscuro, Brillante, Voces), sin referencias a artistas, canciones ni momentos. El momento del servicio va en `group`. Nunca cambies la `clave` de un pad existente: las canciones guardadas la usan. Cada pad lleva también `en` con su palabra en inglés (Dark, Bright, Choir…).
 
 **Volumen parejo:** con la batería y la percusión apagadas, en Estrofa, cada pad nuevo debe medir entre −36 y −32 dB RMS en la salida (los pads oscuros pueden ir un poco más arriba, los brillantes un poco más abajo). Ajusta las ganancias de `layers` y `air`, no el volumen general.
 Modo `fifths` (*solo tónica y quinta*): toca tónica y quinta en varias octavas para que un solo pad sirva en toda la canción.
@@ -221,7 +222,7 @@ Desplazamiento de tiempo ±9 ms × h, velocidad ±20 % × h, notas fantasma de c
 ### 5.9 Estado guardado (`localStorage`)
 | Clave | Contenido |
 |---|---|
-| `acomp` | objeto `S` completo (tempo, compás, parte, estilo, pad, mezcla…) |
+| `acomp` | objeto `S` completo (tempo, compás, parte, estilo, pad, mezcla, idioma `lang`…) |
 | `acomp-songs` | lista `[{ name, bpm, meter, style, key, shaker, pad, padMode, shkSound }]` |
 | `acomp-tab` | última pestaña abierta |
 
@@ -229,7 +230,7 @@ Si cambias el nombre o la forma de una propiedad de `S`, valida al cargar (como 
 
 ### 5.10 Contrato entre `ui.html` y `engine.js`
 El motor busca estos `id`. No los renombres sin cambiar ambos lados:
-`bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `meter`, `dots`, `barinfo`, `play`, botones `[data-s]` dentro de `#sections`, `fill`, `filllbl`, `next`, `autofill`, `key`, `names`, `chords`, `on-shaker`, `v-shaker`, `on-drums`, `v-drums`, `on-pad`, `v-pad`, `mic`, `follow`, `micread`, `micmsg`, `status`, `style`, `shaker`, `human`, `humanval`, `countin`, `shksound`, `padtype`, `padmode`, `padinfo`, `songs`, `songname`, `savesong`, `songtitle`.
+`bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `meter`, `dots`, `barinfo`, `play`, botones `[data-s]` dentro de `#sections`, `fill`, `filllbl`, `next`, `autofill`, `key`, `names`, `chords`, `on-shaker`, `v-shaker`, `on-drums`, `v-drums`, `on-pad`, `v-pad`, `mic`, `follow`, `micread`, `micmsg`, `status`, `style`, `shaker`, `human`, `humanval`, `countin`, `shksound`, `padtype`, `padmode`, `padinfo`, `songs`, `songname`, `savesong`, `songtitle`, `lang`.
 Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[data-tab=…]`. Los interruptores usan `role="switch"` y `aria-checked`.
 Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron.
 
@@ -240,6 +241,13 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 - iOS: `navigator.audioSession.type = 'playback'` (suena con el interruptor de silencio) y *wake lock* para que la pantalla no se apague.
 - Micrófono (beta): detección de ataques por flujo espectral e histograma de intervalos dentro de ±20 % del BPM fijado. Necesita https.
 
+### 5.12 Idiomas (`I18N`)
+- Diccionario `I18N = { es: {...}, en: {...} }` en `src/engine.js`. `T('clave', ...args)` devuelve el texto en el idioma de `S.lang` (si falta, usa español). Algunas entradas son funciones con parámetros (`bar`, `mic.read`, `del.aria`).
+- Textos fijos del HTML: atributo `data-i18n="clave"` (contenido), `data-i18n-aria` (aria-label) o `data-i18n-ph` (placeholder). `applyLang()` los recorre al iniciar y al cambiar de idioma.
+- Datos musicales: `name` en español y `en` en inglés en cada entrada de `STYLES`, `SHAKERS`, `PADS` y `SHK_SETS`; `NM(obj)` elige. Los grupos de pads se traducen en `I18N.<idioma>.groups`.
+- Las claves internas (`estrofa`, `coro`, `atmos`…) nunca se traducen: las canciones guardadas dependen de ellas.
+- **Regla:** cualquier texto nuevo se agrega en **los dos idiomas** a la vez. Para habilitar otro idioma: agrega su bloque completo a `I18N`, los campos de datos que hagan falta y una `<option>` en `#lang` con el nombre del idioma en ese idioma.
+
 ---
 
 ## 6. Reglas de identidad (no negociables)
@@ -248,7 +256,7 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 1. Es un acompañante para **un músico en vivo**, no un DAW ni un secuenciador. Pocas decisiones, grandes y claras.
 2. Funciona **offline** después de la primera carga. Ninguna petición de red en tiempo de ejecución.
 3. **Un solo HTML** generado, sin frameworks ni librerías externas.
-4. Interfaz en **español**; términos musicales de la iglesia latina (Estrofa, Coro, Puente, Remate, Tonalidad, Do/Re/Mi).
+4. Interfaz en **español** (por defecto) e **inglés**; en español, términos musicales de la iglesia latina (Estrofa, Coro, Puente, Remate, Tonalidad, Do/Re/Mi). Los nombres de notas (Do Re Mi / C D E) son un ajuste aparte del idioma.
 5. Lo que el músico guardó (canciones, ajustes) nunca se pierde por una actualización.
 
 **Diseño (iOS oscuro)**

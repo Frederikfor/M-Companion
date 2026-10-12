@@ -126,44 +126,44 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
 </style>
 
 <main>
-  <section class="screen" id="tab-tocar" aria-label="Tocar">
+  <section class="screen" id="tab-tocar" aria-label="Tocar" data-i18n-aria="tab.tocar">
     <div class="wrap">
       <div class="now">
-        <button class="song" data-go="canciones" aria-label="Elegir canción">
-          <small>Canción · <span id="status">Detenido</span></small>
+        <button class="song" data-go="canciones" aria-label="Elegir canción" data-i18n-aria="song.choose">
+          <small><span data-i18n="song.label">Canción</span> · <span id="status">Detenido</span></small>
           <span id="songtitle">Sin canción guardada</span>
         </button>
-        <span class="pill"><span id="meterlbl">4/4</span><select id="meter" aria-label="Compás">
+        <span class="pill"><span id="meterlbl">4/4</span><select id="meter" aria-label="Compás" data-i18n-aria="meter">
           <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
         </select></span>
       </div>
-      <div class="tempo" aria-label="Tempo">
+      <div class="tempo" aria-label="Tempo" data-i18n-aria="tempo">
         <div class="line">
           <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
-            <button class="round" id="m1" aria-label="Bajar 1 BPM"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12"/></svg></button>
-            <button class="round sm" id="m5" aria-label="Bajar 5 BPM">−5</button>
+            <button class="round" id="m1" aria-label="Bajar 1 BPM" data-i18n-aria="bpm.m1"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12"/></svg></button>
+            <button class="round sm" id="m5" aria-label="Bajar 5 BPM" data-i18n-aria="bpm.m5">−5</button>
           </div>
           <div class="bpmbox"><output id="bpm">72</output><span id="bpmunit">BPM (negra)</span></div>
           <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
-            <button class="round" id="p1" aria-label="Subir 1 BPM"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12M9 3v12"/></svg></button>
-            <button class="round sm" id="p5" aria-label="Subir 5 BPM">+5</button>
+            <button class="round" id="p1" aria-label="Subir 1 BPM" data-i18n-aria="bpm.p1"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12M9 3v12"/></svg></button>
+            <button class="round sm" id="p5" aria-label="Subir 5 BPM" data-i18n-aria="bpm.p5">+5</button>
           </div>
         </div>
         <div class="dots" id="dots"></div>
         <div id="barinfo">Listo para empezar</div>
-        <button id="tap">Marcar tempo</button>
+        <button id="tap" data-i18n="tap">Marcar tempo</button>
       </div>
       <div class="padcard" aria-label="Pad">
         <div class="head"><b>Pad</b><button data-go="sonido"><span id="padinfo">Sol · Atmósfera</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button></div>
         <div class="chords" id="chords"></div>
       </div>
-      <div class="live" aria-label="Control en vivo">
-        <div id="sections" role="group" aria-label="Parte de la canción">
-          <button data-s="intro">Intro</button>
-          <button data-s="estrofa">Estrofa</button>
-          <button data-s="coro">Coro</button>
-          <button data-s="puente">Puente</button>
-          <button data-s="final">Final</button>
+      <div class="live" aria-label="Control en vivo" data-i18n-aria="live">
+        <div id="sections" role="group" aria-label="Parte de la canción" data-i18n-aria="sections">
+          <button data-s="intro" data-i18n="sec.intro">Intro</button>
+          <button data-s="estrofa" data-i18n="sec.estrofa">Estrofa</button>
+          <button data-s="coro" data-i18n="sec.coro">Coro</button>
+          <button data-s="puente" data-i18n="sec.puente">Puente</button>
+          <button data-s="final" data-i18n="sec.final">Final</button>
         </div>
         <div class="transport">
           <button class="tbtn" id="fill"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16 9 6l4 8 2-4h3"/></svg><span id="filllbl">Remate</span></button>
@@ -171,78 +171,82 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
             <svg class="i-play" width="30" height="30" viewBox="0 0 18 18" aria-hidden="true"><path d="M6 3.4v11.2c0 .6.7 1 1.2.6l8.4-5.6c.5-.3.5-1 0-1.3L7.2 2.8C6.7 2.4 6 2.8 6 3.4Z" fill="currentColor"/></svg>
             <svg class="i-stop" width="28" height="28" viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="2" fill="currentColor"/></svg>
           </button>
-          <button class="tbtn" id="next"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 5 8 6-8 6V5ZM17 5v12"/></svg>Siguiente parte</button>
+          <button class="tbtn" id="next"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 5 8 6-8 6V5ZM17 5v12"/></svg><span data-i18n="next">Siguiente parte</span></button>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="screen" id="tab-ritmo" aria-label="Ritmo" hidden>
+  <section class="screen" id="tab-ritmo" aria-label="Ritmo" data-i18n-aria="tab.ritmo" hidden>
     <div class="wrap">
-      <h1>Ritmo</h1>
-      <div class="cap">Estilo</div>
+      <h1 data-i18n="tab.ritmo">Ritmo</h1>
+      <div class="cap" data-i18n="style">Estilo</div>
       <div class="group">
-        <label class="row"><span class="lbl">Estilo</span><select id="style"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
-        <label class="row"><span class="lbl">Patrón de shaker</span><select id="shaker"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
-        <label class="row"><span class="lbl">Sonido del shaker</span><select id="shksound"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <label class="row"><span class="lbl" data-i18n="style">Estilo</span><select id="style"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <label class="row"><span class="lbl" data-i18n="shaker.pattern">Patrón de shaker</span><select id="shaker"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <label class="row"><span class="lbl" data-i18n="shaker.sound">Sonido del shaker</span><select id="shksound"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
       </div>
-      <div class="cap">Interpretación</div>
+      <div class="cap" data-i18n="feel">Interpretación</div>
       <div class="group">
-        <div class="row col"><label class="top" for="human"><span>Toque humano</span><span id="humanval" style="color:var(--muted)">40 %</span></label><input type="range" id="human" min="0" max="100" value="40"></div>
-        <div class="row"><span class="lbl" id="lbl-count">Conteo de entrada</span><button class="switch" id="countin" role="switch" aria-checked="true" aria-labelledby="lbl-count"></button></div>
-        <label class="row"><span class="lbl">Remate automático</span><select id="autofill">
-          <option value="0">Apagado</option><option value="4">Cada 4 compases</option><option value="8" selected>Cada 8 compases</option>
+        <div class="row col"><label class="top" for="human"><span data-i18n="human">Toque humano</span><span id="humanval" style="color:var(--muted)">40 %</span></label><input type="range" id="human" min="0" max="100" value="40"></div>
+        <div class="row"><span class="lbl" id="lbl-count" data-i18n="countin">Conteo de entrada</span><button class="switch" id="countin" role="switch" aria-checked="true" aria-labelledby="lbl-count"></button></div>
+        <label class="row"><span class="lbl" data-i18n="autofill">Remate automático</span><select id="autofill">
+          <option value="0" data-i18n="autofill.0">Apagado</option><option value="4" data-i18n="autofill.4">Cada 4 compases</option><option value="8" data-i18n="autofill.8" selected>Cada 8 compases</option>
         </select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
       </div>
-      <div class="cap">Micrófono · beta</div>
+      <div class="cap" data-i18n="mic.cap">Micrófono · beta</div>
       <div class="group">
-        <div class="row"><span class="lbl" id="lbl-mic">Escuchar mi tempo</span><button class="switch" id="mic" role="switch" aria-checked="false" aria-labelledby="lbl-mic"></button></div>
-        <div class="row"><span class="lbl" id="lbl-follow">La base me sigue</span><button class="switch" id="follow" role="switch" aria-checked="false" aria-labelledby="lbl-follow"></button></div>
+        <div class="row"><span class="lbl" id="lbl-mic" data-i18n="mic.listen">Escuchar mi tempo</span><button class="switch" id="mic" role="switch" aria-checked="false" aria-labelledby="lbl-mic"></button></div>
+        <div class="row"><span class="lbl" id="lbl-follow" data-i18n="mic.follow">La base me sigue</span><button class="switch" id="follow" role="switch" aria-checked="false" aria-labelledby="lbl-follow"></button></div>
         <div class="row"><span class="lbl" id="micread">—</span></div>
       </div>
       <p class="foot" id="micmsg">Te avisa si te aceleras o frenas respecto al tempo marcado.</p>
     </div>
   </section>
 
-  <section class="screen" id="tab-sonido" aria-label="Sonido" hidden>
+  <section class="screen" id="tab-sonido" aria-label="Sonido" data-i18n-aria="tab.sonido" hidden>
     <div class="wrap">
-      <h1>Sonido</h1>
+      <h1 data-i18n="tab.sonido">Sonido</h1>
       <div class="cap">Pad</div>
       <div class="group">
-        <label class="row"><span class="lbl">Tonalidad</span><select id="key"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
-        <label class="row"><span class="lbl">Sonido del pad</span><select id="padtype"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
-        <div class="row"><span class="lbl" id="lbl-fifths">Solo tónica y quinta</span><button class="switch" id="padmode" role="switch" aria-checked="false" aria-labelledby="lbl-fifths"></button></div>
-        <label class="row"><span class="lbl">Nombres de notas</span><select id="names"><option value="latin">Do Re Mi</option><option value="abc">C D E</option></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <label class="row"><span class="lbl" data-i18n="key">Tonalidad</span><select id="key"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <label class="row"><span class="lbl" data-i18n="pad.sound">Sonido del pad</span><select id="padtype"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <div class="row"><span class="lbl" id="lbl-fifths" data-i18n="pad.fifths">Solo tónica y quinta</span><button class="switch" id="padmode" role="switch" aria-checked="false" aria-labelledby="lbl-fifths"></button></div>
+        <label class="row"><span class="lbl" data-i18n="names">Nombres de notas</span><select id="names"><option value="latin">Do Re Mi</option><option value="abc">C D E</option></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
       </div>
-      <p class="foot">Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde.</p>
-      <div class="cap">Mezcla</div>
+      <p class="foot" data-i18n="pad.fifths.foot">Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde.</p>
+      <div class="cap" data-i18n="mix">Mezcla</div>
       <div class="group mix">
-        <div class="row"><button id="on-shaker" class="on" aria-label="Activar o silenciar percusión">Percusión</button><input type="range" id="v-shaker" min="0" max="100" value="60" aria-label="Volumen percusión"></div>
-        <div class="row"><button id="on-drums" class="on" aria-label="Activar o silenciar batería">Batería</button><input type="range" id="v-drums" min="0" max="100" value="75" aria-label="Volumen batería"></div>
-        <div class="row"><button id="on-pad" class="on" aria-label="Activar o silenciar pad">Pad</button><input type="range" id="v-pad" min="0" max="100" value="50" aria-label="Volumen pad"></div>
+        <div class="row"><button id="on-shaker" class="on" aria-label="Activar o silenciar percusión" data-i18n-aria="mute.shaker" data-i18n="ch.shaker">Percusión</button><input type="range" id="v-shaker" min="0" max="100" value="60" aria-label="Volumen percusión" data-i18n-aria="vol.shaker"></div>
+        <div class="row"><button id="on-drums" class="on" aria-label="Activar o silenciar batería" data-i18n-aria="mute.drums" data-i18n="ch.drums">Batería</button><input type="range" id="v-drums" min="0" max="100" value="75" aria-label="Volumen batería" data-i18n-aria="vol.drums"></div>
+        <div class="row"><button id="on-pad" class="on" aria-label="Activar o silenciar pad" data-i18n-aria="mute.pad">Pad</button><input type="range" id="v-pad" min="0" max="100" value="50" aria-label="Volumen pad" data-i18n-aria="vol.pad"></div>
       </div>
-      <p class="foot">Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.</p>
-      <p class="foot credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
+      <p class="foot" data-i18n="mix.foot">Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.</p>
+      <div class="cap" data-i18n="app">App</div>
+      <div class="group">
+        <label class="row"><span class="lbl" data-i18n="lang">Idioma</span><select id="lang"><option value="es">Español</option><option value="en">English</option></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+      </div>
+      <p class="foot credits" data-i18n="credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
     </div>
   </section>
 
-  <section class="screen" id="tab-canciones" aria-label="Canciones" hidden>
+  <section class="screen" id="tab-canciones" aria-label="Canciones" data-i18n-aria="tab.canciones" hidden>
     <div class="wrap">
-      <h1>Canciones</h1>
-      <div class="save"><input type="text" id="songname" placeholder="Nombre de la canción" aria-label="Nombre de la canción"><button id="savesong">Guardar</button></div>
-      <p class="foot">Guarda el tempo, compás, estilo, tono, pad y shaker actuales.</p>
-      <div class="cap">Mis canciones</div>
+      <h1 data-i18n="tab.canciones">Canciones</h1>
+      <div class="save"><input type="text" id="songname" placeholder="Nombre de la canción" aria-label="Nombre de la canción" data-i18n-ph="song.name" data-i18n-aria="song.name"><button id="savesong" data-i18n="save">Guardar</button></div>
+      <p class="foot" data-i18n="save.foot">Guarda el tempo, compás, estilo, tono, pad y shaker actuales.</p>
+      <div class="cap" data-i18n="mysongs">Mis canciones</div>
       <div class="group songs" id="songs"></div>
-      <p class="foot">Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.</p>
+      <p class="foot" data-i18n="songs.foot">Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.</p>
     </div>
   </section>
 </main>
 
-<nav class="tabbar" role="tablist" aria-label="Secciones">
-  <button class="tab" role="tab" data-tab="tocar" aria-selected="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="13" r="10"/><path d="M11 9v8l6-4-6-4Z" fill="currentColor"/></svg>Tocar</button>
-  <button class="tab" role="tab" data-tab="ritmo" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 13h2M8 8v10M12 5v16M16 9v8M20 11v4M22 13h1"/></svg>Ritmo</button>
-  <button class="tab" role="tab" data-tab="sonido" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4v18M13 4v18M20 4v18"/><circle cx="6" cy="16" r="2.4" fill="#161618"/><circle cx="13" cy="9" r="2.4" fill="#161618"/><circle cx="20" cy="14" r="2.4" fill="#161618"/></svg>Sonido</button>
-  <button class="tab" role="tab" data-tab="canciones" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 7h13M9 13h13M9 19h13"/><circle cx="4.5" cy="7" r="1" fill="currentColor"/><circle cx="4.5" cy="13" r="1" fill="currentColor"/><circle cx="4.5" cy="19" r="1" fill="currentColor"/></svg>Canciones</button>
+<nav class="tabbar" role="tablist" aria-label="Secciones" data-i18n-aria="tabbar">
+  <button class="tab" role="tab" data-tab="tocar" aria-selected="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="13" r="10"/><path d="M11 9v8l6-4-6-4Z" fill="currentColor"/></svg><span data-i18n="tab.tocar">Tocar</span></button>
+  <button class="tab" role="tab" data-tab="ritmo" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 13h2M8 8v10M12 5v16M16 9v8M20 11v4M22 13h1"/></svg><span data-i18n="tab.ritmo">Ritmo</span></button>
+  <button class="tab" role="tab" data-tab="sonido" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4v18M13 4v18M20 4v18"/><circle cx="6" cy="16" r="2.4" fill="#161618"/><circle cx="13" cy="9" r="2.4" fill="#161618"/><circle cx="20" cy="14" r="2.4" fill="#161618"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+  <button class="tab" role="tab" data-tab="canciones" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 7h13M9 13h13M9 19h13"/><circle cx="4.5" cy="7" r="1" fill="currentColor"/><circle cx="4.5" cy="13" r="1" fill="currentColor"/><circle cx="4.5" cy="19" r="1" fill="currentColor"/></svg><span data-i18n="tab.canciones">Canciones</span></button>
 </nav>
 
 <script>
