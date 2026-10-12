@@ -108,20 +108,20 @@
   // Optional: air [gain, Hz] adds breathy filtered noise; formant [[Hz, Q, gain]…] shapes the layers like a choir "ah";
   // trem [Hz, depth] adds a soft volume tremolo, like an electric piano.
   const PADS = {
-    atmos:     { group: 'Worship', name: 'Atmósfera (Elevation)', layers: [['sawtooth', [-9, 0, 9], 0, .022], ['sine', [0], 12, .018]], cutoff: 1, q: .7, attack: 2.2, release: 2.5, vib: [.25, 4], hall: .9, voicing: 'add9' },
-    fundamento:{ group: 'Worship', name: 'Fundamento (cálido y amplio)', layers: [['sawtooth', [-7, 7], 0, .013], ['triangle', [0], -12, .032], ['sine', [0], 12, .008]], cutoff: .7, q: .9, attack: 3, release: 3, vib: [.2, 3], hall: 1, voicing: 'sus2', air: [.032, 3500] },
-    aire:      { group: 'Worship', name: 'Aire (pad con respiración)', layers: [['triangle', [-5, 5], 0, .035], ['sine', [0], 12, .02]], cutoff: 1.2, q: .5, attack: 2.5, release: 3, vib: [.15, 4], hall: 1.1, voicing: 'open', air: [.12, 6000] },
-    shimmer:   { group: 'Worship', name: 'Shimmer', layers: [['sine', [-4, 4], 12, .03], ['triangle', [0], 24, .01], ['sawtooth', [-10, 10], 0, .01]], cutoff: 1.6, q: .4, attack: 2.8, release: 3, vib: [.3, 5], hall: 1.2, voicing: 'open' },
-    amanecer:  { group: 'Worship', name: 'Amanecer (crece brillante)', layers: [['sawtooth', [-14, -5, 5, 14], 0, .036], ['sawtooth', [0], 12, .014]], cutoff: 1.4, q: 1.2, attack: 4, release: 3, vib: [.2, 4], hall: 1, voicing: 'add9' },
-    oracion:   { group: 'Oración y ministración', name: 'Oración (oscuro y suave)', layers: [['sine', [-3, 3], 0, .025], ['triangle', [0], -12, .02]], cutoff: .5, q: .4, attack: 4, release: 4, vib: [.1, 3], hall: 1, voicing: 'sus2' },
-    quintas:   { group: 'Oración y ministración', name: 'Quintas profundas', layers: [['sawtooth', [-6, 6], 0, .013], ['sine', [0], -12, .035]], cutoff: .6, q: .6, attack: 3, release: 3.5, vib: [.15, 3], hall: 1, voicing: 'power', air: [.028, 2500] },
-    cristal:   { group: 'Oración y ministración', name: 'Cristal (íntimo)', layers: [['sine', [0], 12, .03], ['sine', [0], 19, .01], ['triangle', [0], 0, .021]], cutoff: 2.2, q: .3, attack: .4, release: 3, vib: [.2, 4.5], hall: 1.2, voicing: 'open', trem: [3.5, .15] },
+    atmos:     { group: 'Worship', name: 'Atmósfera', layers: [['sawtooth', [-9, 0, 9], 0, .022], ['sine', [0], 12, .018]], cutoff: 1, q: .7, attack: 2.2, release: 2.5, vib: [.25, 4], hall: .9, voicing: 'add9' },
+    fundamento:{ group: 'Worship', name: 'Envolvente', layers: [['sawtooth', [-7, 7], 0, .013], ['triangle', [0], -12, .032], ['sine', [0], 12, .008]], cutoff: .7, q: .9, attack: 3, release: 3, vib: [.2, 3], hall: 1, voicing: 'sus2', air: [.032, 3500] },
+    aire:      { group: 'Worship', name: 'Aire', layers: [['triangle', [-5, 5], 0, .035], ['sine', [0], 12, .02]], cutoff: 1.2, q: .5, attack: 2.5, release: 3, vib: [.15, 4], hall: 1.1, voicing: 'open', air: [.12, 6000] },
+    shimmer:   { group: 'Worship', name: 'Brillante', layers: [['sine', [-4, 4], 12, .03], ['triangle', [0], 24, .01], ['sawtooth', [-10, 10], 0, .01]], cutoff: 1.6, q: .4, attack: 2.8, release: 3, vib: [.3, 5], hall: 1.2, voicing: 'open' },
+    amanecer:  { group: 'Worship', name: 'Creciente', layers: [['sawtooth', [-14, -5, 5, 14], 0, .036], ['sawtooth', [0], 12, .014]], cutoff: 1.4, q: 1.2, attack: 4, release: 3, vib: [.2, 4], hall: 1, voicing: 'add9' },
+    oracion:   { group: 'Oración y ministración', name: 'Oscuro', layers: [['sine', [-3, 3], 0, .025], ['triangle', [0], -12, .02]], cutoff: .5, q: .4, attack: 4, release: 4, vib: [.1, 3], hall: 1, voicing: 'sus2' },
+    quintas:   { group: 'Oración y ministración', name: 'Profundo', layers: [['sawtooth', [-6, 6], 0, .013], ['sine', [0], -12, .035]], cutoff: .6, q: .6, attack: 3, release: 3.5, vib: [.15, 3], hall: 1, voicing: 'power', air: [.028, 2500] },
+    cristal:   { group: 'Oración y ministración', name: 'Cristalino', layers: [['sine', [0], 12, .03], ['sine', [0], 19, .01], ['triangle', [0], 0, .021]], cutoff: 2.2, q: .3, attack: .4, release: 3, vib: [.2, 4.5], hall: 1.2, voicing: 'open', trem: [3.5, .15] },
     calido:    { group: 'Alabanza', name: 'Cálido', layers: [['triangle', [-6, 6], 0, .05], ['sine', [0], -12, .04]], cutoff: .75, q: .5, attack: 1.2, release: 1.8, vib: [.2, 3], hall: .5, voicing: 'triad' },
-    analogico: { group: 'Alabanza', name: 'Analógico (sinte 80s)', layers: [['sawtooth', [-12, 0, 12], 0, .029], ['square', [-6, 6], -12, .019]], cutoff: 1.1, q: 1.5, attack: .5, release: 1.2, vib: [.6, 6], hall: .5, voicing: 'triad' },
-    teclas:    { group: 'Alabanza', name: 'Teclas suaves (Rhodes)', layers: [['sine', [0], 0, .039], ['triangle', [-3, 3], 12, .01]], cutoff: 1.5, q: .3, attack: .15, release: 1.2, vib: [.1, 2], hall: .5, voicing: 'add9', trem: [4.5, .3] },
+    analogico: { group: 'Alabanza', name: 'Analógico', layers: [['sawtooth', [-12, 0, 12], 0, .029], ['square', [-6, 6], -12, .019]], cutoff: 1.1, q: 1.5, attack: .5, release: 1.2, vib: [.6, 6], hall: .5, voicing: 'triad' },
+    teclas:    { group: 'Alabanza', name: 'Teclado', layers: [['sine', [0], 0, .039], ['triangle', [-3, 3], 12, .01]], cutoff: 1.5, q: .3, attack: .15, release: 1.2, vib: [.1, 2], hall: .5, voicing: 'add9', trem: [4.5, .3] },
     cuerdas:   { group: 'Himnos y gospel', name: 'Cuerdas', layers: [['sawtooth', [-12, -4, 4, 12], 0, .016]], cutoff: .9, q: .6, attack: 1.4, release: 2, vib: [5, 6], hall: .7, voicing: 'triad' },
-    coro:      { group: 'Himnos y gospel', name: 'Coro (voces "ah")', layers: [['sawtooth', [-8, 0, 8], 0, .057]], cutoff: 2.5, q: .3, attack: 1.2, release: 2, vib: [5.5, 10], hall: .9, voicing: 'triad', formant: [[700, 6, 1], [1150, 8, .6], [2700, 10, .3]] },
-    organo:    { group: 'Himnos y gospel', name: 'Órgano gospel', layers: [['sine', [0], -12, .03], ['sine', [0], 0, .04], ['sine', [0], 12, .03], ['sine', [0], 19, .018], ['sine', [0], 24, .012]], cutoff: 3, q: .3, attack: .06, release: .35, vib: [6.3, 12], hall: .3, voicing: 'gospel7' }
+    coro:      { group: 'Himnos y gospel', name: 'Voces', layers: [['sawtooth', [-8, 0, 8], 0, .057]], cutoff: 2.5, q: .3, attack: 1.2, release: 2, vib: [5.5, 10], hall: .9, voicing: 'triad', formant: [[700, 6, 1], [1150, 8, .6], [2700, 10, .3]] },
+    organo:    { group: 'Himnos y gospel', name: 'Órgano', layers: [['sine', [0], -12, .03], ['sine', [0], 0, .04], ['sine', [0], 12, .03], ['sine', [0], 19, .018], ['sine', [0], 24, .012]], cutoff: 3, q: .3, attack: .06, release: .35, vib: [6.3, 12], hall: .3, voicing: 'gospel7' }
   };
   const SHK_SETS = {
     small:  { name: 'Shaker pequeño', down: ['shkH_Down_1', 'shkH_Down_2', 'shkL_Down_1', 'shkL_Down_2'], up: ['shkH_Up_1', 'shkH_Up_2', 'shkL_Up_1', 'shkL_Up_2'] },
@@ -654,7 +654,7 @@
     for (const [id, x] of Object.entries(SHK_SETS)) { const o = document.createElement('option'); o.value = id; o.textContent = x.name; shs.appendChild(o); }
     shs.value = S.shkSound;
     $('padmode').setAttribute('aria-checked', String(S.padMode === 'fifths'));
-    $('padinfo').textContent = NAMES[S.names][S.key] + ' · ' + PADS[S.pad].name.replace(/ \(.*\)/, '');
+    $('padinfo').textContent = NAMES[S.names][S.key] + ' · ' + PADS[S.pad].name;
     $('chords').classList.toggle('muted', S.padMode === 'fifths');
   }
   function setCountUi() { $('countin').setAttribute('aria-checked', String(S.countIn)); }
