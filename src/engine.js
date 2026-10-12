@@ -819,7 +819,7 @@
   $('names').addEventListener('change', (e) => { S.names = e.target.value; save(); buildKeys(); buildChords(); renderSongs(); });
   ['shaker', 'drums', 'pad'].forEach(bindLayer);
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.closest?.('.pd')) return;
     const k = e.key.toLowerCase();
     if (k === ' ') { e.preventDefault(); playing ? stop() : start(); }
     else if (k === 'r') $('fill').click();

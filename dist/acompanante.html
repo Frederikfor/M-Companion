@@ -54,7 +54,25 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
 .now small { font-size: 13px; color: var(--muted); }
 #songtitle { font-size: 22px; line-height: 28px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pill { position: relative; height: 32px; padding: 0 12px; border-radius: 16px; background: var(--card); display: flex; align-items: center; font-size: 15px; font-weight: 600; }
-.pill select { position: absolute; inset: 0; opacity: 0; width: 100%; }
+.pill { gap: 6px; }
+.pill .ud { width: 8px; height: 12px; color: var(--muted); }
+/* iOS pull-down menus: the native <select> stays hidden as the source of truth; .pd buttons open .pd-menu */
+select.native { display: none; }
+.pd { display: flex; align-items: center; gap: 6px; max-width: 64%; min-height: 32px; color: var(--muted); font-size: 17px; text-align: right; }
+.pd-val { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ud { flex: none; width: 9px; height: 14px; }
+.row.pick { cursor: pointer; }
+.pd-layer { position: fixed; inset: 0; z-index: 50; }
+.pd-menu { position: absolute; min-width: 230px; max-width: min(300px, calc(100vw - 32px)); overflow-y: auto; overscroll-behavior: contain; background: rgba(40, 40, 42, .86); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); border-radius: 13px; box-shadow: 0 12px 40px rgba(0, 0, 0, .55), 0 0 0 .5px rgba(255, 255, 255, .08); animation: pd-in .24s cubic-bezier(.2, .9, .3, 1.15); }
+.pd-menu.closing { animation: pd-out .14s ease-in forwards; }
+@keyframes pd-in { from { opacity: 0; transform: scale(.82); } to { opacity: 1; transform: none; } }
+@keyframes pd-out { to { opacity: 0; transform: scale(.92); } }
+.pd-head { padding: 9px 16px 5px 44px; font-size: 13px; color: var(--muted); }
+.pd-sep { height: 8px; background: rgba(0, 0, 0, .3); }
+.pd-item { position: relative; min-height: 44px; padding: 11px 16px 11px 44px; display: flex; align-items: center; font-size: 17px; line-height: 22px; color: var(--fg); outline: none; cursor: pointer; }
+.pd-item + .pd-item::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: .5px; background: rgba(84, 84, 88, .55); }
+.pd-item:hover, .pd-item:focus-visible, .pd-item.press { background: rgba(255, 255, 255, .1); }
+.pd-item svg { position: absolute; left: 16px; top: 50%; margin-top: -7px; width: 15px; height: 14px; }
 #status { font-size: 12px; color: var(--muted); }
 .tempo { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .tempo .line { width: 100%; display: flex; align-items: center; justify-content: space-between; }
@@ -122,7 +140,7 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
 .tab { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #8E8E93; font-size: 10px; font-weight: 600; min-height: 44px; }
 .tab[aria-selected="true"] { color: var(--accent); }
 @media (max-height: 700px) { .tempo { margin-top: 12px; gap: 8px; } #bpm { font-size: 72px; line-height: 76px; } .padcard { margin-top: 12px; } .live { gap: 12px; padding-top: 12px; } }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } .pd-menu, .pd-menu.closing { animation-duration: .01s; } }
 </style>
 
 <main>
@@ -133,9 +151,9 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
           <small><span data-i18n="song.label">Canción</span> · <span id="status">Detenido</span></small>
           <span id="songtitle">Sin canción guardada</span>
         </button>
-        <span class="pill"><span id="meterlbl">4/4</span><select id="meter" aria-label="Compás" data-i18n-aria="meter">
+        <button type="button" class="pill pd" data-for="meter" aria-haspopup="listbox" aria-expanded="false" aria-label="Compás" data-i18n-aria="meter"><span id="meterlbl">4/4</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="meter" class="native" tabindex="-1" aria-hidden="true">
           <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
-        </select></span>
+        </select>
       </div>
       <div class="tempo" aria-label="Tempo" data-i18n-aria="tempo">
         <div class="line">
@@ -182,17 +200,17 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
       <h1 data-i18n="tab.ritmo">Ritmo</h1>
       <div class="cap" data-i18n="style">Estilo</div>
       <div class="group">
-        <label class="row"><span class="lbl" data-i18n="style">Estilo</span><select id="style"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
-        <label class="row"><span class="lbl" data-i18n="shaker.pattern">Patrón de shaker</span><select id="shaker"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
-        <label class="row"><span class="lbl" data-i18n="shaker.sound">Sonido del shaker</span><select id="shksound"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <div class="row pick"><span class="lbl" id="lbl-style" data-i18n="style">Estilo</span><select id="style" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="style" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-style val-style"><span class="pd-val" id="val-style"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
+        <div class="row pick"><span class="lbl" id="lbl-shaker" data-i18n="shaker.pattern">Patrón de shaker</span><select id="shaker" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="shaker" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-shaker val-shaker"><span class="pd-val" id="val-shaker"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
+        <div class="row pick"><span class="lbl" id="lbl-shksound" data-i18n="shaker.sound">Sonido del shaker</span><select id="shksound" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="shksound" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-shksound val-shksound"><span class="pd-val" id="val-shksound"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
       <div class="cap" data-i18n="feel">Interpretación</div>
       <div class="group">
         <div class="row col"><label class="top" for="human"><span data-i18n="human">Toque humano</span><span id="humanval" style="color:var(--muted)">40 %</span></label><input type="range" id="human" min="0" max="100" value="40"></div>
         <div class="row"><span class="lbl" id="lbl-count" data-i18n="countin">Conteo de entrada</span><button class="switch" id="countin" role="switch" aria-checked="true" aria-labelledby="lbl-count"></button></div>
-        <label class="row"><span class="lbl" data-i18n="autofill">Remate automático</span><select id="autofill">
+        <div class="row pick"><span class="lbl" id="lbl-autofill" data-i18n="autofill">Remate automático</span><select id="autofill" class="native" tabindex="-1" aria-hidden="true">
           <option value="0" data-i18n="autofill.0">Apagado</option><option value="4" data-i18n="autofill.4">Cada 4 compases</option><option value="8" data-i18n="autofill.8" selected>Cada 8 compases</option>
-        </select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        </select><button type="button" class="pd" data-for="autofill" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-autofill val-autofill"><span class="pd-val" id="val-autofill"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
       <div class="cap" data-i18n="mic.cap">Micrófono · beta</div>
       <div class="group">
@@ -209,10 +227,10 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
       <h1 data-i18n="tab.sonido">Sonido</h1>
       <div class="cap">Pad</div>
       <div class="group">
-        <label class="row"><span class="lbl" data-i18n="key">Tonalidad</span><select id="key"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
-        <label class="row"><span class="lbl" data-i18n="pad.sound">Sonido del pad</span><select id="padtype"></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <div class="row pick"><span class="lbl" id="lbl-key" data-i18n="key">Tonalidad</span><select id="key" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="key" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-key val-key"><span class="pd-val" id="val-key"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
+        <div class="row pick"><span class="lbl" id="lbl-padtype" data-i18n="pad.sound">Sonido del pad</span><select id="padtype" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="padtype" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-padtype val-padtype"><span class="pd-val" id="val-padtype"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <div class="row"><span class="lbl" id="lbl-fifths" data-i18n="pad.fifths">Solo tónica y quinta</span><button class="switch" id="padmode" role="switch" aria-checked="false" aria-labelledby="lbl-fifths"></button></div>
-        <label class="row"><span class="lbl" data-i18n="names">Nombres de notas</span><select id="names"><option value="latin">Do Re Mi</option><option value="abc">C D E</option></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <div class="row pick"><span class="lbl" id="lbl-names" data-i18n="names">Nombres de notas</span><select id="names" class="native" tabindex="-1" aria-hidden="true"><option value="latin">Do Re Mi</option><option value="abc">C D E</option></select><button type="button" class="pd" data-for="names" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-names val-names"><span class="pd-val" id="val-names"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
       <p class="foot" data-i18n="pad.fifths.foot">Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde.</p>
       <div class="cap" data-i18n="mix">Mezcla</div>
@@ -224,7 +242,7 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
       <p class="foot" data-i18n="mix.foot">Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.</p>
       <div class="cap" data-i18n="app">App</div>
       <div class="group">
-        <label class="row"><span class="lbl" data-i18n="lang">Idioma</span><select id="lang"><option value="es">Español</option><option value="en">English</option></select><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></label>
+        <div class="row pick"><span class="lbl" id="lbl-lang" data-i18n="lang">Idioma</span><select id="lang" class="native" tabindex="-1" aria-hidden="true"><option value="es">Español</option><option value="en">English</option></select><button type="button" class="pd" data-for="lang" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-lang val-lang"><span class="pd-val" id="val-lang"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
       <p class="foot credits" data-i18n="credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
     </div>
@@ -259,10 +277,95 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
   document.getElementById('songs').addEventListener('click', (e) => { if (e.target.closest('.songload')) show('tocar'); });
-  const meter = document.getElementById('meter');
-  const syncMeter = () => { document.getElementById('meterlbl').textContent = meter.value; };
-  meter.addEventListener('change', syncMeter);
-  new MutationObserver(syncMeter).observe(document.getElementById('bpmunit'), { childList: true, characterData: true, subtree: true });
+
+  // iOS-style pull-down menus over hidden native selects. The engine keeps using the selects:
+  // it fills them, sets .value and listens for 'change'; the buttons only mirror and drive them.
+  const valueProp = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+  Object.defineProperty(HTMLSelectElement.prototype, 'value', {
+    configurable: true, get() { return valueProp.get.call(this); },
+    set(v) { valueProp.set.call(this, v); this.dispatchEvent(new Event('pd-sync')); }
+  });
+  const CHECK = '<svg viewBox="0 0 15 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 7.5 4 4 8-9.5"/></svg>';
+  let open = null;
+  function sync(sel, btn) {
+    const o = sel.options[sel.selectedIndex];
+    const txt = o ? o.textContent : '';
+    if (sel.id === 'meter') document.getElementById('meterlbl').textContent = txt;
+    else btn.querySelector('.pd-val').textContent = txt;
+  }
+  function close(focusBack) {
+    if (!open) return;
+    const { layer, menu, btn } = open; open = null;
+    btn.setAttribute('aria-expanded', 'false');
+    menu.classList.add('closing');
+    setTimeout(() => layer.remove(), 140);
+    if (focusBack) btn.focus();
+  }
+  function pick(sel, value) {
+    if (sel.value !== value) { sel.value = value; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+    close(true);
+  }
+  function openMenu(sel, btn) {
+    if (open) { close(false); return; }
+    const layer = document.createElement('div'); layer.className = 'pd-layer';
+    const menu = document.createElement('div'); menu.className = 'pd-menu'; menu.setAttribute('role', 'listbox');
+    const lbl = btn.closest('.row')?.querySelector('.lbl'); menu.setAttribute('aria-label', lbl ? lbl.textContent : (btn.getAttribute('aria-label') || ''));
+    let first = true, current = null;
+    const addItem = (o, box) => {
+      const it = document.createElement('div'); it.className = 'pd-item'; it.setAttribute('role', 'option'); it.tabIndex = -1;
+      const on = o.value === sel.value; it.setAttribute('aria-selected', String(on));
+      it.innerHTML = (on ? CHECK : '') + '<span></span>'; it.lastChild.textContent = o.textContent;
+      it.addEventListener('click', () => pick(sel, o.value));
+      if (on) current = it;
+      box.appendChild(it);
+    };
+    for (const child of sel.children) {
+      if (child.tagName === 'OPTGROUP') {
+        if (!first) { const sep = document.createElement('div'); sep.className = 'pd-sep'; menu.appendChild(sep); }
+        const g = document.createElement('div'); g.setAttribute('role', 'group'); g.setAttribute('aria-label', child.label);
+        const h = document.createElement('div'); h.className = 'pd-head'; h.textContent = child.label; h.setAttribute('aria-hidden', 'true'); g.appendChild(h);
+        for (const o of child.children) addItem(o, g);
+        menu.appendChild(g);
+      } else addItem(child, menu);
+      first = false;
+    }
+    layer.appendChild(menu); document.body.appendChild(layer);
+    // Place under the button, right-aligned; flip above when there is no room; never under the tab bar.
+    const r = btn.getBoundingClientRect(), vw = innerWidth;
+    const bottomLimit = innerHeight - (document.querySelector('.tabbar')?.offsetHeight || 0) - 8, topLimit = 12;
+    const h = Math.min(menu.scrollHeight, bottomLimit - topLimit);
+    menu.style.maxHeight = h + 'px';
+    menu.style.right = Math.min(Math.max(16, vw - r.right), vw - menu.offsetWidth - 16) + 'px';
+    let top = r.bottom + 6, origin = 'top right';
+    if (top + h > bottomLimit) { top = r.top - 6 - h; origin = 'bottom right'; }
+    if (top < topLimit) { top = Math.max(topLimit, bottomLimit - h); origin = 'center right'; }
+    menu.style.top = top + 'px'; menu.style.transformOrigin = origin;
+    if (current) { current.scrollIntoView({ block: 'center' }); current.focus({ preventScroll: true }); } else menu.querySelector('.pd-item')?.focus();
+    btn.setAttribute('aria-expanded', 'true');
+    open = { layer, menu, btn };
+    layer.addEventListener('click', (e) => { if (e.target === layer) close(false); });
+    menu.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      const items = [...menu.querySelectorAll('.pd-item')], i = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); items[Math.min(items.length - 1, i + 1)].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); items[Math.max(0, i - 1)].focus(); }
+      else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+      else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.activeElement.click(); }
+      else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); close(true); }
+    });
+  }
+  document.querySelectorAll('.pd[data-for]').forEach(btn => {
+    const sel = document.getElementById(btn.dataset.for);
+    const update = () => sync(sel, btn);
+    sel.addEventListener('change', update); sel.addEventListener('pd-sync', update);
+    new MutationObserver(update).observe(sel, { childList: true, subtree: true, characterData: true });
+    const row = btn.closest('.row.pick');
+    (row || btn).addEventListener('click', () => openMenu(sel, btn));
+    update();
+  });
+  addEventListener('resize', () => close(false));
+  document.querySelectorAll('.screen').forEach(sc => sc.addEventListener('scroll', () => close(false), { passive: true }));
   let start = 'tocar';
   try { start = localStorage.getItem('acomp-tab') || 'tocar'; } catch (e) {}
   if (!document.getElementById('tab-' + start)) start = 'tocar';
@@ -1092,7 +1195,7 @@ input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-hei
   $('names').addEventListener('change', (e) => { S.names = e.target.value; save(); buildKeys(); buildChords(); renderSongs(); });
   ['shaker', 'drums', 'pad'].forEach(bindLayer);
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.closest?.('.pd')) return;
     const k = e.key.toLowerCase();
     if (k === ' ') { e.preventDefault(); playing ? stop() : start(); }
     else if (k === 'r') $('fill').click();

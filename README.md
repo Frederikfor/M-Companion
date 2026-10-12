@@ -231,6 +231,7 @@ Si cambias el nombre o la forma de una propiedad de `S`, valida al cargar (como 
 ### 5.10 Contrato entre `ui.html` y `engine.js`
 El motor busca estos `id`. No los renombres sin cambiar ambos lados:
 `bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `meter`, `dots`, `barinfo`, `play`, botones `[data-s]` dentro de `#sections`, `fill`, `filllbl`, `next`, `autofill`, `key`, `names`, `chords`, `on-shaker`, `v-shaker`, `on-drums`, `v-drums`, `on-pad`, `v-pad`, `mic`, `follow`, `micread`, `micmsg`, `status`, `style`, `shaker`, `human`, `humanval`, `countin`, `shksound`, `padtype`, `padmode`, `padinfo`, `songs`, `songname`, `savesong`, `songtitle`, `lang`.
+Los `select` (`meter`, `style`, `shaker`, `shksound`, `autofill`, `key`, `padtype`, `names`, `lang`) están ocultos y se manejan con los menús `.pd[data-for=id]`; las pruebas eligen opciones haciendo clic en el menú, no con `selectOption`.
 Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[data-tab=…]`. Los interruptores usan `role="switch"` y `aria-checked`.
 Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron.
 
@@ -278,6 +279,7 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 - Objetivos táctiles **≥ 44 px**; Play redondo de 84 px.
 - En **Tocar**, de arriba abajo: información (canción, compás, tempo) → pad → **zona del pulgar** con partes y transporte. Los controles en vivo nunca suben.
 - Barra de 4 pestañas abajo con área segura (`env(safe-area-inset-bottom)`).
+- Las listas de opciones son **menús pull-down estilo iOS** (`.pd` → `.pd-menu`), nunca el selector nativo: palomita a la izquierda en la opción elegida, grupos separados con banda oscura y título gris, se abre bajo el botón o encima si no cabe. El `<select class="native">` oculto sigue siendo la fuente de verdad: el motor lo llena, cambia su `.value` y escucha `change`; el menú solo lo refleja. Un selector nuevo = `<div class="row pick">` con `.lbl`, el `select.native` y un `button.pd[data-for=id]` (copia una fila existente de `src/ui.html`).
 - Accesible: `aria-label` en botones con ícono, `role="switch"`/`aria-checked`, foco visible naranja.
 
 **Música**
