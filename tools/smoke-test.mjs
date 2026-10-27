@@ -92,6 +92,19 @@ await page.waitForTimeout(1500);
 const pad = await page.evaluate(() => window.acompTest.pad());
 if (pad.kind !== 'ps' || pad.cached < 6) errors.push(`pad should play a PADsynth loop with 6 chords ready, got ${JSON.stringify(pad)}`);
 if ((await page.textContent('#padrichval')).trim() !== '80 %') errors.push('Richness value is not shown');
+// Movement at the top must sway a dark pad, never silence it (the filter sweep used to close Senoidal).
+await page.$eval('#padmove', (m) => { m.value = 100; m.dispatchEvent(new Event('input')); });
+await page.evaluate(() => {
+  const r = document.getElementById('padrich'); r.value = 50; r.dispatchEvent(new Event('change'));
+  document.querySelector('#sections button[data-s=estrofa]').click();
+  const s = document.getElementById('padtype'); s.value = 'oracion'; s.dispatchEvent(new Event('change'));
+  window.acompTest.padLevel();
+});
+await page.waitForTimeout(8000);
+const padLevels = [];
+for (let i = 0; i < 90; i++) { padLevels.push(await page.evaluate(() => window.acompTest.padLevel())); await page.waitForTimeout(100); }
+const padLow = 20 * Math.log10(Math.min(...padLevels) + 1e-9), padHigh = 20 * Math.log10(Math.max(...padLevels) + 1e-9);
+if (padHigh - padLow > 15) errors.push(`Senoidal with Movement 100 dips ${(padHigh - padLow).toFixed(1)} dB (should sway, not drop out)`);
 // Version: the row shows the release, the screen lists every version, and the build matches sw.js's cache.
 const ver = await page.evaluate(() => window.acompVersion());
 const verRow = (await page.textContent('#versionval')).trim();

@@ -525,7 +525,9 @@ select.native { display: none; }
   // Optional: air [gain, Hz] adds breathy filtered noise; formant [[Hz, Q, gain]…] shapes the layers like a choir "ah";
   // trem [Hz, depth] adds a soft volume tremolo, like an electric piano.
   // Pads are rendered with PADsynth (see below); osc: true keeps live oscillators, for keys that are not pads.
-  // bw [cents] overrides the band width that PADsynth takes from the detune spread.
+  // bw [cents] overrides the band width that PADsynth takes from the detune spread; spread (default .25) is how fast
+  // it widens with the harmonic number. tilt darkens the source by h^-tilt (a voice falls faster than a sawtooth).
+  // sections: formant scales sung at once (men 1, women ~1.15), which blurs the vowel like a mixed choir.
   const PADS = {
     atmos:     { group: 'Worship', name: 'Supersaw', en: 'Supersaw', layers: [['sawtooth', [-9, 0, 9], 0, .035], ['sine', [0], 12, .029]], cutoff: 1, q: .7, attack: 2.2, release: 2.5, vib: [.25, 4], hall: .9, voicing: 'add9' },
     fundamento:{ group: 'Worship', name: 'Pad cálido', en: 'Warm Pad', layers: [['sawtooth', [-7, 7], 0, .016], ['triangle', [0], -12, .04], ['sine', [0], 12, .01]], cutoff: .7, q: .9, attack: 3, release: 3, vib: [.2, 3], hall: 1, voicing: 'sus2', air: [.032, 3500] },
@@ -539,7 +541,7 @@ select.native { display: none; }
     analogico: { group: 'Alabanza', name: 'Polisinte', en: 'Poly Synth', layers: [['sawtooth', [-12, 0, 12], 0, .029], ['square', [-6, 6], -12, .019]], cutoff: 1.1, q: 1.5, attack: .5, release: 1.2, vib: [.6, 6], hall: .5, voicing: 'triad' },
     teclas:    { group: 'Alabanza', name: 'Rhodes', en: 'Rhodes', layers: [['sine', [0], 0, .039], ['triangle', [-3, 3], 12, .01]], cutoff: 1.5, q: .3, attack: .15, release: 1.2, vib: [.1, 2], hall: .5, voicing: 'add9', trem: [4.5, .3], osc: true },
     cuerdas:   { group: 'Himnos y gospel', name: 'Cuerdas', en: 'Strings', layers: [['sawtooth', [-12, -4, 4, 12], 0, .048]], cutoff: .9, q: .6, attack: 1.4, release: 2, vib: [5, 6], hall: .7, voicing: 'triad' },
-    coro:      { group: 'Himnos y gospel', name: 'Coro "Aah"', en: 'Choir Aahs', layers: [['sawtooth', [-8, 0, 8], 0, .057]], cutoff: 2.5, q: .3, attack: 1.2, release: 2, vib: [5.5, 10], hall: .9, voicing: 'triad', formant: [[700, 6, 1], [1150, 8, .6], [2700, 10, .3]] },
+    coro:      { group: 'Himnos y gospel', name: 'Coro "Aah"', en: 'Choir Aahs', layers: [['sawtooth', [-8, 0, 8], 0, .046]], cutoff: 2.5, q: .3, attack: 1.2, release: 2, vib: [.2, 3], hall: .9, voicing: 'triad', bw: 30, spread: .6, tilt: 1, sections: [1, 1.15], formant: [[750, 6, 1], [1200, 7, .7], [2650, 9, .35], [3400, 10, .15]], air: [.012, 3000] },
     organo:    { group: 'Himnos y gospel', name: 'Gospel B3', en: 'Gospel B3', layers: [['sine', [0], -12, .021], ['sine', [0], 0, .028], ['sine', [0], 12, .021], ['sine', [0], 19, .013], ['sine', [0], 24, .008]], cutoff: 3, q: .3, attack: .06, release: .35, vib: [6.3, 12], hall: .3, voicing: 'gospel7', osc: true }
   };
   const SHK_SETS = {
@@ -637,8 +639,8 @@ select.native { display: none; }
   // ---------- Version ----------
   // tools/build.py fills CHANGELOG from src/changelog.json (newest first) and BUILD with the content hash
   // that also names the service worker's cache, so what the screen shows is what is cached offline.
-  const CHANGELOG = [{"version": "1.5.1", "date": "2026-10-27", "es": ["Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."], "en": ["Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."]}, {"version": "1.5.0", "date": "2026-10-27", "es": ["Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.", "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.", "Reverb nueva para el pad y la batería, con más sala y menos siseo."], "en": ["New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.", "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.", "New reverb for the pad and the drums, with more room and less hiss."]}, {"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
-  const BUILD = '11e49725';
+  const CHANGELOG = [{"version": "1.5.2", "date": "2026-10-27", "es": ["Con Movimiento alto, los pads oscuros (Senoidal, Quintas, Pad cálido, Cuerdas) ya no se apagan por ratos: el barrido del filtro se mueve en proporción a cada pad.", "Coro \"Aah\" más natural: la vocal se forma en cada nota, voces de hombres y mujeres a la vez, sin el vibrato que lo hacía sonar a una sola voz robótica."], "en": ["With high Movement, dark pads (Sine, Power 5th, Warm Pad, Strings) no longer drop out: the filter sweep now moves in proportion to each pad.", "More natural Choir Aahs: the vowel is shaped on each note, men's and women's voices together, without the vibrato that made it sound like one robotic voice."]}, {"version": "1.5.1", "date": "2026-10-27", "es": ["Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."], "en": ["Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."]}, {"version": "1.5.0", "date": "2026-10-27", "es": ["Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.", "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.", "Reverb nueva para el pad y la batería, con más sala y menos siseo."], "en": ["New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.", "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.", "New reverb for the pad and the drums, with more room and less hiss."]}, {"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
+  const BUILD = 'b4083b13';
   const RELEASE = CHANGELOG.length ? CHANGELOG[0].version : '';
   let updateReady = false;
   function renderVersion() {
@@ -716,7 +718,8 @@ select.native { display: none; }
     hallSend = ctx.createGain(); hallSend.gain.value = PADS[S.pad].hall * 0.6;
     buses.pad.connect(hallSend); hallSend.connect(hall); hall.connect(master);
     const lfo = ctx.createOscillator(); padLfo = ctx.createGain();
-    lfo.frequency.value = 0.08; padLfo.gain.value = 300 * moveF(); lfo.connect(padLfo); padLfo.connect(padFilter.frequency); lfo.start();
+    // The slow sweep moves the filter in cents, so it scales with each pad's cutoff and never closes a dark pad.
+    lfo.frequency.value = 0.08; padLfo.gain.value = sweepCents(); lfo.connect(padLfo); padLfo.connect(padFilter.detune); lfo.start();
     noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noise.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -938,6 +941,7 @@ select.native { display: none; }
   let psRe, psIm, psAmp, psTodo = [], psTimer = null, psMs = 0;
   const richF = () => (S.padRich - 50) / 50;
   const moveF = () => (S.padMove / 50) ** 1.5;
+  const sweepCents = () => Math.min(900, 400 * moveF());
   const psKey = (notes) => [S.pad, S.padRich, notes.join(',')].join('|');
   // In-place radix-2 FFT; sign +1 is the inverse transform without the 1/N (the loop is normalised after).
   function fft(re, im, sign) {
@@ -960,6 +964,15 @@ select.native { display: none; }
       }
     }
   }
+  // A sung vowel: every harmonic is weighted by how close it falls to the formants (in octaves), so the
+  // "ah" moves with each note as in a real choir instead of coming from fixed filters after the mix.
+  function vowel(P, f) {
+    if (!P.formant) return 1;
+    const sec = P.sections || [1];
+    let v = 0.06;
+    for (const s of sec) for (const [F, q, g] of P.formant) { const x = Math.log2(f / (F * s)) * q / 1.5; v += g * Math.exp(-x * x) / sec.length; }
+    return v;
+  }
   function psRender(notes) {
     const t0 = performance.now(), P = PADS[S.pad], sr = ctx.sampleRate, N = PS_N, df = sr / N, r = richF();
     if (!psRe) { psRe = new Float64Array(N); psIm = new Float64Array(N); psAmp = new Float64Array(N / 2); }
@@ -972,12 +985,12 @@ select.native { display: none; }
         const f0 = mtof(m + semi) * 2 ** (mean / 1200);
         const bw = (P.bw || Math.max(8, Math.max(...dets) - Math.min(...dets))) * 2 ** (1.3 * r);
         const hs = [];
-        for (let h = 1; h <= 96 && f0 * h < top; h++) { const a = WAVES[wave](h) * h ** (0.6 * r); if (a) hs.push([h, a]); }
+        for (let h = 1; h <= 96 && f0 * h < top; h++) { const a = WAVES[wave](h) * h ** (0.6 * r - (P.tilt || 0)) * vowel(P, f0 * h); if (a) hs.push([h, a]); }
         const norm = g * WAVE_RMS[wave] / Math.sqrt(hs.reduce((e, [, a]) => e + a * a, 0) || 1);
         energy += (g * WAVE_RMS[wave]) ** 2;
         for (const [h, a] of hs) {
           // The band widens slowly with the harmonic number, as in a real section of players.
-          const cents = Math.min(100, bw * h ** 0.25), sig = Math.max(1, (2 ** (cents / 1200) - 1) * f0 * h / df / 2);
+          const cents = Math.min(100, bw * h ** (P.spread || 0.25)), sig = Math.max(1, (2 ** (cents / 1200) - 1) * f0 * h / df / 2);
           const c = f0 * h / df, amp = a * norm / Math.sqrt(sig);
           for (let k = Math.max(1, Math.floor(c - 3 * sig)), e = Math.min(N / 2 - 1, Math.ceil(c + 3 * sig)); k <= e; k++) {
             const x = (k - c) / sig; psAmp[k] += amp * Math.exp(-x * x);
@@ -1025,7 +1038,7 @@ select.native { display: none; }
   function padMotion() {
     if (!ctx) return;
     const t = ctx.currentTime;
-    padLfo.gain.setTargetAtTime(300 * moveF(), t, 0.2);
+    padLfo.gain.setTargetAtTime(sweepCents(), t, 0.2);
     for (const v of padVoices) v.vib.gain.setTargetAtTime(v.vibBase * moveF(), t, 0.2);
   }
   let padRelease = 1;
@@ -1062,7 +1075,7 @@ select.native { display: none; }
       lfo.connect(depth); depth.connect(tg.gain); lfo.start(t); oscs.push(lfo);
       dest = tg;
     }
-    if (P.formant) {
+    if (P.formant && !buf) {
       const pre = ctx.createGain();
       for (const [f, q, g] of P.formant) {
         const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
@@ -1696,11 +1709,16 @@ select.native { display: none; }
   window.acompLoaded = () => Object.keys(SB).length;
   window.acompVersion = () => ({ release: RELEASE, build: BUILD, versions: CHANGELOG.length });
   // For the smoke test: stop the clock as iOS does in the background, and read the rhythm's level.
-  let probe = null;
+  let probe = null, padProbe = null;
   window.acompTest = {
     freeze: clockStop, thaw: clockStart,
     chunks: () => chunks.map((c) => [c.t0, c.t1]),
     pad: () => ({ kind: padVoices.length ? padVoices[padVoices.length - 1].kind : null, cached: psCache.size, ms: Math.round(psMs) }),
+    padLevel() {
+      if (!padProbe) { padProbe = ctx.createAnalyser(); padProbe.fftSize = 2048; buses.pad.connect(padProbe); }
+      const d = new Float32Array(padProbe.fftSize); padProbe.getFloatTimeDomainData(d);
+      return Math.sqrt(d.reduce((m, x) => m + x * x, 0) / d.length);
+    },
     level() {
       if (!probe) { probe = ctx.createAnalyser(); probe.fftSize = 2048; rhythmIn.connect(probe, 0); rhythmIn.connect(probe, 1); }
       const d = new Float32Array(probe.fftSize); probe.getFloatTimeDomainData(d);

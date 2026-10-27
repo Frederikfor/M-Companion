@@ -188,12 +188,16 @@ clave: {
   formant: [[Hz, Q, ganancia], …],     // opcional: filtra las capas como vocal "ah" (coro)
   trem: [Hz, profundidad 0..1],        // opcional: trémolo de volumen (piano eléctrico)
   bw: cents,                           // opcional: ancho de banda PADsynth (si falta, sale de la desafinación)
+  spread: n,                           // opcional: cuánto se ensancha la banda con cada armónico (0.25 por defecto)
+  tilt: n,                             // opcional: oscurece la fuente por h^-tilt (una voz cae más rápido que una sierra)
+  sections: [1, 1.15],                 // opcional: escalas de formante cantadas a la vez (hombres y mujeres)
   osc: true                            // opcional: tocar con osciladores en vivo en vez de PADsynth (Rhodes, B3)
 }
 ```
 **Cómo suena (PADsynth):** salvo los pads con `osc: true`, cada acorde se genera como un bucle estéreo sin costuras de unos 5.5 s con el algoritmo PADsynth (Nasca O. Paul, ZynAddSubFX), escrito desde cero en `src/engine.js`. Cada armónico de cada nota se vuelve una banda angosta de sonido, así el acorde suena a ensamble sin el batido regular de los osciladores desafinados. Las `layers` conservan su sentido: la onda da la serie de armónicos, la dispersión de `desafinación` da el ancho de banda y la ganancia da el nivel. Izquierda y derecha comparten parte de la fase: suena amplio en estéreo y sigue lleno si la mezcladora lo suma a mono.
 - Se generan los 6 acordes de la tonalidad (o el de quintas): el que suena al momento (25 a 80 ms en computadora) y los demás poco a poco. Si algo falla, el pad toca con osciladores.
-- **Movimiento** (`S.padMove`, 0–100) escala el vibrato y el barrido lento del filtro, en vivo. **Riqueza** (`S.padRich`, 0–100) ensancha las bandas, inclina los armónicos hacia arriba y abre un poco el filtro; regenera los bucles y entra con un fundido de 1.5 s al soltar el control. En 50 los dos dejan el pad como fue diseñado.
+- **Movimiento** (`S.padMove`, 0–100) escala el vibrato y el barrido lento del filtro, en vivo. El barrido mueve el `detune` del filtro en cents (máx. ±900), así sube y baja en proporción al corte de cada pad y nunca cierra un pad oscuro.
+- `formant` en un pad PADsynth se aplica dentro del espectro (cada armónico pesa según su cercanía a los formantes, en octavas), no como filtros después de la mezcla. El coro no lleva vibrato rápido: un vibrato común a todo el bucle suena a una sola voz robótica; el ensamble sale del ancho de banda, más abierto en los armónicos altos. En osciladores sigue siendo la cadena de filtros paso banda. **Riqueza** (`S.padRich`, 0–100) ensancha las bandas, inclina los armónicos hacia arriba y abre un poco el filtro; regenera los bucles y entra con un fundido de 1.5 s al soltar el control. En 50 los dos dejan el pad como fue diseñado.
 | Grupo | Pads (`clave` → español / inglés) | Cómo está hecho |
 |---|---|---|
 | Worship | `atmos` → Supersaw (por defecto), `fundamento` → Pad cálido / Warm Pad, `aire` → Pad respiro / Breath Pad, `shimmer` → Shimmer, `amanecer` → Swell | sierras desafinadas; sierra filtrada oscura con soplo; capa de ruido tipo respiración; octavas altas; entrada lenta de volumen |
