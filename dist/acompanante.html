@@ -134,6 +134,14 @@ select.native { display: none; }
 .alert { color: var(--stop); font-weight: 600; }
 .ok { color: var(--go); font-weight: 600; }
 .credits { font-size: 12px; }
+.row.link { width: 100%; text-align: left; }
+.row .val { color: var(--muted); font-variant-numeric: tabular-nums; }
+.row .val.new { color: var(--accent); }
+.back { align-self: flex-start; display: flex; align-items: center; gap: 6px; min-height: 44px; margin-left: -4px; color: var(--accent); }
+.back svg { width: 12px; height: 20px; }
+.notes { margin: 0; padding: 4px 0; list-style: none; }
+.notes li { position: relative; padding: 8px 16px 8px 30px; font-size: 15px; line-height: 20px; }
+.notes li::before { content: ""; position: absolute; left: 16px; top: 16px; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
 
 /* Tab bar */
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(22, 22, 24, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
@@ -243,8 +251,22 @@ select.native { display: none; }
       <div class="cap" data-i18n="app">App</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-lang" data-i18n="lang">Idioma</span><select id="lang" class="native" tabindex="-1" aria-hidden="true"><option value="es">Español</option><option value="en">English</option></select><button type="button" class="pd" data-for="lang" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-lang val-lang"><span class="pd-val" id="val-lang"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
+        <button type="button" class="row link" id="version" data-go="version"><span class="lbl" data-i18n="version">Versión</span><span class="val" id="versionval"></span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
       </div>
       <p class="foot credits" data-i18n="credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-version" data-parent="sonido" aria-label="Versión" data-i18n-aria="version" hidden>
+    <div class="wrap">
+      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <h1 data-i18n="version.title">Novedades</h1>
+      <div class="group">
+        <div class="row"><span class="lbl" data-i18n="version.installed">Versión instalada</span><span class="val" id="vercur"></span></div>
+        <div class="row"><span class="lbl" data-i18n="version.build">Compilación</span><span class="val" id="verbuild"></span></div>
+      </div>
+      <p class="foot" id="verupdate" data-i18n="version.foot">La app se actualiza sola cuando hay internet. La versión nueva se usa la siguiente vez que la abres.</p>
+      <div id="changelog"></div>
     </div>
   </section>
 
@@ -269,10 +291,15 @@ select.native { display: none; }
 
 <script>
 (() => {
+  // A screen with data-parent (Versión) opens inside its tab: the tab bar keeps that tab selected.
   const show = (name) => {
-    document.querySelectorAll('.screen').forEach(s => { s.hidden = s.id !== 'tab-' + name; });
-    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
-    try { localStorage.setItem('acomp-tab', name); } catch (e) {}
+    let tab = name;
+    document.querySelectorAll('.screen').forEach(s => {
+      s.hidden = s.id !== 'tab-' + name;
+      if (!s.hidden && s.dataset.parent) { s.scrollTop = 0; tab = s.dataset.parent; }
+    });
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
+    try { localStorage.setItem('acomp-tab', tab); } catch (e) {}
   };
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
@@ -530,6 +557,9 @@ select.native { display: none; }
       mix: 'Mezcla', 'ch.shaker': 'Percusión', 'ch.drums': 'Batería', 'mute.shaker': 'Activar o silenciar percusión', 'mute.drums': 'Activar o silenciar batería', 'mute.pad': 'Activar o silenciar pad',
       'vol.shaker': 'Volumen percusión', 'vol.drums': 'Volumen batería', 'vol.pad': 'Volumen pad',
       'mix.foot': 'Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.', app: 'App', lang: 'Idioma',
+      version: 'Versión', 'version.title': 'Novedades', 'version.installed': 'Versión instalada', 'version.build': 'Compilación', 'version.new': 'Nueva lista',
+      'version.foot': 'La app se actualiza sola cuando hay internet. La versión nueva se usa la siguiente vez que la abres.',
+      'version.ready': '<span class="ok">Ya se descargó una versión nueva.</span> Cierra la app por completo y vuelve a abrirla para usarla. Lo que suena ahora no se interrumpe.',
       credits: 'Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.',
       'song.name': 'Nombre de la canción', save: 'Guardar', 'save.foot': 'Guarda el tempo, compás, estilo, tono, pad y shaker actuales.', mysongs: 'Mis canciones',
       'songs.foot': 'Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.',
@@ -560,6 +590,9 @@ select.native { display: none; }
       mix: 'Mix', 'ch.shaker': 'Percussion', 'ch.drums': 'Drums', 'mute.shaker': 'Mute or unmute percussion', 'mute.drums': 'Mute or unmute drums', 'mute.pad': 'Mute or unmute pad',
       'vol.shaker': 'Percussion volume', 'vol.drums': 'Drums volume', 'vol.pad': 'Pad volume',
       'mix.foot': 'Tap a channel name to mute it. On iPhone, turn off silent mode if there is no sound.', app: 'App', lang: 'Language',
+      version: 'Version', 'version.title': 'What’s new', 'version.installed': 'Installed version', 'version.build': 'Build', 'version.new': 'New one ready',
+      'version.foot': 'The app updates itself when there is internet. The new version is used the next time you open it.',
+      'version.ready': '<span class="ok">A new version has downloaded.</span> Close the app completely and open it again to use it. What is playing now is not interrupted.',
       credits: 'Free-to-use recordings (CC0): acoustic drums from freesound.org; shakers, cabasa, tambourine, conga and claps from the Versilian Community Sample Library.',
       'song.name': 'Song name', save: 'Save', 'save.foot': 'Saves the current tempo, time signature, style, key, pad and shaker.', mysongs: 'My songs',
       'songs.foot': 'Tap a song to load it. Tap ✕ twice to delete it.',
@@ -582,7 +615,42 @@ select.native { display: none; }
     $('play').setAttribute('aria-label', T(playing ? 'stop' : 'play'));
     if (!playing) $('barinfo').textContent = T('ready');
     if (!micOn) $('micmsg').textContent = T('mic.hint');
-    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); renderSongs();
+    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); renderSongs(); renderVersion();
+  }
+
+  // ---------- Version ----------
+  // tools/build.py fills CHANGELOG from src/changelog.json (newest first) and BUILD with the content hash
+  // that also names the service worker's cache, so what the screen shows is what is cached offline.
+  const CHANGELOG = [{"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
+  const BUILD = 'f88162a8';
+  const RELEASE = CHANGELOG.length ? CHANGELOG[0].version : '';
+  let updateReady = false;
+  function renderVersion() {
+    $('versionval').textContent = updateReady ? T('version.new') : RELEASE;
+    $('versionval').classList.toggle('new', updateReady);
+    $('vercur').textContent = RELEASE;
+    $('verbuild').textContent = BUILD;
+    if (updateReady) $('verupdate').innerHTML = T('version.ready'); else $('verupdate').textContent = T('version.foot');
+    const date = (d) => { try { return new Date(d + 'T12:00:00').toLocaleDateString(S.lang, { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d; } };
+    const box = $('changelog'); box.textContent = '';
+    for (const r of CHANGELOG) {
+      const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = `${r.version} · ${date(r.date)}`;
+      const group = document.createElement('div'); group.className = 'group';
+      const ul = document.createElement('ul'); ul.className = 'notes';
+      for (const n of r[S.lang] || r.es) { const li = document.createElement('li'); li.textContent = n; ul.appendChild(li); }
+      group.appendChild(ul); box.append(cap, group);
+    }
+  }
+  // The service worker downloads a new version in the background and takes over the open page.
+  // Never reload (it would cut the audio): only say that reopening the app picks it up.
+  // After a takeover the new worker has deleted every other cache, so if ours is gone the page is the old one.
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller && window.caches) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      caches.keys().then((keys) => {
+        updateReady = keys.some(k => k.startsWith('acompanante-')) && !keys.includes(`acompanante-${RELEASE}-${BUILD}`);
+        renderVersion();
+      }).catch(() => {});
+    });
   }
   const firstStyle = (m) => Object.keys(STYLES).find(k => STYLES[k].meter === m);
 
@@ -1480,6 +1548,7 @@ select.native { display: none; }
   if (S.section === 'final') S.section = 'estrofa';
   buildKeys(); buildChords(); refreshSections(); setFillUi(); renderSongs(); applyLang();
   window.acompLoaded = () => Object.keys(SB).length;
+  window.acompVersion = () => ({ release: RELEASE, build: BUILD, versions: CHANGELOG.length });
   // For the smoke test: stop the clock as iOS does in the background, and read the rhythm's level.
   let probe = null;
   window.acompTest = {

@@ -1,5 +1,5 @@
-// Template: tools/build.py writes it to /sw.js with a content hash as the version. Keeps the app working without internet: serve from cache, refresh it in the background.
-const CACHE = 'acompanante-9270f07c';
+// Template: tools/build.py writes it to /sw.js with the release and a content hash as the version (acompanante-1.4.0-1a2b3c4d); the app shows the same build in Sonido › App › Versión. Keeps the app working without internet: serve from cache, refresh it in the background.
+const CACHE = 'acompanante-1.4.0-f88162a8';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => {

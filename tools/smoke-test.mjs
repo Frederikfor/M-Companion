@@ -4,6 +4,7 @@
 import { chromium } from 'playwright';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const opts = { headless: true, args: ['--autoplay-policy=no-user-gesture-required'] };
@@ -72,6 +73,19 @@ await page.click('.tab[data-tab=ritmo]');
 for (const id of ['style', 'shaker', 'shksound']) await pickEach(id);
 await page.click('.tab[data-tab=sonido]');
 await pickEach('padtype');
+// Version: the row shows the release, the screen lists every version, and the build matches sw.js's cache.
+const ver = await page.evaluate(() => window.acompVersion());
+const verRow = (await page.textContent('#versionval')).trim();
+await page.click('#version');
+const verShown = { cur: (await page.textContent('#vercur')).trim(), build: (await page.textContent('#verbuild')).trim(), entries: await page.$$eval('#changelog .notes', (l) => l.length) };
+const sonidoSelected = await page.getAttribute('.tab[data-tab=sonido]', 'aria-selected');
+await page.click('#tab-version .back');
+const backHome = await page.isVisible('#tab-sonido');
+const swCache = fs.readFileSync(path.join(root, 'sw.js'), 'utf8').match(/'acompanante-([^']+)'/)[1];
+if (!/^\d+\.\d+\.\d+$/.test(ver.release) || verRow !== ver.release || verShown.cur !== ver.release) errors.push(`version row shows "${verRow}", screen "${verShown.cur}", release "${ver.release}"`);
+if (!/^[0-9a-f]{8}$/.test(verShown.build) || swCache !== `${ver.release}-${verShown.build}`) errors.push(`build "${verShown.build}" does not match the cache "${swCache}"`);
+if (verShown.entries !== ver.versions || ver.versions < 1) errors.push(`changelog shows ${verShown.entries} of ${ver.versions} versions`);
+if (sonidoSelected !== 'true' || !backHome) errors.push('version screen does not open inside Sonido or its back button fails');
 await pickEach('lang');
 await page.click('.tab[data-tab=canciones]');
 await page.fill('#songname', 'Prueba');

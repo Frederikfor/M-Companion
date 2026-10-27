@@ -59,6 +59,7 @@ M-Companion/
 ├── src/
 │   ├── ui.html            ← interfaz: estilos, 4 pestañas, barra de pestañas (EDITABLE)
 │   ├── engine.js          ← motor de audio, datos musicales y lógica de UI (EDITABLE)
+│   ├── changelog.json     ← versión de la app y novedades de cada versión, en es/en (EDITABLE)
 │   └── sw.template.js     ← plantilla del service worker (EDITABLE)
 ├── samples/
 │   ├── *.wav              ← 42 muestras CC0, 32 kHz mono (EDITABLE, ver reglas)
@@ -70,7 +71,7 @@ M-Companion/
 │   ├── build.py           ← genera index.html, sw.js y dist/acompanante.html
 │   └── smoke-test.mjs     ← prueba en Chromium sin pantalla
 ├── index.html             ← GENERADO: lo que publica GitHub Pages
-├── sw.js                  ← GENERADO: caché offline con versión por hash
+├── sw.js                  ← GENERADO: caché offline `acompanante-<versión>-<hash>`
 ├── dist/acompanante.html  ← GENERADO: la app como un solo archivo
 └── .nojekyll              ← Pages sirve los archivos tal cual
 ```
@@ -88,12 +89,13 @@ GitHub Pages publica la rama `main`, carpeta raíz. Por eso `index.html` y `sw.j
 ### Secuencia obligatoria para cualquier cambio
 1. **Entiende** qué problema musical o de uso resuelve el cambio y en qué pestaña vive.
 2. **Edita** solo `src/`, `samples/`, `icons/` o `manifest.webmanifest`.
-3. **Construye:** `python3 tools/build.py` (imprime número de muestras, tamaño y versión de caché).
-4. **Prueba:** `npm test` (o `CHROMIUM_PATH=/ruta/a/chromium node tools/smoke-test.mjs`). Debe decir `OK: 42 samples…` sin errores. Si agregaste muestras, actualiza el número esperado en la prueba.
-5. **Escucha** si el cambio es sonoro: abre `dist/acompanante.html` y prueba cada parte, el remate y el final.
-6. **Revisa en 390 × 844** (tamaño iPhone) que nada se encime y que los controles en vivo sigan abajo.
-7. **Haz commit** de fuentes y generados juntos (`src/…`, `index.html`, `sw.js`, `dist/…`). Un commit por cambio, mensaje en presente que diga qué escucha o ve el músico.
-8. Al subir a `main`, Pages publica en un par de minutos. El iPhone toma la versión nueva la **segunda** vez que se abre la app (el service worker sirve el caché y actualiza en segundo plano).
+3. **Versiona:** si el músico nota el cambio, agrega una entrada **arriba** en `src/changelog.json` (sección 5.13).
+4. **Construye:** `python3 tools/build.py` (imprime número de muestras, tamaño, versión y nombre de caché).
+5. **Prueba:** `npm test` (o `CHROMIUM_PATH=/ruta/a/chromium node tools/smoke-test.mjs`). Debe decir `OK: 42 samples…` sin errores. Si agregaste muestras, actualiza el número esperado en la prueba.
+6. **Escucha** si el cambio es sonoro: abre `dist/acompanante.html` y prueba cada parte, el remate y el final.
+7. **Revisa en 390 × 844** (tamaño iPhone) que nada se encime y que los controles en vivo sigan abajo.
+8. **Haz commit** de fuentes y generados juntos (`src/…`, `index.html`, `sw.js`, `dist/…`). Un commit por cambio, mensaje en presente que diga qué escucha o ve el músico.
+9. Al subir a `main`, Pages publica en un par de minutos. El iPhone toma la versión nueva la **segunda** vez que se abre la app (el service worker sirve el caché y actualiza en segundo plano). En Sonido › App › Versión se ve cuál está instalada.
 
 ### Dónde se cambia cada cosa
 | Quiero… | Edita |
@@ -106,6 +108,7 @@ GitHub Pages publica la rama `main`, carpeta raíz. Por eso `index.html` y `sw.j
 | Intensidad por parte de la canción | `SEC_DYN`, `SEC_SHK`, `SEC_PAD` |
 | Valores por defecto | objeto `S` |
 | Disposición o colores | `src/ui.html` |
+| Versión y novedades | `src/changelog.json` |
 | Nombre o ícono de la app | `manifest.webmanifest`, `icons/`, `<head>` en `tools/build.py` |
 
 ---
@@ -230,10 +233,10 @@ Si cambias el nombre o la forma de una propiedad de `S`, valida al cargar (como 
 
 ### 5.10 Contrato entre `ui.html` y `engine.js`
 El motor busca estos `id`. No los renombres sin cambiar ambos lados:
-`bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `meter`, `dots`, `barinfo`, `play`, botones `[data-s]` dentro de `#sections`, `fill`, `filllbl`, `next`, `autofill`, `key`, `names`, `chords`, `on-shaker`, `v-shaker`, `on-drums`, `v-drums`, `on-pad`, `v-pad`, `mic`, `follow`, `micread`, `micmsg`, `status`, `style`, `shaker`, `human`, `humanval`, `countin`, `shksound`, `padtype`, `padmode`, `padinfo`, `songs`, `songname`, `savesong`, `songtitle`, `lang`.
+`bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `meter`, `dots`, `barinfo`, `play`, botones `[data-s]` dentro de `#sections`, `fill`, `filllbl`, `next`, `autofill`, `key`, `names`, `chords`, `on-shaker`, `v-shaker`, `on-drums`, `v-drums`, `on-pad`, `v-pad`, `mic`, `follow`, `micread`, `micmsg`, `status`, `style`, `shaker`, `human`, `humanval`, `countin`, `shksound`, `padtype`, `padmode`, `padinfo`, `songs`, `songname`, `savesong`, `songtitle`, `lang`, `version`, `versionval`, `vercur`, `verbuild`, `verupdate`, `changelog`.
 Los `select` (`meter`, `style`, `shaker`, `shksound`, `autofill`, `key`, `padtype`, `names`, `lang`) están ocultos y se manejan con los menús `.pd[data-for=id]`; las pruebas eligen opciones haciendo clic en el menú, no con `selectOption`.
-Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[data-tab=…]`. Los interruptores usan `role="switch"` y `aria-checked`.
-Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron.
+Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[data-tab=…]`. Una pantalla interna (`#tab-version`) lleva `data-parent="sonido"`: se abre con `data-go`, la barra deja marcada su pestaña y tiene botón `.back`. Los interruptores usan `role="switch"` y `aria-checked`.
+Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron y `window.acompVersion()` devuelve `{ release, build, versions }`.
 
 ### 5.11 Motor de audio (resumen)
 - Ritmo pre-generado por tramos: shaker, percusión, batería y conteo se generan por adelantado como audio (`OfflineAudioContext`, tres pistas: percusión, batería, clic) en tramos de hasta una frase (el remate automático, máx. 16 s), con las mismas muestras y la misma lógica de `scheduleStep`. El motor de audio los toca; el código solo prepara el siguiente tramo unos 4 s antes. El volumen, el silencio de cada capa y la reverb siguen en vivo.
@@ -249,6 +252,20 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 - Datos musicales: `name` en español y `en` en inglés en cada entrada de `STYLES`, `SHAKERS`, `PADS` y `SHK_SETS`; `NM(obj)` elige. Los grupos de pads se traducen en `I18N.<idioma>.groups`.
 - Las claves internas (`estrofa`, `coro`, `atmos`…) nunca se traducen: las canciones guardadas dependen de ellas.
 - **Regla:** cualquier texto nuevo se agrega en **los dos idiomas** a la vez. Para habilitar otro idioma: agrega su bloque completo a `I18N`, los campos de datos que hagan falta y una `<option>` en `#lang` con el nombre del idioma en ese idioma.
+
+### 5.13 Versiones (`src/changelog.json`)
+```json
+[
+  { "version": "1.4.0", "date": "2026-10-27",
+    "es": ["Lo que el músico nota, en una frase."],
+    "en": ["The same, in English."] }
+]
+```
+- **La más nueva va primero.** Esa es la versión que muestra la app. `build.py` falla si una versión no es `X.Y.Z`, se repite, está fuera de orden, no tiene fecha `AAAA-MM-DD` o le falta `es` o `en`.
+- **Qué número subir:** `Z` para arreglos que no cambian cómo se usa; `Y` para algo nuevo que el músico ve u oye (un pad, un estilo, una pantalla); `X` solo si cambia la forma de tocar con la app o se pierde compatibilidad con lo guardado (no debería pasar, regla 6.5).
+- **Cómo se escribe una nota:** lo que el músico nota, no cómo se programó. Frases cortas, en presente, con la ruta de la pantalla si ayuda (Sonido › App › Idioma).
+- **Compilación:** `build.py` calcula un hash del contenido y lo pone en la app (`BUILD`) y en el nombre de la caché del service worker (`acompanante-<versión>-<hash>`). Así lo que muestra Sonido › App › Versión es exactamente lo que el teléfono tiene guardado offline.
+- **Aviso de actualización:** cuando el service worker descarga una versión nueva y toma la página, la fila Versión dice *Nueva lista* y la pantalla explica que basta con cerrar y abrir la app. Nunca se recarga sola: cortaría el audio.
 
 ---
 

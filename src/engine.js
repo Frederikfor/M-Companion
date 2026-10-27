@@ -154,6 +154,9 @@
       mix: 'Mezcla', 'ch.shaker': 'Percusión', 'ch.drums': 'Batería', 'mute.shaker': 'Activar o silenciar percusión', 'mute.drums': 'Activar o silenciar batería', 'mute.pad': 'Activar o silenciar pad',
       'vol.shaker': 'Volumen percusión', 'vol.drums': 'Volumen batería', 'vol.pad': 'Volumen pad',
       'mix.foot': 'Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.', app: 'App', lang: 'Idioma',
+      version: 'Versión', 'version.title': 'Novedades', 'version.installed': 'Versión instalada', 'version.build': 'Compilación', 'version.new': 'Nueva lista',
+      'version.foot': 'La app se actualiza sola cuando hay internet. La versión nueva se usa la siguiente vez que la abres.',
+      'version.ready': '<span class="ok">Ya se descargó una versión nueva.</span> Cierra la app por completo y vuelve a abrirla para usarla. Lo que suena ahora no se interrumpe.',
       credits: 'Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.',
       'song.name': 'Nombre de la canción', save: 'Guardar', 'save.foot': 'Guarda el tempo, compás, estilo, tono, pad y shaker actuales.', mysongs: 'Mis canciones',
       'songs.foot': 'Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.',
@@ -184,6 +187,9 @@
       mix: 'Mix', 'ch.shaker': 'Percussion', 'ch.drums': 'Drums', 'mute.shaker': 'Mute or unmute percussion', 'mute.drums': 'Mute or unmute drums', 'mute.pad': 'Mute or unmute pad',
       'vol.shaker': 'Percussion volume', 'vol.drums': 'Drums volume', 'vol.pad': 'Pad volume',
       'mix.foot': 'Tap a channel name to mute it. On iPhone, turn off silent mode if there is no sound.', app: 'App', lang: 'Language',
+      version: 'Version', 'version.title': 'What’s new', 'version.installed': 'Installed version', 'version.build': 'Build', 'version.new': 'New one ready',
+      'version.foot': 'The app updates itself when there is internet. The new version is used the next time you open it.',
+      'version.ready': '<span class="ok">A new version has downloaded.</span> Close the app completely and open it again to use it. What is playing now is not interrupted.',
       credits: 'Free-to-use recordings (CC0): acoustic drums from freesound.org; shakers, cabasa, tambourine, conga and claps from the Versilian Community Sample Library.',
       'song.name': 'Song name', save: 'Save', 'save.foot': 'Saves the current tempo, time signature, style, key, pad and shaker.', mysongs: 'My songs',
       'songs.foot': 'Tap a song to load it. Tap ✕ twice to delete it.',
@@ -206,7 +212,42 @@
     $('play').setAttribute('aria-label', T(playing ? 'stop' : 'play'));
     if (!playing) $('barinfo').textContent = T('ready');
     if (!micOn) $('micmsg').textContent = T('mic.hint');
-    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); renderSongs();
+    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); renderSongs(); renderVersion();
+  }
+
+  // ---------- Version ----------
+  // tools/build.py fills CHANGELOG from src/changelog.json (newest first) and BUILD with the content hash
+  // that also names the service worker's cache, so what the screen shows is what is cached offline.
+  const CHANGELOG = /*CHANGELOG*/[];
+  const BUILD = '__BUILD__';
+  const RELEASE = CHANGELOG.length ? CHANGELOG[0].version : '';
+  let updateReady = false;
+  function renderVersion() {
+    $('versionval').textContent = updateReady ? T('version.new') : RELEASE;
+    $('versionval').classList.toggle('new', updateReady);
+    $('vercur').textContent = RELEASE;
+    $('verbuild').textContent = BUILD;
+    if (updateReady) $('verupdate').innerHTML = T('version.ready'); else $('verupdate').textContent = T('version.foot');
+    const date = (d) => { try { return new Date(d + 'T12:00:00').toLocaleDateString(S.lang, { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d; } };
+    const box = $('changelog'); box.textContent = '';
+    for (const r of CHANGELOG) {
+      const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = `${r.version} · ${date(r.date)}`;
+      const group = document.createElement('div'); group.className = 'group';
+      const ul = document.createElement('ul'); ul.className = 'notes';
+      for (const n of r[S.lang] || r.es) { const li = document.createElement('li'); li.textContent = n; ul.appendChild(li); }
+      group.appendChild(ul); box.append(cap, group);
+    }
+  }
+  // The service worker downloads a new version in the background and takes over the open page.
+  // Never reload (it would cut the audio): only say that reopening the app picks it up.
+  // After a takeover the new worker has deleted every other cache, so if ours is gone the page is the old one.
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller && window.caches) {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      caches.keys().then((keys) => {
+        updateReady = keys.some(k => k.startsWith('acompanante-')) && !keys.includes(`acompanante-${RELEASE}-${BUILD}`);
+        renderVersion();
+      }).catch(() => {});
+    });
   }
   const firstStyle = (m) => Object.keys(STYLES).find(k => STYLES[k].meter === m);
 
@@ -1104,6 +1145,7 @@
   if (S.section === 'final') S.section = 'estrofa';
   buildKeys(); buildChords(); refreshSections(); setFillUi(); renderSongs(); applyLang();
   window.acompLoaded = () => Object.keys(SB).length;
+  window.acompVersion = () => ({ release: RELEASE, build: BUILD, versions: CHANGELOG.length });
   // For the smoke test: stop the clock as iOS does in the background, and read the rhythm's level.
   let probe = null;
   window.acompTest = {
