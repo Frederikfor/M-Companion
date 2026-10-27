@@ -134,6 +134,14 @@ select.native { display: none; }
 .alert { color: var(--stop); font-weight: 600; }
 .ok { color: var(--go); font-weight: 600; }
 .credits { font-size: 12px; }
+.row.link { width: 100%; text-align: left; }
+.row .val { color: var(--muted); font-variant-numeric: tabular-nums; }
+.row .val.new { color: var(--accent); }
+.back { align-self: flex-start; display: flex; align-items: center; gap: 6px; min-height: 44px; margin-left: -4px; color: var(--accent); }
+.back svg { width: 12px; height: 20px; }
+.notes { margin: 0; padding: 4px 0; list-style: none; }
+.notes li { position: relative; padding: 8px 16px 8px 30px; font-size: 15px; line-height: 20px; }
+.notes li::before { content: ""; position: absolute; left: 16px; top: 16px; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
 
 /* Tab bar */
 .tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(22, 22, 24, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
@@ -243,8 +251,22 @@ select.native { display: none; }
       <div class="cap" data-i18n="app">App</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-lang" data-i18n="lang">Idioma</span><select id="lang" class="native" tabindex="-1" aria-hidden="true"><option value="es">Español</option><option value="en">English</option></select><button type="button" class="pd" data-for="lang" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-lang val-lang"><span class="pd-val" id="val-lang"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
+        <button type="button" class="row link" id="version" data-go="version"><span class="lbl" data-i18n="version">Versión</span><span class="val" id="versionval"></span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
       </div>
       <p class="foot credits" data-i18n="credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-version" data-parent="sonido" aria-label="Versión" data-i18n-aria="version" hidden>
+    <div class="wrap">
+      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <h1 data-i18n="version.title">Novedades</h1>
+      <div class="group">
+        <div class="row"><span class="lbl" data-i18n="version.installed">Versión instalada</span><span class="val" id="vercur"></span></div>
+        <div class="row"><span class="lbl" data-i18n="version.build">Compilación</span><span class="val" id="verbuild"></span></div>
+      </div>
+      <p class="foot" id="verupdate" data-i18n="version.foot">La app se actualiza sola cuando hay internet. La versión nueva se usa la siguiente vez que la abres.</p>
+      <div id="changelog"></div>
     </div>
   </section>
 
@@ -269,10 +291,15 @@ select.native { display: none; }
 
 <script>
 (() => {
+  // A screen with data-parent (Versión) opens inside its tab: the tab bar keeps that tab selected.
   const show = (name) => {
-    document.querySelectorAll('.screen').forEach(s => { s.hidden = s.id !== 'tab-' + name; });
-    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
-    try { localStorage.setItem('acomp-tab', name); } catch (e) {}
+    let tab = name;
+    document.querySelectorAll('.screen').forEach(s => {
+      s.hidden = s.id !== 'tab-' + name;
+      if (!s.hidden && s.dataset.parent) { s.scrollTop = 0; tab = s.dataset.parent; }
+    });
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
+    try { localStorage.setItem('acomp-tab', tab); } catch (e) {}
   };
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
