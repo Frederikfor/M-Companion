@@ -37,6 +37,37 @@ await page.click('#next');
 await page.click('#fill');
 await page.waitForTimeout(1500);
 
+// Background: iOS freezes the page's code but not the audio. Stop the clock for longer than
+// what is rendered ahead, and the rhythm must keep sounding (its loop takes over).
+const loudest = () => page.evaluate(async () => {
+  let m = 0;
+  for (let i = 0; i < 40; i++) { m = Math.max(m, window.acompTest.level()); await new Promise((r) => setTimeout(r, 50)); }
+  return m;
+});
+const before = await loudest();
+await page.evaluate(() => window.acompTest.freeze());
+await page.waitForTimeout(12000);
+const frozen = await loudest();
+await page.evaluate(() => window.acompTest.thaw());
+await page.waitForTimeout(1500);
+const after = await loudest();
+// A change replaces what sounds; Stop silences at once.
+await page.click('#p5');
+await page.click('#sections button[data-s=coro]');
+await page.waitForTimeout(300);
+const changed = await loudest();
+const part = await page.waitForFunction(() => document.querySelector('#sections button[data-s=coro]').classList.contains('on'), null, { timeout: 8000 }).then(() => true, () => false);
+if (!part) errors.push('changing to Coro never took effect');
+await page.click('#play');
+await page.waitForTimeout(150);
+const stopped = await page.evaluate(() => window.acompTest.level());
+if (stopped > 0.001) errors.push(`rhythm still sounds after Stop (peak ${stopped})`);
+await page.click('#play');
+await page.waitForTimeout(1500);
+for (const [when, v] of [['playing', before], ['frozen', frozen], ['after thaw', after], ['after a change', changed]]) {
+  if (!(v > 0.01)) errors.push(`rhythm is silent ${when} (peak ${v})`);
+}
+
 await page.click('.tab[data-tab=ritmo]');
 for (const id of ['style', 'shaker', 'shksound']) await pickEach(id);
 await page.click('.tab[data-tab=sonido]');
