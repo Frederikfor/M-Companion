@@ -236,7 +236,8 @@ Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[dat
 Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron.
 
 ### 5.11 Motor de audio (resumen)
-- Programador con anticipación: `setInterval` cada 25 ms agenda los pasos de los próximos 0.12 s con `ctx.currentTime`.
+- Programador con anticipación: un reloj cada 25 ms (en un *Web Worker*, con `setInterval` de respaldo) agenda los pasos de los próximos 0.12 s con `ctx.currentTime`.
+- Segundo plano / pantalla bloqueada: la anticipación sube a 2.5 s (iOS frena los temporizadores a ~1 por segundo); si el reloj se congeló, los pasos perdidos se saltan en vez de sonar todos juntos. Al volver se reanuda el audio y el *wake lock*. El micrófono no ajusta el tempo mientras la app está oculta.
 - Buses `shaker`, `drums`, `pad` → master → compresor. Reverb de sala (1.3 s) en todos; reverb larga (5 s) para el pad.
 - El hi-hat cerrado corta al abierto (choke).
 - iOS: `navigator.audioSession.type = 'playback'` (suena con el interruptor de silencio) y *wake lock* para que la pantalla no se apague.

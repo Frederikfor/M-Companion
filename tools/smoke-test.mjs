@@ -37,6 +37,16 @@ await page.click('#next');
 await page.click('#fill');
 await page.waitForTimeout(1500);
 
+// Background: pretend the app is hidden (long lookahead), then visible again.
+const setHidden = (h) => page.evaluate((h) => {
+  Object.defineProperty(document, 'hidden', { configurable: true, get: () => h });
+  document.dispatchEvent(new Event('visibilitychange'));
+}, h);
+await setHidden(true);
+await page.waitForTimeout(1500);
+await setHidden(false);
+await page.waitForTimeout(500);
+
 await page.click('.tab[data-tab=ritmo]');
 for (const id of ['style', 'shaker', 'shksound']) await pickEach(id);
 await page.click('.tab[data-tab=sonido]');
