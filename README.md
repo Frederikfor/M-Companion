@@ -69,7 +69,8 @@ M-Companion/
 ├── manifest.webmanifest   ← nombre, colores y modo standalone de la PWA
 ├── tools/
 │   ├── build.py           ← genera index.html, sw.js y dist/acompanante.html
-│   └── smoke-test.mjs     ← prueba en Chromium sin pantalla
+│   ├── smoke-test.mjs     ← prueba en Chromium sin pantalla
+│   └── _loud.mjs          ← mide el volumen de cada pad (regla de volumen parejo)
 ├── index.html             ← GENERADO: lo que publica GitHub Pages
 ├── sw.js                  ← GENERADO: caché offline `acompanante-<versión>-<hash>`
 ├── dist/acompanante.html  ← GENERADO: la app como un solo archivo
@@ -185,9 +186,14 @@ clave: {
   voicing: 'triad' | 'add9' | 'open' | 'gospel7' | 'sus2' | 'power',
   air: [ganancia, Hz],                 // opcional: aire / respiración (ruido filtrado que ondula lento)
   formant: [[Hz, Q, ganancia], …],     // opcional: filtra las capas como vocal "ah" (coro)
-  trem: [Hz, profundidad 0..1]         // opcional: trémolo de volumen (piano eléctrico)
+  trem: [Hz, profundidad 0..1],        // opcional: trémolo de volumen (piano eléctrico)
+  bw: cents,                           // opcional: ancho de banda PADsynth (si falta, sale de la desafinación)
+  osc: true                            // opcional: tocar con osciladores en vivo en vez de PADsynth (Rhodes, B3)
 }
 ```
+**Cómo suena (PADsynth):** salvo los pads con `osc: true`, cada acorde se genera como un bucle estéreo sin costuras de unos 5.5 s con el algoritmo PADsynth (Nasca O. Paul, ZynAddSubFX), escrito desde cero en `src/engine.js`. Cada armónico de cada nota se vuelve una banda angosta de sonido, así el acorde suena a ensamble sin el batido regular de los osciladores desafinados. Las `layers` conservan su sentido: la onda da la serie de armónicos, la dispersión de `desafinación` da el ancho de banda y la ganancia da el nivel. Izquierda y derecha comparten parte de la fase: suena amplio en estéreo y sigue lleno si la mezcladora lo suma a mono.
+- Se generan los 6 acordes de la tonalidad (o el de quintas): el que suena al momento (25 a 80 ms en computadora) y los demás poco a poco. Si algo falla, el pad toca con osciladores.
+- **Movimiento** (`S.padMove`, 0–100) escala el vibrato y el barrido lento del filtro, en vivo. **Riqueza** (`S.padRich`, 0–100) ensancha las bandas, inclina los armónicos hacia arriba y abre un poco el filtro; regenera los bucles y entra con un fundido de 1.5 s al soltar el control. En 50 los dos dejan el pad como fue diseñado.
 | Grupo | Pads (`clave` → español / inglés) | Cómo está hecho |
 |---|---|---|
 | Worship | `atmos` → Supersaw (por defecto), `fundamento` → Pad cálido / Warm Pad, `aire` → Pad respiro / Breath Pad, `shimmer` → Shimmer, `amanecer` → Swell | sierras desafinadas; sierra filtrada oscura con soplo; capa de ruido tipo respiración; octavas altas; entrada lenta de volumen |
@@ -197,7 +203,7 @@ clave: {
 
 **Nombres:** el nombre comercial con el que se conoce ese sonido en teclados (lista General MIDI, Yamaha, Nord, Casio) o el término de síntesis que diga cómo está hecho (Supersaw, Swell, Senoidal). Se traduce solo cuando hay un término común en español (Cuerdas, Quintas). Nada genérico (Profundo, Brillante) ni referencias a artistas o canciones; el momento del servicio va en `group`. Nunca cambies la `clave` de un pad existente: las canciones guardadas la usan.
 
-**Volumen parejo:** con la batería y la percusión apagadas, en Estrofa, cada pad nuevo debe medir entre −36 y −32 dB RMS en la salida (los pads oscuros pueden ir un poco más arriba, los brillantes un poco más abajo). Ajusta las ganancias de `layers` y `air`, no el volumen general.
+**Volumen parejo:** con la batería y la percusión apagadas, en Estrofa, cada pad nuevo debe medir entre −36 y −32 dB RMS en la salida (los pads oscuros pueden ir un poco más arriba, los brillantes un poco más abajo). Ajusta las ganancias de `layers` y `air`, no el volumen general. Para medir: `python3 tools/build.py && node tools/_loud.mjs` (imprime RMS, pico y si el pad sonó como PADsynth `ps` u osciladores `osc`).
 Modo `fifths` (*solo tónica y quinta*): toca tónica y quinta en varias octavas para que un solo pad sirva en toda la canción.
 Acordes disponibles: grados I, ii, iii, IV, V, vi de la tonalidad mayor (`DEGREES`). Mantén las ganancias bajas: el pad acompaña, no domina.
 
@@ -226,14 +232,14 @@ Desplazamiento de tiempo ±9 ms × h, velocidad ±20 % × h, notas fantasma de c
 | Clave | Contenido |
 |---|---|
 | `acomp` | objeto `S` completo (tempo, compás, parte, estilo, pad, mezcla, idioma `lang`…) |
-| `acomp-songs` | lista `[{ name, bpm, meter, style, key, shaker, pad, padMode, shkSound }]` |
+| `acomp-songs` | lista `[{ name, bpm, meter, style, key, shaker, pad, padMode, padMove, padRich, shkSound }]` (las canciones viejas sin `padMove`/`padRich` cargan en 50) |
 | `acomp-tab` | última pestaña abierta |
 
 Si cambias el nombre o la forma de una propiedad de `S`, valida al cargar (como ya se hace con `STYLES[S.style]`, `PADS[S.pad]`…) para que las canciones guardadas del músico no rompan la app.
 
 ### 5.10 Contrato entre `ui.html` y `engine.js`
 El motor busca estos `id`. No los renombres sin cambiar ambos lados:
-`bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `meter`, `dots`, `barinfo`, `play`, botones `[data-s]` dentro de `#sections`, `fill`, `filllbl`, `next`, `autofill`, `key`, `names`, `chords`, `on-shaker`, `v-shaker`, `on-drums`, `v-drums`, `on-pad`, `v-pad`, `mic`, `follow`, `micread`, `micmsg`, `status`, `style`, `shaker`, `human`, `humanval`, `countin`, `shksound`, `padtype`, `padmode`, `padinfo`, `songs`, `songname`, `savesong`, `songtitle`, `lang`, `version`, `versionval`, `vercur`, `verbuild`, `verupdate`, `changelog`.
+`bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `meter`, `dots`, `barinfo`, `play`, botones `[data-s]` dentro de `#sections`, `fill`, `filllbl`, `next`, `autofill`, `key`, `names`, `chords`, `on-shaker`, `v-shaker`, `on-drums`, `v-drums`, `on-pad`, `v-pad`, `mic`, `follow`, `micread`, `micmsg`, `status`, `style`, `shaker`, `human`, `humanval`, `countin`, `shksound`, `padtype`, `padmode`, `padmove`, `padmoveval`, `padrich`, `padrichval`, `padinfo`, `songs`, `songname`, `savesong`, `songtitle`, `lang`, `version`, `versionval`, `vercur`, `verbuild`, `verupdate`, `changelog`.
 Los `select` (`meter`, `style`, `shaker`, `shksound`, `autofill`, `key`, `padtype`, `names`, `lang`) están ocultos y se manejan con los menús `.pd[data-for=id]`; las pruebas eligen opciones haciendo clic en el menú, no con `selectOption`.
 Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[data-tab=…]`. Una pantalla interna (`#tab-version`) lleva `data-parent="sonido"`: se abre con `data-go`, la barra deja marcada su pestaña y tiene botón `.back`. Los interruptores usan `role="switch"` y `aria-checked`.
 Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron y `window.acompVersion()` devuelve `{ release, build, versions }`.
@@ -242,6 +248,7 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 - Ritmo pre-generado por tramos: shaker, percusión, batería y conteo se generan por adelantado como audio (`OfflineAudioContext`, tres pistas: percusión, batería, clic) en tramos de hasta una frase (el remate automático, máx. 16 s), con las mismas muestras y la misma lógica de `scheduleStep`. El motor de audio los toca; el código solo prepara el siguiente tramo unos 4 s antes. El volumen, el silencio de cada capa y la reverb siguen en vivo.
 - Pantalla bloqueada / segundo plano: iOS frena o congela el código de la página pero no el motor de audio (por eso el pad nunca se cortaba). Cada tramo trae un loop sin costuras de sí mismo que entra solo si el siguiente tramo no llegó a tiempo, y la app se reengancha al volver.
 - Interrupciones: Stop corta al instante. Tempo, parte, remate, estilo, shaker, humanizar, compás y remate automático cortan lo que suena en el siguiente paso (~0.1 s) y lo reemplazan con un tramo nuevo; los cambios de parte siguen entrando en el siguiente compás.
+- Pad: bucles PADsynth (ver 5.5) o osciladores, por un filtro según la parte y dos reverbs sintéticas generadas al iniciar (sala de 1.3 s para todo, hall de 5 s para el pad), con pre-delay, reflexiones tempranas y agudos que se apagan antes que los graves.
 - Reloj en un *Web Worker* (con `setInterval` de respaldo). El micrófono no ajusta el tempo mientras la app está oculta.
 - iOS: `navigator.audioSession.type = 'playback'` (suena con el interruptor de silencio) y *wake lock* para que la pantalla no se apague.
 - Micrófono (beta): detección de ataques por flujo espectral e histograma de intervalos dentro de ±20 % del BPM fijado. Necesita https.

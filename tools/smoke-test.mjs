@@ -73,6 +73,16 @@ await page.click('.tab[data-tab=ritmo]');
 for (const id of ['style', 'shaker', 'shksound']) await pickEach(id);
 await page.click('.tab[data-tab=sonido]');
 await pickEach('padtype');
+// Pads: the first one plays as a PADsynth loop, Richness re-renders it, and every chord of the key is ready ahead.
+await page.click('.pd[data-for=padtype]');
+await page.locator('.pd-menu .pd-item').nth(0).click();
+await page.waitForTimeout(1500);
+await page.evaluate(() => { const r = document.getElementById('padrich'); r.value = 80; r.dispatchEvent(new Event('input')); r.dispatchEvent(new Event('change')); });
+await page.$eval('#padmove', (m) => { m.value = 20; m.dispatchEvent(new Event('input')); });
+await page.waitForTimeout(1500);
+const pad = await page.evaluate(() => window.acompTest.pad());
+if (pad.kind !== 'ps' || pad.cached < 6) errors.push(`pad should play a PADsynth loop with 6 chords ready, got ${JSON.stringify(pad)}`);
+if ((await page.textContent('#padrichval')).trim() !== '80 %') errors.push('Richness value is not shown');
 // Version: the row shows the release, the screen lists every version, and the build matches sw.js's cache.
 const ver = await page.evaluate(() => window.acompVersion());
 const verRow = (await page.textContent('#versionval')).trim();

@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.5.0",
+    "date": "2026-10-27",
+    "es": [
+      "Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.",
+      "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.",
+      "Reverb nueva para el pad y la batería, con más sala y menos siseo."
+    ],
+    "en": [
+      "New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.",
+      "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.",
+      "New reverb for the pad and the drums, with more room and less hiss."
+    ]
+  },
+  {
     "version": "1.4.0",
     "date": "2026-10-27",
     "es": [
