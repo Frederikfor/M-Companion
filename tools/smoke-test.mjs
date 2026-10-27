@@ -1,5 +1,6 @@
 // Smoke test: opens index.html in headless Chromium, plays, changes parts, visits every tab,
-// saves and loads a song, and tries every style, shaker and pad. Fails on any page error.
+// edits the song structure, plays chords by hand, pans the mix, saves and loads a song, and tries
+// every style, shaker and pad. Fails on any page error.
 // Usage: npm install && node tools/smoke-test.mjs
 import { chromium } from 'playwright';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -30,6 +31,15 @@ async function pickEach(id) {
 }
 
 await page.goto(pathToFileURL(path.join(root, 'index.html')).href);
+// Only the pad is on by default, and Remate needs the drums.
+{
+  const on = await page.$$eval('.tile', (ts) => ts.map((t) => t.dataset.ch + ':' + t.classList.contains('on')).join(' '));
+  if (on !== 'shaker:false drums:false pad:true click:false') errors.push(`default channels should be only the pad, got ${on}`);
+  if (!(await page.isDisabled('#fill'))) errors.push('Remate should be disabled with the drums off');
+}
+await page.click('.tile[data-ch=shaker]');
+await page.click('.tile[data-ch=drums]');
+if (await page.isDisabled('#fill')) errors.push('Remate should be enabled with the drums on');
 await page.click('#play');
 // The rhythm keeps tempo: each rendered chunk starts where the previous one ends, never on top of it.
 await page.waitForTimeout(6000);
@@ -63,11 +73,36 @@ await page.waitForTimeout(1500);
 const after = await loudest();
 // A change replaces what sounds; Stop silences at once.
 await page.click('#p5');
-await page.click('#sections button[data-s=coro]');
+await page.click('#map button:nth-child(3)');
 await page.waitForTimeout(300);
 const changed = await loudest();
-const part = await page.waitForFunction(() => document.querySelector('#sections button[data-s=coro]').classList.contains('on'), null, { timeout: 8000 }).then(() => true, () => false);
+const part = await page.waitForFunction(() => document.querySelector('#map button:nth-child(3)').classList.contains('now') && document.getElementById('partname').textContent.startsWith('Coro'), null, { timeout: 8000 }).then(() => true, () => false);
 if (!part) errors.push('changing to Coro never took effect');
+// The pad follows the part's chords: the chorus starts on IV for one bar, then goes to I.
+{
+  const iv = await page.waitForFunction(() => window.acompTest.song().chord === 3, null, { timeout: 4000 }).then(() => true, () => false);
+  const i = await page.waitForFunction(() => window.acompTest.song().chord === 0, null, { timeout: 5000 }).then(() => true, () => false);
+  if (!iv || !i) errors.push(`the chorus should play IV then I (IV ${iv}, I ${i})`);
+}
+// Manual: a tap replaces the chord; holding one and tapping another plays both as one merged chord.
+await page.click('#mode button[data-m=manual]');
+await page.click('#win button[data-c="5"]');
+{
+  const a = page.locator('#win button[data-c="5"]'), b = page.locator('#win button[data-c="4"]');
+  const ba = await a.boundingBox(), bb = await b.boundingBox();
+  await page.mouse.move(ba.x + 10, ba.y + 10); await page.mouse.down();
+  await page.evaluate(([x, y]) => { const el = document.elementFromPoint(x, y); el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 7, clientX: x, clientY: y })); el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 7, clientX: x, clientY: y })); }, [bb.x + 10, bb.y + 10]);
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+  const sg = await page.evaluate(() => window.acompTest.song()), pd = await page.evaluate(() => window.acompTest.pad());
+  if (sg.held.join() !== '5,4' || pd.notes <= 5) errors.push(`holding vi and tapping V should merge both chords, got held ${sg.held} with ${pd.notes} notes`);
+  await page.click('#win button[data-c="5"]');
+  if ((await page.evaluate(() => window.acompTest.song())).held.join() !== '5') errors.push('a tap in Manual should replace the chords');
+  await page.click('#win button[data-c="5"]');
+  await page.waitForTimeout(300);
+  if ((await page.evaluate(() => window.acompTest.pad())).voices !== 0) errors.push('tapping the only chord in Manual should silence the pad');
+}
+await page.click('#mode button[data-m=auto]');
 await page.click('#play');
 await page.waitForTimeout(150);
 const stopped = await page.evaluate(() => window.acompTest.level());
@@ -96,7 +131,7 @@ if ((await page.textContent('#padrichval')).trim() !== '80 %') errors.push('Rich
 await page.$eval('#padmove', (m) => { m.value = 100; m.dispatchEvent(new Event('input')); });
 await page.evaluate(() => {
   const r = document.getElementById('padrich'); r.value = 50; r.dispatchEvent(new Event('change'));
-  document.querySelector('#sections button[data-s=estrofa]').click();
+  document.querySelector('#map button:nth-child(2)').click();
   const s = document.getElementById('padtype'); s.value = 'oracion'; s.dispatchEvent(new Event('change'));
   window.acompTest.padLevel();
 });
@@ -118,6 +153,40 @@ if (!/^\d+\.\d+\.\d+$/.test(ver.release) || verRow !== ver.release || verShown.c
 if (!/^[0-9a-f]{8}$/.test(verShown.build) || swCache !== `${ver.release}-${verShown.build}`) errors.push(`build "${verShown.build}" does not match the cache "${swCache}"`);
 if (verShown.entries !== ver.versions || ver.versions < 1) errors.push(`changelog shows ${verShown.entries} of ${ver.versions} versions`);
 if (sonidoSelected !== 'true' || !backHome) errors.push('version screen does not open inside Sonido or its back button fails');
+// Mix: the pan sides fold out, and a side moves that channel.
+await page.click('#panfold');
+if (!(await page.isVisible('#panrows'))) errors.push('the pan rows should fold out');
+await page.click('#panrows button[data-ch=pad][data-side=R]');
+await page.waitForTimeout(200);
+{
+  const pan = await page.evaluate(() => window.acompTest.pan());
+  if (pan.join() !== '0,0,1,-1') errors.push(`pan should be centre, centre, right, left; got ${pan}`);
+  if ((await page.textContent('.tile[data-ch=pad] .side')).trim() !== 'DER') errors.push('the Pad tile should show DER');
+}
+await page.click('#panfold');
+// Structure: add a part to the order, then give a new part two chords in the editor.
+const seqLen = await page.$$eval('#seq .chip:not(.add)', (c) => c.length);
+await page.click('#addchip');
+await page.locator('.pd-menu .pd-item').nth(0).click();
+if (await page.$$eval('#seq .chip:not(.add)', (c) => c.length) !== seqLen + 1) errors.push('Añadir did not add a part to the order');
+await page.click('#t-partes');
+await page.click('#newrow');
+await page.locator('.pd-menu .pd-item').nth(0).click();
+if (!(await page.isVisible('#tab-parte'))) errors.push('a new part should open its editor');
+await page.click('#degs button:nth-child(4)');
+await page.click('#ask .durs button:nth-child(1)');
+await page.click('#degs button:nth-child(5)');
+await page.click('#ask .durs button:nth-child(3)');
+{
+  const rows = await page.$$eval('#prog .prow .val', (v) => v.map((x) => x.textContent));
+  if (rows.join('|') !== 'medio compás|2 compases') errors.push(`the part should list half a bar and 2 bars, got ${rows}`);
+  if (!(await page.textContent('#progcap')).includes('3 compases')) errors.push('2½ bars should round up to 3');
+}
+await page.click('#prog .prow');
+await page.click('#prog .edit .rm');
+if (await page.$$eval('#prog .prow', (r) => r.length) !== 1) errors.push('Quitar did not remove the chord');
+await page.click('#tab-parte .back');
+await page.click('#t-orden');
 await pickEach('lang');
 await page.click('.tab[data-tab=canciones]');
 await page.fill('#songname', 'Prueba');

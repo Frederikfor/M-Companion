@@ -1,6 +1,6 @@
 # M-Companion · Acompañante de Ensayo
 
-App web (PWA) que acompaña a un músico que toca solo: pone una base de **shaker y percusión**, **batería** y un **pad** de teclado, a un tempo que el músico controla, con remates (fills) que respetan el compás y la parte de la canción. Pensada para ensayar en casa y para tocar en la iglesia conectada a la mezcladora.
+App web (PWA) que acompaña a un músico que toca solo: pone una base de **shaker y percusión**, **batería**, un **pad** de teclado que sigue los acordes de la canción y un **clic** (metrónomo), a un tempo que el músico controla, con remates (fills) que respetan el compás y la parte de la canción. Pensada para ensayar en casa y para tocar en la iglesia conectada a la mezcladora.
 
 - **App en vivo:** https://frederikfor.github.io/M-Companion/
 - **Usuario principal:** cantante que toca guitarra y a veces piano, en servicios de iglesia (worship, gospel, baladas, latino).
@@ -23,16 +23,17 @@ Abre la misma dirección en Chrome, Edge o Safari. También puedes abrir `dist/a
 ### Las 4 pestañas
 | Pestaña | Para qué |
 |---|---|
-| **Tocar** | Lo que se usa en vivo. Tempo (−/+, −5/+5, *Marcar tempo*), compás, acorde del pad, partes de la canción (Intro, Estrofa, Coro, Puente, Final) y el transporte: **Remate · Play/Stop · Siguiente parte**. |
-| **Ritmo** | Estilo, patrón y sonido de shaker, humanizar, remate automático cada N compases, conteo de entrada, seguir el tempo por micrófono (beta). |
-| **Sonido** | Tonalidad, nombres de notas (Do/C), sonido del pad, modo *solo tónica y quinta*, mezcla y on/off de Percusión, Batería y Pad. |
-| **Canciones** | Guardar la configuración actual con un nombre y cargarla con un toque (vuelve a Tocar). |
+| **Tocar** | Lo que se usa en vivo. Canción, compás y tempo (−5, −, *Marcar tempo*, +, +5); la parte que suena (*Coro 1 · 3/8 → Estrofa 2*) y el **mapa de la canción** (tocar una parte salta a ella); el sonido del pad (`< nombre >`); el **dial de tonalidad** (deslizar cambia de tono, tocar abre la lista); la **ventana de acordes** (IV I V arriba, ii vi iii abajo, colores por función); **Auto/Manual** y *Tónica + 5ª*; los cuatro canales **Shaker · Batería · Pad · Clic**; y el transporte **Remate · Play/Stop · Siguiente**. |
+| **Ritmo** | Estilo, patrón y sonido de shaker, humanizar, remate automático, conteo de entrada, seguir el tempo por micrófono (beta). |
+| **Sonido** | Tonalidad, sonido del pad, Movimiento, Riqueza, nombres de notas (Do/C); **Mezcla** con volumen de cada canal y **Paneo** plegable (Izq/Centro/Der); **Estructura de la canción** con pestañas *Orden* y *Partes*, y el editor de acordes de cada parte. |
+| **Canciones** | Guardar la configuración actual con un nombre, incluida la estructura con sus acordes, y cargarla con un toque (vuelve a Tocar). |
 
 ### Flujo típico en vivo
-1. Carga la canción en **Canciones** (o ajusta tempo, compás, estilo y tono).
-2. **Play**: suena el conteo de entrada de un compás y arranca en la parte elegida.
-3. Toca **Siguiente parte** o una parte específica: el cambio entra en el **siguiente compás**, con un remate antes y un platillo al entrar.
-4. **Final**: remate, platillo y el pad se desvanece.
+1. Carga la canción en **Canciones** (o ajusta tempo, compás, estilo, tono y la estructura en Sonido).
+2. Enciende en Tocar los canales que quieras (por defecto solo el Pad). **Play**: suena el conteo de entrada de un compás y arranca en la parte elegida en el mapa.
+3. La app pasa sola de parte en parte y el pad cambia de acorde a tiempo (modo **Auto**). Con **Manual** el pad no sigue la canción: tocas tú el acorde, o hasta tres a la vez.
+4. **Siguiente** o tocar una parte del mapa: el cambio entra en el **siguiente compás**, con un remate antes (si la batería está encendida) y un platillo al entrar.
+5. **Final** (o Siguiente en la última parte): remate, platillo, el pad va al acorde final y se desvanece.
 
 ---
 
@@ -107,6 +108,7 @@ GitHub Pages publica la rama `main`, carpeta raíz. Por eso `index.html` y `sw.j
 | Un juego de shaker nuevo | `SHK_SETS` + muestras en `samples/` |
 | Cómo suenan los remates | `buildFill(target, meter)` |
 | Intensidad por parte de la canción | `SEC_DYN`, `SEC_SHK`, `SEC_PAD` |
+| Tipos de parte (Pre-coro, Tag…) o la estructura de ejemplo | `PART_SEC`, `DEFAULT_SONG` (sección 5.4) |
 | Valores por defecto | objeto `S` |
 | Disposición o colores | `src/ui.html` |
 | Versión y novedades | `src/changelog.json` |
@@ -174,6 +176,10 @@ Actuales: `auto`, `corcheas`, `semicorcheas`, `galope`, `contra`, `tresillo`, `n
 | puente | 0.90 | 0.80 | 800 |
 | final | 1.00 | 1.00 | 2300 |
 
+**Partes de la canción (`PART_SEC`).** Cada tipo de parte suena con la dinámica, los patrones y los remates de una sección base: `intro`, `interludio`, `outro` → intro; `estrofa`, `precoro` → estrofa; `coro`, `instrumental`, `tag`, `vamp` → coro; `puente` → puente; `final` → final (al entrar, remate, platillo, el pad va a su primer acorde y se desvanece; la app se detiene). Las claves se guardan en las canciones: nunca las cambies.
+
+**Estructura (`S.song`).** `parts: { clave: { ch: [[grado 0–5, compases], …], bars } }` y `seq: [claves…]` en orden de sonido. La duración de un acorde es en compases: `0.5`, `1`, `2`, `4` desde el editor (se aceptan múltiplos de 0.5 hasta 16). Una parte dura la suma de sus acordes **redondeada hacia arriba al compás** (el último acorde ocupa lo que falta), así los cambios de parte siempre caen en el 1; sin acordes dura `bars` (4). Al terminar la última parte, esa parte se repite hasta Siguiente (que lleva al final) o Stop. `validSong()` revisa todo lo guardado; si no queda nada válido, usa `DEFAULT_SONG`.
+
 ### 5.5 Pads (`PADS`)
 ```js
 clave: {
@@ -216,7 +222,8 @@ Acordes disponibles: grados I, ii, iii, IV, V, vi de la tonalidad mayor (`DEGREE
 - Hacia **puente**: 2 tiempos de caja en crescendo.
 - Hacia **coro/final**: 2 tiempos de semicorcheas bajando caja → toms; el final agrega bombo.
 - Siempre terminan en el último paso del compás; el platillo cae en el siguiente tiempo 1 (excepto al ir a intro, o a estrofa sin cambio de parte).
-- Remate automático cada `S.autoFill` compases (0 = apagado).
+- Remate automático (`S.autoFill` 4 u 8; 0 = apagado): en el último compás de cada parte, antes de pasar a la siguiente, y cada N compases dentro de una parte larga. Un cambio pedido a mano (mapa o Siguiente) siempre lleva remate.
+- **Sin batería no hay remate:** con el canal Batería apagado el botón se desactiva (dice *sin batería*), el motor no programa remates ni el platillo de entrada.
 
 ### 5.7 Humanizar (`S.human`, 0–100)
 Desplazamiento de tiempo ±9 ms × h, velocidad ±20 % × h, notas fantasma de caja ocasionales, hi-hat abierto al final de cada frase de 4 compases y bombo de anticipación en el coro. Todo escala con `h`.
@@ -235,22 +242,30 @@ Desplazamiento de tiempo ±9 ms × h, velocidad ±20 % × h, notas fantasma de c
 ### 5.9 Estado guardado (`localStorage`)
 | Clave | Contenido |
 |---|---|
-| `acomp` | objeto `S` completo (tempo, compás, parte, estilo, pad, mezcla, idioma `lang`…) |
-| `acomp-songs` | lista `[{ name, bpm, meter, style, key, shaker, pad, padMode, padMove, padRich, shkSound }]` (las canciones viejas sin `padMove`/`padRich` cargan en 50) |
+| `acomp` | objeto `S` completo (tempo, compás, parte `at`, estilo, pad, modo `padHand` y acordes `held`, mezcla `layers` con `on`/`vol`/`side` por canal, estructura `song`, idioma `lang`…) |
+| `acomp-songs` | lista `[{ name, bpm, meter, style, key, shaker, pad, padMode, padHand, padMove, padRich, shkSound, song }]` (las canciones viejas sin `padMove`/`padRich` cargan en 50; sin `song`, con `DEFAULT_SONG`) |
 | `acomp-tab` | última pestaña abierta |
+
+`S.layers` tiene `shaker`, `drums`, `pad` y `click`, cada uno `{ on, vol 0–100, side 'L'|'C'|'R' }`. Un estado guardado antes de 1.6.0 (sin `click`) arranca con los valores nuevos: solo el Pad encendido, todo al centro y el Clic a la izquierda; conserva sus volúmenes. La mezcla y el paneo son del equipo, no de cada canción: no se guardan en `acomp-songs`.
 
 Si cambias el nombre o la forma de una propiedad de `S`, valida al cargar (como ya se hace con `STYLES[S.style]`, `PADS[S.pad]`…) para que las canciones guardadas del músico no rompan la app.
 
 ### 5.10 Contrato entre `ui.html` y `engine.js`
 El motor busca estos `id`. No los renombres sin cambiar ambos lados:
-`bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `meter`, `dots`, `barinfo`, `play`, botones `[data-s]` dentro de `#sections`, `fill`, `filllbl`, `next`, `autofill`, `key`, `names`, `chords`, `on-shaker`, `v-shaker`, `on-drums`, `v-drums`, `on-pad`, `v-pad`, `mic`, `follow`, `micread`, `micmsg`, `status`, `style`, `shaker`, `human`, `humanval`, `countin`, `shksound`, `padtype`, `padmode`, `padmove`, `padmoveval`, `padrich`, `padrichval`, `padinfo`, `songs`, `songname`, `savesong`, `songtitle`, `lang`, `version`, `versionval`, `vercur`, `verbuild`, `verupdate`, `changelog`.
-Los `select` (`meter`, `style`, `shaker`, `shksound`, `autofill`, `key`, `padtype`, `names`, `lang`) están ocultos y se manejan con los menús `.pd[data-for=id]`; las pruebas eligen opciones haciendo clic en el menú, no con `selectOption`.
-Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[data-tab=…]`. Una pantalla interna (`#tab-version`) lleva `data-parent="sonido"`: se abre con `data-go`, la barra deja marcada su pestaña y tiene botón `.back`. Los interruptores usan `role="switch"` y `aria-checked`.
-Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron y `window.acompVersion()` devuelve `{ release, build, versions }`.
+- **Tocar:** `songtitle`, `status`, `meterlbl`, `bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `partname`, `partpos`, `map` (el motor crea un botón por parte del orden), `padprev`, `padmid`, `padname`, `padsub`, `padnext`, `dial`, `dialnames`, `win` (el motor crea los botones `[data-c=grado]`), `mode` (botones `[data-m=auto|manual]`), `padmode` (interruptor *Tónica + 5ª*), `legend`, `hint`, `tiles` (el motor crea `.tile[data-ch=…]`), `fill`, `filllbl`, `fillnote`, `play`, `next`, `nextname`.
+- **Sonido:** `key`, `padtype`, `padmove`, `padmoveval`, `padrich`, `padrichval`, `names`, `mix` (el motor crea `on-<canal>`, `v-<canal>`, `tag-<canal>`, `panfold`, `pansum`, `panrows` con botones `[data-ch][data-side]`), `t-orden`, `t-partes`, `p-orden`, `p-partes`, `seq`, `addchip`, `addpart`, `partlist`, `newrow`, `newpart`, `structfoot`, `lang`, `version`, `versionval`. Editor de parte (`#tab-parte`): `ptitle`, `degs`, `ask`, `progcap`, `prog`, `pdel`.
+- **Ritmo, Canciones y Versión:** `style`, `shaker`, `shksound`, `human`, `humanval`, `countin`, `autofill`, `mic`, `follow`, `micread`, `micmsg`, `songs`, `songname`, `savesong`, `vercur`, `verbuild`, `verupdate`, `changelog`.
+
+Los `select` (`meter`, `style`, `shaker`, `shksound`, `autofill`, `key`, `padtype`, `names`, `lang`, y los de menú `addpart`, `newpart`) están ocultos. Cualquier botón con `data-for=id` abre el menú de ese select (`#padmid` abre el de pads; `#addchip` y `#newrow` los de partes); si tiene `.pd-val`, muestra la opción elegida. Una `<option data-sub>` muestra un texto gris a la derecha en el menú (armaduras, compases). Las pruebas eligen opciones haciendo clic en el menú, no con `selectOption`. El motor abre menús con `window.acompMenu(id, botón)` (el dial abre el de tonalidad) y cambia de pantalla con `window.acompShow(nombre)`.
+Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[data-tab=…]`. Las pantallas internas (`#tab-version`, `#tab-parte`) llevan `data-parent="sonido"`: se abren con `data-go` (o `acompShow`), la barra deja marcada su pestaña y tienen botón `.back`. Los interruptores usan `role="switch"` y `aria-checked`.
+Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron y `window.acompVersion()` devuelve `{ release, build, versions }`; `window.acompTest` tiene `pad()` (tipo, bucles listos, ms del último render, notas, voces), `pan()`, `song()` (parte, pendiente, acorde, acordes en Manual, orden), `chunks()`, `level()`, `padLevel()`, `freeze()` y `thaw()`.
 
 ### 5.11 Motor de audio (resumen)
-- Ritmo pre-generado por tramos: shaker, percusión, batería y conteo se generan por adelantado como audio (`OfflineAudioContext`, tres pistas: percusión, batería, clic) en tramos de hasta una frase (el remate automático, máx. 16 s), con las mismas muestras y la misma lógica de `scheduleStep`. El motor de audio los toca; el código solo prepara el siguiente tramo unos 4 s antes. El volumen, el silencio de cada capa y la reverb siguen en vivo.
+- Ritmo pre-generado por tramos: shaker, percusión, batería, clic y conteo se generan por adelantado como audio (`OfflineAudioContext`, cuatro pistas: percusión, batería, clic, conteo) en tramos de hasta el final de la parte (máx. 16 s), con las mismas muestras y la misma lógica de `scheduleStep`. El motor de audio los toca; el código solo prepara el siguiente tramo unos 4 s antes. El volumen, el silencio de cada capa y la reverb siguen en vivo.
 - Pantalla bloqueada / segundo plano: iOS frena o congela el código de la página pero no el motor de audio (por eso el pad nunca se cortaba). Cada tramo trae un loop sin costuras de sí mismo que entra solo si el siguiente tramo no llegó a tiempo, y la app se reengancha al volver.
+- Canales: cada uno es `bus` (encendido y volumen) → `StereoPanner` (lado) → salida; las reverbs se alimentan después del panner, así un canal mandado a un lado lleva su eco del mismo lado. El clic (metrónomo, cada pulso, con acento en el 1) siempre se genera y el canal Clic decide si se oye; no pasa por el compresor para no hacer bombear a los demás. El conteo de entrada va por su propia pista al lado del clic y suena aunque el Clic esté apagado. Cada canal tiene un analizador que mueve el LED verde de su botón en Tocar.
+- Partes y acordes: `scheduleStep` lleva la parte (`q.at`) y el compás dentro de ella (`q.phraseBar`); al pasar la última barra o con un cambio pedido (`q.pend`) cambia de parte en el 1. Los cambios de acorde se revisan cada medio compás y se programan con `ev()` al reloj de audio (`autoChord`): el pad cambia justo a tiempo y solo en modo Auto.
+- Pad en Manual: hasta tres acordes (`S.held`) se unen en un solo acorde (`curNotes()`: sin notas repetidas, solo el primero conserva el bajo) y se generan como **un** bucle PADsynth; su volumen se compensa por el número de notas.
 - Interrupciones: Stop corta al instante. Tempo, parte, remate, estilo, shaker, humanizar, compás y remate automático cortan lo que suena en el siguiente paso (~0.1 s) y lo reemplazan con un tramo nuevo; los cambios de parte siguen entrando en el siguiente compás.
 - Pad: bucles PADsynth (ver 5.5) o osciladores, por un filtro según la parte y dos reverbs sintéticas generadas al iniciar (sala de 1.3 s para todo, hall de 5 s para el pad), con pre-delay, reflexiones tempranas y agudos que se apagan antes que los graves.
 - Reloj en un *Web Worker* (con `setInterval` de respaldo). El micrófono no ajusta el tempo mientras la app está oculta.
@@ -258,7 +273,7 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 - Micrófono (beta): detección de ataques por flujo espectral e histograma de intervalos dentro de ±20 % del BPM fijado. Necesita https.
 
 ### 5.12 Idiomas (`I18N`)
-- Diccionario `I18N = { es: {...}, en: {...} }` en `src/engine.js`. `T('clave', ...args)` devuelve el texto en el idioma de `S.lang` (si falta, usa español). Algunas entradas son funciones con parámetros (`bar`, `mic.read`, `del.aria`).
+- Diccionario `I18N = { es: {...}, en: {...} }` en `src/engine.js`. `T('clave', ...args)` devuelve el texto en el idioma de `S.lang` (si falta, usa español). Algunas entradas son funciones con parámetros (`bars.n`, `pad.of`, `mic.read`, `del.aria`).
 - Textos fijos del HTML: atributo `data-i18n="clave"` (contenido), `data-i18n-aria` (aria-label) o `data-i18n-ph` (placeholder). `applyLang()` los recorre al iniciar y al cambiar de idioma.
 - Datos musicales: `name` en español y `en` en inglés en cada entrada de `STYLES`, `SHAKERS`, `PADS` y `SHK_SETS`; `NM(obj)` elige. Los grupos de pads se traducen en `I18N.<idioma>.groups`.
 - Las claves internas (`estrofa`, `coro`, `atmos`…) nunca se traducen: las canciones guardadas dependen de ellas.
@@ -292,21 +307,26 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 **Diseño (iOS oscuro)**
 | Token | Valor | Uso |
 |---|---|---|
-| `--bg` | `#000000` | fondo |
+| `--bg` | `#0B0B0C` | fondo |
 | `--card` | `#1C1C1E` | tarjetas y listas |
+| `--surf` | `#161618` | botones de Tocar (tempo, pad, transporte) |
+| `--surf2` | `#131315` | panel de armonía en Tocar |
 | `--fill` | `#2C2C2E` | botones secundarios |
 | `--seg` | `#48484A` | segmento activo |
 | `--line` | `#38383A` | separadores |
-| `--fg` | `#FFFFFF` | texto |
+| `--edge` | `#2A2A2D` | bordes de canales apagados, mapa |
+| `--fg` | `#F2F2F2` | texto |
 | `--muted` | `#98989F` | texto secundario |
+| `--dim` | `#8E8E93` | leyendas, pestañas inactivas |
 | `--accent` | `#FF9F0A` | naranja: acento, selección |
+| `--rest` / `--away` / `--tense` | `#FF9F0A` / `#64D2FF` / `#BF5AF2` | función del acorde: reposo (I, vi, iii), se aleja (IV, ii), tensión (V) |
 | `--go` | `#30D158` | Play / interruptor encendido |
 | `--stop` | `#FF453A` | Stop |
 | `--off` | `#39393D` | interruptor apagado |
 
-- Fuente del sistema (`-apple-system`), tamaños iOS (34 títulos, 17 cuerpo, 13 notas).
-- Objetivos táctiles **≥ 44 px**; Play redondo de 84 px.
-- En **Tocar**, de arriba abajo: información (canción, compás, tempo) → pad → **zona del pulgar** con partes y transporte. Los controles en vivo nunca suben.
+- Fuente del sistema (`-apple-system`), tamaños iOS (34 títulos, 17 cuerpo, 13 notas); el BPM, la posición en la parte y el dial usan la monoespaciada del sistema (`--mono`).
+- Objetivos táctiles **≥ 44 px**; Play redondo de 76 px; canales de 56 px.
+- En **Tocar** (diseño C5a), de arriba abajo: canción, compás y BPM → fila de tempo → parte y mapa → selector de pad → panel de armonía (dial, ventana de acordes, Auto/Manual, Tónica + 5ª, leyenda) → **zona del pulgar** con los cuatro canales y el transporte. Los controles en vivo nunca suben. Play debe verse sin desplazar en iPhone SE, 13 mini, 16 y Pro Max: dos niveles compactos con `@media (max-height: 880px)` y `(max-height: 700px)`.
 - Barra de 4 pestañas abajo con área segura (`env(safe-area-inset-bottom)`).
 - Las listas de opciones son **menús pull-down estilo iOS** (`.pd` → `.pd-menu`), nunca el selector nativo: palomita a la izquierda en la opción elegida, grupos separados con banda oscura y título gris, se abre bajo el botón o encima si no cabe. El `<select class="native">` oculto sigue siendo la fuente de verdad: el motor lo llena, cambia su `.value` y escucha `change`; el menú solo lo refleja. Un selector nuevo = `<div class="row pick">` con `.lbl`, el `select.native` y un `button.pd[data-for=id]` (copia una fila existente de `src/ui.html`).
 - Accesible: `aria-label` en botones con ícono, `role="switch"`/`aria-checked`, foco visible naranja.

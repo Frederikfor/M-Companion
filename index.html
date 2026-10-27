@@ -12,30 +12,40 @@
 </head><body>
 <title>Acompañante de Ensayo</title>
 <style>
-/* Layout: iOS-style app shell, dark on purpose for stages; four tabs, live controls in the thumb zone */
+/* Layout: iOS-style app shell, dark on purpose for stages; four tabs, live controls in the thumb zone. Tocar follows design C5a. */
 :root {
-  --bg: #000000;
+  --bg: #0B0B0C;
   --card: #1C1C1E;
+  --surf: #161618;
+  --surf2: #131315;
   --fill: #2C2C2E;
   --seg: #48484A;
   --line: #38383A;
-  --fg: #FFFFFF;
+  --edge: #2A2A2D;
+  --fg: #F2F2F2;
   --muted: #98989F;
+  --dim: #8E8E93;
   --chev: #5A5A5F;
   --accent: #FF9F0A;
   --accent-soft: rgba(255, 159, 10, 0.16);
+  --rest: #FF9F0A;
+  --away: #64D2FF;
+  --tense: #BF5AF2;
   --go: #30D158;
   --stop: #FF453A;
   --off: #39393D;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
   --tabbar: calc(56px + env(safe-area-inset-bottom, 0px));
   color-scheme: dark;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 17px; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
 button, select, input { font: inherit; color: inherit; }
 button { cursor: pointer; border: 0; background: none; padding: 0; touch-action: manipulation; }
+button:disabled { cursor: default; }
 button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .screen { position: fixed; inset: 0 0 var(--tabbar) 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 24px; }
 .wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; min-height: 100%; }
@@ -46,29 +56,18 @@ h1 { margin: 8px 0 12px; font-size: 34px; line-height: 41px; font-weight: 700; l
 .row { min-height: 44px; padding: 6px 16px; display: flex; align-items: center; gap: 8px; position: relative; }
 .row + .row::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--line); }
 .row > .lbl { flex: 1; min-width: 0; }
-.row select { appearance: none; -webkit-appearance: none; background: transparent; border: 0; color: var(--muted); text-align: right; text-align-last: right; max-width: 62%; padding: 6px 0; font-size: 17px; }
-.chev { flex: none; width: 8px; height: 13px; }
+.chev { flex: none; width: 8px; height: 13px; transition: transform .2s; }
 .row.col { flex-direction: column; align-items: stretch; padding-block: 11px; }
 .row.col .top { display: flex; justify-content: space-between; }
 input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-height: 28px; }
 .switch { flex: none; position: relative; width: 51px; height: 31px; border-radius: 16px; background: var(--off); transition: background .2s; }
 .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.25); transition: left .2s; }
-.switch[aria-checked="true"] { background: var(--go); }
-.switch[aria-checked="true"]::after { left: 22px; }
+.switch[aria-checked="true"], [aria-checked="true"] > .switch { background: var(--go); }
+.switch[aria-checked="true"]::after, [aria-checked="true"] > .switch::after { left: 22px; }
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 2px; border-radius: 9px; background: var(--fill); }
-.seg button, .seg label { height: 32px; border-radius: 7px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
-.seg .on { background: var(--seg); font-weight: 600; }
-
-/* Tocar */
-#tab-tocar .wrap { gap: 0; }
-.now { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
-.now .song { min-width: 0; display: flex; flex-direction: column; }
-.now small { font-size: 13px; color: var(--muted); }
-#songtitle { font-size: 22px; line-height: 28px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pill { position: relative; height: 32px; padding: 0 12px; border-radius: 16px; background: var(--card); display: flex; align-items: center; font-size: 15px; font-weight: 600; }
-.pill { gap: 6px; }
-.pill .ud { width: 8px; height: 12px; color: var(--muted); }
-/* iOS pull-down menus: the native <select> stays hidden as the source of truth; .pd buttons open .pd-menu */
+.seg button { height: 32px; border-radius: 7px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.seg .on { background: var(--seg); font-weight: 600; color: var(--fg); }
+/* iOS pull-down menus: the native <select> stays hidden as the source of truth; [data-for] buttons open .pd-menu */
 select.native { display: none; }
 .pd { display: flex; align-items: center; gap: 6px; max-width: 64%; min-height: 32px; color: var(--muted); font-size: 17px; text-align: right; }
 .pd-val { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -85,39 +84,105 @@ select.native { display: none; }
 .pd-item + .pd-item::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: .5px; background: rgba(84, 84, 88, .55); }
 .pd-item:hover, .pd-item:focus-visible, .pd-item.press { background: rgba(255, 255, 255, .1); }
 .pd-item svg { position: absolute; left: 16px; top: 50%; margin-top: -7px; width: 15px; height: 14px; }
-#status { font-size: 12px; color: var(--muted); }
-.tempo { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.tempo .line { width: 100%; display: flex; align-items: center; justify-content: space-between; }
-.round { width: 56px; height: 56px; border-radius: 28px; background: var(--card); display: flex; align-items: center; justify-content: center; }
-.round.sm { width: 44px; height: 44px; border-radius: 22px; font-size: 13px; font-weight: 600; color: var(--muted); }
-.bpmbox { display: flex; flex-direction: column; align-items: center; }
-#bpm { font-size: 88px; line-height: 92px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
-#bpmunit { font-size: 15px; color: var(--muted); }
-.dots { display: flex; gap: 12px; justify-content: center; min-height: 16px; }
-.dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #3A3A3C; }
-.dot.strong { border-color: #8E8E93; }
-.dot.now { background: var(--accent); border-color: var(--accent); }
-#barinfo { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; min-height: 20px; }
-#tap { height: 44px; padding: 0 20px; border-radius: 22px; color: var(--accent); font-size: 17px; font-weight: 600; }
-.padcard { margin-top: 20px; padding: 12px; border-radius: 16px; background: var(--card); display: flex; flex-direction: column; gap: 10px; }
-.padcard .head { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 15px; min-height: 28px; }
-.padcard .head button { display: flex; align-items: center; gap: 6px; color: var(--muted); min-height: 32px; }
-.chords { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-.chords button { height: 48px; border-radius: 10px; background: var(--fill); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
-.chords b { font-size: 15px; font-weight: 600; }
-.chords span { font-size: 10px; opacity: .6; }
-.chords button.on { background: var(--accent); color: #000000; }
-.chords.muted { opacity: .4; }
-.live { margin-top: auto; padding-top: 24px; display: flex; flex-direction: column; gap: 20px; }
-#sections { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; padding: 2px; border-radius: 12px; background: var(--card); }
-#sections button { height: 44px; border-radius: 10px; font-size: 14px; font-weight: 500; }
-#sections button.on { background: var(--seg); font-weight: 600; }
-#sections button.pending { box-shadow: inset 0 0 0 2px var(--accent); color: var(--accent); }
+.pd-item .sub { margin-left: auto; padding-left: 12px; font-size: 13px; color: var(--muted); }
+
+/* Tocar (design C5a): song and tempo → part and map → pad and harmony → thumb zone with channels and transport */
+#tab-tocar { padding-bottom: 8px; }
+#tab-tocar .wrap { gap: 0; }
+.top1 { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.top1 .song { display: flex; flex-direction: column; min-width: 0; }
+.songbtn { min-width: 0; min-height: 28px; text-align: left; }
+#songtitle { display: block; font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top1 .sub { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.pd.meterpd { min-height: 44px; margin: -10px 0; font-size: 13px; font-weight: 600; color: #C7C7CC; gap: 4px; }
+.pd.meterpd .ud { width: 7px; height: 11px; }
+.bpmread { display: flex; align-items: baseline; gap: 4px; }
+#bpm { font-family: var(--mono); font-size: 40px; line-height: 40px; font-weight: 600; font-variant-numeric: tabular-nums; transition: color .08s; }
+#bpm.flash { color: var(--accent); }
+#bpmunit { font-size: 13px; color: var(--muted); }
+.bpmrow { margin-top: 8px; display: grid; grid-template-columns: 44px 44px minmax(0, 1fr) 44px 44px; gap: 6px; }
+.bpmrow button { height: 44px; border-radius: 10px; background: var(--surf); font-size: 20px; display: flex; align-items: center; justify-content: center; }
+.bpmrow .sm { font-size: 13px; font-weight: 600; color: var(--muted); }
+#tap { font-size: 15px; font-weight: 600; color: var(--accent); }
+.partline { margin-top: 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+#partname { font-size: 28px; line-height: 34px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#partpos { font-family: var(--mono); font-size: 17px; color: var(--muted); white-space: nowrap; }
+#partpos b { color: var(--fg); font-weight: 400; }
+#map { margin-top: 8px; display: flex; gap: 2px; }
+#map button { min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-bottom: 4px; }
+#map .seg-bar { position: relative; overflow: hidden; height: 22px; border-radius: 4px; background: var(--edge); }
+#map .seg-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--accent); }
+#map .lb { font-size: 11px; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; }
+#map .now .seg-bar { background: var(--fg); }
+#map .now .lb { color: var(--fg); font-weight: 600; }
+#map .next .seg-bar { background: var(--seg); }
+#map .next .lb { color: var(--fg); }
+#map .pending .seg-bar { background: var(--seg); box-shadow: inset 0 0 0 2px var(--accent); }
+#map .pending .lb { color: var(--accent); font-weight: 600; }
+.padsel { margin-top: 6px; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; height: 48px; border-radius: 12px; background: var(--surf); }
+.padsel button { display: flex; align-items: center; justify-content: center; }
+#padmid { flex-direction: column; min-width: 0; }
+#padname { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+#padsub { font-size: 11px; color: var(--muted); }
+.harm { margin-top: 12px; padding: 12px 0; border-radius: 18px; background: var(--surf2); display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+#dial { position: relative; height: 44px; display: flex; flex-direction: column; justify-content: flex-end; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+#dial .needle { position: absolute; left: 50%; top: 0; margin-left: -7px; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 9px solid var(--accent); }
+#dial .names { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); align-items: end; font-family: var(--mono); text-align: center; white-space: nowrap; transition: transform .12s ease-out; }
+#dial .d0 { font-size: 22px; font-weight: 700; color: var(--accent); }
+#dial .d1 { font-size: 15px; color: #C7C7CC; }
+#dial .d2 { font-size: 13px; color: #8E8E93; }
+#dial .d3 { font-size: 12px; color: #636366; }
+#dial .d4 { font-size: 11px; color: #48484A; }
+#dial .ticks { margin-top: 6px; height: 8px; background-image: repeating-linear-gradient(to right, #3A3A3C 0 1px, transparent 1px 10px); background-position: 4px 0; }
+.win { position: relative; display: grid; grid-template-columns: .55fr 1fr 1fr 1fr .55fr; gap: 6px; transition: opacity .2s; }
+.win.off { opacity: .35; }
+.win .frame { position: absolute; left: calc(15.4% - 3px); right: calc(15.4% - 3px); top: -6px; bottom: -6px; border-radius: 16px; border: 1.5px solid rgba(255, 255, 255, .22); pointer-events: none; }
+.win .col { display: flex; flex-direction: column; gap: 6px; }
+.win .nb { opacity: .45; }
+.win .nb span { background: #1E1E21; display: flex; align-items: center; font-weight: 600; color: var(--dim); white-space: nowrap; overflow: hidden; }
+.win .nb.l span { border-radius: 0 12px 12px 0; justify-content: flex-end; padding-right: 8px; }
+.win .nb.r span { border-radius: 12px 0 0 12px; padding-left: 8px; }
+.win .big { height: 68px; font-size: 15px; }
+.win .small { height: 54px; font-size: 13px; }
+.win button { border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background .12s, box-shadow .12s; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.win button.big b { font-size: 24px; }
+.win button.small b { font-size: 18px; }
+.win button span { font-size: 12px; font-weight: 600; }
+.win .rest { background: rgba(255, 159, 10, .16); } .win .rest span { color: #FFB340; }
+.win .rest.big { background: rgba(255, 159, 10, .28); }
+.win .away { background: rgba(100, 210, 255, .16); } .win .away span { color: var(--away); }
+.win .tense { background: rgba(191, 90, 242, .2); } .win .tense span { color: #DA8FFF; }
+.win button.on { color: #000000; } .win button.on span { color: #000000; font-weight: 700; }
+.win .rest.on { background: var(--rest); box-shadow: 0 0 22px rgba(255, 159, 10, .35); }
+.win .away.on { background: var(--away); box-shadow: 0 0 22px rgba(100, 210, 255, .35); }
+.win .tense.on { background: var(--tense); box-shadow: 0 0 22px rgba(191, 90, 242, .35); }
+.harmfoot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; }
+#mode { width: 150px; flex: none; }
+#mode button { height: 30px; }
+#padmode { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+#padmode > span:first-child { font-size: 13px; font-weight: 600; color: #C7C7CC; }
+.legend { display: flex; gap: 10px; font-size: 11px; color: var(--dim); padding: 0 12px; margin-top: -4px; white-space: nowrap; }
+.legend > span { display: flex; align-items: center; gap: 4px; }
+.legend i { width: 8px; height: 8px; border-radius: 2px; }
+#hint { font-size: 11px; line-height: 13px; color: var(--dim); padding: 0 12px; margin-top: -4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live { margin-top: auto; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tile { position: relative; height: 56px; border-radius: 14px; border: 1px solid var(--edge); font-size: 15px; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; }
+.tile.on { background: #3A3A3C; border-color: #3A3A3C; color: #FFFFFF; }
+.tile .led { width: 8px; height: 8px; border-radius: 4px; background: var(--go); display: none; flex: none; }
+.tile.on .led { display: block; }
+.tile .side { position: absolute; top: 4px; right: 8px; font-size: 9px; font-weight: 700; letter-spacing: .3px; color: var(--muted); }
 .transport { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
-.tbtn { height: 64px; border-radius: 16px; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 13px; font-weight: 600; }
-#fill { background: var(--accent-soft); color: var(--accent); }
+.tbtn { height: 64px; min-width: 0; border-radius: 16px; background: var(--surf); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; font-weight: 600; }
+#fill { color: var(--accent); background: rgba(255, 159, 10, .14); }
 #fill.armed { background: var(--accent); color: #000000; }
-#play { width: 84px; height: 84px; border-radius: 42px; background: var(--go); color: #000000; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+#fill:disabled { background: var(--surf); color: #55555A; }
+#fill:disabled svg { stroke: #48484A; }
+#fill small { font-size: 11px; font-weight: 500; color: var(--dim); }
+#next small { font-size: 12px; color: var(--muted); font-weight: 400; }
+#next b { font-size: 15px; font-weight: 700; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
+#next:disabled b { color: var(--dim); }
+#play { width: 76px; height: 76px; border-radius: 38px; background: var(--go); color: #000000; display: flex; align-items: center; justify-content: center; }
 #play .i-stop { display: none; }
 #play.stop { background: var(--stop); }
 #play.stop .i-stop { display: block; }
@@ -140,14 +205,50 @@ select.native { display: none; }
 
 /* Sonido */
 .mix .row { gap: 12px; }
-.mix .row > button { flex: none; width: 96px; min-height: 32px; border-radius: 8px; text-align: left; padding-left: 0; color: var(--muted); }
-.mix .row > button.on { color: var(--fg); }
+.mix .row > button.ch { flex: none; width: 96px; min-height: 32px; text-align: left; color: var(--muted); }
+.mix .row > button.ch.on { color: var(--fg); }
+.mix .row .tag { flex: none; width: 40px; text-align: right; font-size: 12px; font-weight: 600; color: var(--muted); }
+.fold[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.panrows { background: #151517; }
+.panrows .seg { width: 190px; flex: none; }
+.panfoot { margin: 0; padding: 6px 16px 12px; font-size: 13px; line-height: 18px; color: var(--muted); }
+.tabsrow { padding: 10px 16px 0; }
+.seqbox { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; }
+.chip { height: 36px; padding: 0 10px 0 12px; border-radius: 18px; background: var(--fill); font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.chip .n { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip .x { color: var(--muted); font-size: 18px; line-height: 1; margin-left: 2px; }
+.chip:disabled .x { visibility: hidden; }
+.chip.add { background: var(--accent-soft); color: var(--accent); font-weight: 600; padding: 0 14px; }
+#partlist { padding-top: 6px; }
+.addrow { color: var(--accent); }
+#partlist:not(:empty) + .addrow::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--line); }
+.degs { padding: 14px 16px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.degs button { height: 48px; border-radius: 10px; background: var(--fill); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.degs b { font-size: 15px; font-weight: 600; }
+.degs span { font-size: 10px; opacity: .7; }
+.degs .rest span { color: #FFB340; } .degs .away span { color: var(--away); } .degs .tense span { color: #DA8FFF; }
+.degs button.on { box-shadow: inset 0 0 0 2px var(--accent); }
+.ask { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+.askh { display: flex; align-items: center; justify-content: space-between; font-size: 15px; color: var(--muted); }
+.askh b { color: var(--fg); }
+.askh .cancel { color: var(--accent); min-height: 44px; font-size: 15px; }
+.durs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.durs button { height: 56px; border-radius: 12px; background: var(--fill); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.durs b { font-size: 20px; font-weight: 700; } .durs span { font-size: 11px; color: var(--muted); }
+.durs button.on { background: var(--accent); color: #000000; } .durs button.on span { color: #3A2500; }
+.prow { gap: 12px; } .prow .n { width: 18px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.prow .cn { font-weight: 600; } .prow .cn.rest { color: #FFB340; } .prow .cn.away { color: var(--away); } .prow .cn.tense { color: #DA8FFF; }
+.prow.sel { background: rgba(255,255,255,.05); } .prow.sel .chev { transform: rotate(90deg); }
+.edit { padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 8px; background: rgba(255,255,255,.05); }
+.edit .rm { color: var(--stop); font-size: 15px; min-height: 44px; }
+.lbl.empty { color: var(--muted); font-size: 15px; padding: 6px 0; }
+.danger { color: var(--stop); justify-content: center; }
 #micread { font-size: 17px; font-variant-numeric: tabular-nums; }
 .alert { color: var(--stop); font-weight: 600; }
 .ok { color: var(--go); font-weight: 600; }
 .credits { font-size: 12px; }
 .row.link { width: 100%; text-align: left; }
-.row .val { color: var(--muted); font-variant-numeric: tabular-nums; }
+.row .val { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row .val.new { color: var(--accent); }
 .back { align-self: flex-start; display: flex; align-items: center; gap: 6px; min-height: 44px; margin-left: -4px; color: var(--accent); }
 .back svg { width: 12px; height: 20px; }
@@ -156,60 +257,78 @@ select.native { display: none; }
 .notes li::before { content: ""; position: absolute; left: 16px; top: 16px; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
 
 /* Tab bar */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(22, 22, 24, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
-.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #8E8E93; font-size: 10px; font-weight: 600; min-height: 44px; }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(18, 18, 20, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--edge); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--dim); font-size: 10px; font-weight: 600; min-height: 44px; }
 .tab[aria-selected="true"] { color: var(--accent); }
-@media (max-height: 700px) { .tempo { margin-top: 12px; gap: 8px; } #bpm { font-size: 72px; line-height: 76px; } .padcard { margin-top: 12px; } .live { gap: 12px; padding-top: 12px; } }
+/* Shorter phones (mini, 16e) and the SE: the same layout, tighter, so Play never hides under the tab bar. */
+@media (max-height: 880px) {
+  #partname { font-size: 24px; line-height: 28px; } .partline { margin-top: 8px; }
+  .harm { margin-top: 8px; padding: 10px 0; gap: 10px; } #dial { height: 38px; }
+  .win .big { height: 56px; } .win .small { height: 46px; } .win button.big b { font-size: 21px; } .win button.small b { font-size: 16px; }
+  .tile { height: 48px; } .tbtn { height: 58px; } #play { width: 68px; height: 68px; }
+  .bpmrow button { height: 40px; } .padsel { height: 44px; } .live { padding-top: 8px; gap: 8px; } #map { margin-top: 6px; }
+}
+@media (max-height: 700px) {
+  #bpm { font-size: 32px; line-height: 32px; } .bpmrow { margin-top: 6px; }
+  #partname { font-size: 22px; line-height: 26px; } #map .seg-bar { height: 16px; } #map .lb { font-size: 10px; }
+  .harm { gap: 8px; padding: 8px 0; } #dial { height: 34px; }
+  .win .big { height: 48px; } .win .small { height: 40px; } .win button.big b { font-size: 19px; } .win button.small b { font-size: 15px; }
+  .win button span { font-size: 11px; } #padmode { min-height: 36px; }
+  .tile { height: 44px; } .tbtn { height: 54px; } #play { width: 64px; height: 64px; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .pd-menu, .pd-menu.closing { animation-duration: .01s; } }
 </style>
 
 <main>
   <section class="screen" id="tab-tocar" aria-label="Tocar" data-i18n-aria="tab.tocar">
     <div class="wrap">
-      <div class="now">
-        <button class="song" data-go="canciones" aria-label="Elegir canción" data-i18n-aria="song.choose">
-          <small><span data-i18n="song.label">Canción</span> · <span id="status">Detenido</span></small>
-          <span id="songtitle">Sin canción guardada</span>
-        </button>
-        <button type="button" class="pill pd" data-for="meter" aria-haspopup="listbox" aria-expanded="false" aria-label="Compás" data-i18n-aria="meter"><span id="meterlbl">4/4</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="meter" class="native" tabindex="-1" aria-hidden="true">
-          <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
-        </select>
-      </div>
-      <div class="tempo" aria-label="Tempo" data-i18n-aria="tempo">
-        <div class="line">
-          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
-            <button class="round" id="m1" aria-label="Bajar 1 BPM" data-i18n-aria="bpm.m1"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12"/></svg></button>
-            <button class="round sm" id="m5" aria-label="Bajar 5 BPM" data-i18n-aria="bpm.m5">−5</button>
-          </div>
-          <div class="bpmbox"><output id="bpm">72</output><span id="bpmunit">BPM (negra)</span></div>
-          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
-            <button class="round" id="p1" aria-label="Subir 1 BPM" data-i18n-aria="bpm.p1"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12M9 3v12"/></svg></button>
-            <button class="round sm" id="p5" aria-label="Subir 5 BPM" data-i18n-aria="bpm.p5">+5</button>
-          </div>
+      <div class="top1">
+        <div class="song">
+          <button type="button" class="songbtn" data-go="canciones" aria-label="Elegir canción" data-i18n-aria="song.choose"><b id="songtitle">Sin canción guardada</b></button>
+          <div class="sub"><button type="button" class="pd meterpd" data-for="meter" aria-haspopup="listbox" aria-expanded="false" aria-label="Compás" data-i18n-aria="meter"><span id="meterlbl">4/4</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><span aria-hidden="true">·</span><span id="status">Detenido</span></div>
         </div>
-        <div class="dots" id="dots"></div>
-        <div id="barinfo">Listo para empezar</div>
-        <button id="tap" data-i18n="tap">Marcar tempo</button>
+        <div class="bpmread"><output id="bpm" aria-label="Tempo" data-i18n-aria="tempo">72</output><span id="bpmunit">BPM</span></div>
       </div>
-      <div class="padcard" aria-label="Pad">
-        <div class="head"><b>Pad</b><button data-go="sonido"><span id="padinfo">Sol · Supersaw</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button></div>
-        <div class="chords" id="chords"></div>
+      <select id="meter" class="native" tabindex="-1" aria-hidden="true">
+        <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
+      </select>
+      <div class="bpmrow" aria-label="Tempo" data-i18n-aria="tempo" role="group">
+        <button type="button" class="sm" id="m5" aria-label="Bajar 5 BPM" data-i18n-aria="bpm.m5">−5</button>
+        <button type="button" id="m1" aria-label="Bajar 1 BPM" data-i18n-aria="bpm.m1"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12"/></svg></button>
+        <button type="button" id="tap" data-i18n="tap">Marcar tempo</button>
+        <button type="button" id="p1" aria-label="Subir 1 BPM" data-i18n-aria="bpm.p1"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12M9 3v12"/></svg></button>
+        <button type="button" class="sm" id="p5" aria-label="Subir 5 BPM" data-i18n-aria="bpm.p5">+5</button>
       </div>
-      <div class="live" aria-label="Control en vivo" data-i18n-aria="live">
-        <div id="sections" role="group" aria-label="Parte de la canción" data-i18n-aria="sections">
-          <button data-s="intro" data-i18n="sec.intro">Intro</button>
-          <button data-s="estrofa" data-i18n="sec.estrofa">Estrofa</button>
-          <button data-s="coro" data-i18n="sec.coro">Coro</button>
-          <button data-s="puente" data-i18n="sec.puente">Puente</button>
-          <button data-s="final" data-i18n="sec.final">Final</button>
+
+      <div class="partline"><span id="partname">Intro</span><span id="partpos"></span></div>
+      <div id="map" role="group" aria-label="Mapa de la canción" data-i18n-aria="map"></div>
+
+      <div class="padsel">
+        <button type="button" id="padprev" aria-label="Sonido de pad anterior" data-i18n-aria="pad.prev"><svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 2 8l6 6"/></svg></button>
+        <button type="button" id="padmid" data-for="padtype" aria-haspopup="listbox" aria-expanded="false" aria-label="Elegir sonido de pad" data-i18n-aria="pad.choose"><span id="padname">Supersaw</span><span id="padsub"></span></button>
+        <button type="button" id="padnext" aria-label="Sonido de pad siguiente" data-i18n-aria="pad.next"><svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 2 6 6-6 6"/></svg></button>
+      </div>
+
+      <div class="harm">
+        <button type="button" id="dial" aria-haspopup="listbox"><span class="needle" aria-hidden="true"></span><span class="names" id="dialnames" aria-hidden="true"></span><span class="ticks" aria-hidden="true"></span></button>
+        <div class="win" id="win"></div>
+        <div class="harmfoot">
+          <div class="seg" id="mode" role="radiogroup" aria-label="Cómo cambia el pad" data-i18n-aria="mode.aria"><button type="button" role="radio" data-m="auto" class="on" aria-checked="true" data-i18n="mode.auto">Auto</button><button type="button" role="radio" data-m="manual" aria-checked="false" data-i18n="mode.manual">Manual</button></div>
+          <button type="button" id="padmode" role="switch" aria-checked="false" aria-label="Solo tónica y quinta" data-i18n-aria="pad.fifths"><span data-i18n="fifths.short">Tónica + 5ª</span><span class="switch" aria-hidden="true"></span></button>
         </div>
+        <div class="legend" id="legend"><span><i style="background:var(--rest)"></i><span data-i18n="fn.rest">Reposo</span></span><span><i style="background:var(--away)"></i><span data-i18n="fn.away">Se aleja</span></span><span><i style="background:var(--tense)"></i><span data-i18n="fn.tense">Tensión</span></span></div>
+        <div id="hint" hidden></div>
+      </div>
+
+      <div class="live" role="group" aria-label="Control en vivo" data-i18n-aria="live">
+        <div class="tiles" id="tiles"></div>
         <div class="transport">
-          <button class="tbtn" id="fill"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16 9 6l4 8 2-4h3"/></svg><span id="filllbl">Remate</span></button>
-          <button id="play" aria-label="Tocar">
-            <svg class="i-play" width="30" height="30" viewBox="0 0 18 18" aria-hidden="true"><path d="M6 3.4v11.2c0 .6.7 1 1.2.6l8.4-5.6c.5-.3.5-1 0-1.3L7.2 2.8C6.7 2.4 6 2.8 6 3.4Z" fill="currentColor"/></svg>
-            <svg class="i-stop" width="28" height="28" viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="2" fill="currentColor"/></svg>
+          <button type="button" class="tbtn" id="fill"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16 9 6l4 8 2-4h3"/></svg><span id="filllbl">Remate</span><small id="fillnote" data-i18n="fill.nodrums" hidden>sin batería</small></button>
+          <button type="button" id="play" aria-label="Tocar">
+            <svg class="i-play" width="28" height="28" viewBox="0 0 18 18" aria-hidden="true"><path d="M6 3.4v11.2c0 .6.7 1 1.2.6l8.4-5.6c.5-.3.5-1 0-1.3L7.2 2.8C6.7 2.4 6 2.8 6 3.4Z" fill="currentColor"/></svg>
+            <svg class="i-stop" width="26" height="26" viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="2" fill="currentColor"/></svg>
           </button>
-          <button class="tbtn" id="next"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 5 8 6-8 6V5ZM17 5v12"/></svg><span data-i18n="next">Siguiente parte</span></button>
+          <button type="button" class="tbtn" id="next"><small data-i18n="next.small">Siguiente</small><b id="nextname">—</b></button>
         </div>
       </div>
     </div>
@@ -249,25 +368,43 @@ select.native { display: none; }
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-key" data-i18n="key">Tonalidad</span><select id="key" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="key" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-key val-key"><span class="pd-val" id="val-key"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <div class="row pick"><span class="lbl" id="lbl-padtype" data-i18n="pad.sound">Sonido del pad</span><select id="padtype" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="padtype" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-padtype val-padtype"><span class="pd-val" id="val-padtype"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
-        <div class="row"><span class="lbl" id="lbl-fifths" data-i18n="pad.fifths">Solo tónica y quinta</span><button class="switch" id="padmode" role="switch" aria-checked="false" aria-labelledby="lbl-fifths"></button></div>
         <div class="row col"><label class="top" for="padmove"><span data-i18n="pad.move">Movimiento</span><span id="padmoveval" style="color:var(--muted)">50 %</span></label><input type="range" id="padmove" min="0" max="100" value="50"></div>
         <div class="row col"><label class="top" for="padrich"><span data-i18n="pad.rich">Riqueza</span><span id="padrichval" style="color:var(--muted)">50 %</span></label><input type="range" id="padrich" min="0" max="100" value="50"></div>
         <div class="row pick"><span class="lbl" id="lbl-names" data-i18n="names">Nombres de notas</span><select id="names" class="native" tabindex="-1" aria-hidden="true"><option value="latin">Do Re Mi</option><option value="abc">C D E</option></select><button type="button" class="pd" data-for="names" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-names val-names"><span class="pd-val" id="val-names"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
-      <p class="foot" data-i18n="pad.fifths.foot">Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde. Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene.</p>
+      <p class="foot" data-i18n="pad.foot">Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Tocar.</p>
       <div class="cap" data-i18n="mix">Mezcla</div>
-      <div class="group mix">
-        <div class="row"><button id="on-shaker" class="on" aria-label="Activar o silenciar percusión" data-i18n-aria="mute.shaker" data-i18n="ch.shaker">Percusión</button><input type="range" id="v-shaker" min="0" max="100" value="60" aria-label="Volumen percusión" data-i18n-aria="vol.shaker"></div>
-        <div class="row"><button id="on-drums" class="on" aria-label="Activar o silenciar batería" data-i18n-aria="mute.drums" data-i18n="ch.drums">Batería</button><input type="range" id="v-drums" min="0" max="100" value="75" aria-label="Volumen batería" data-i18n-aria="vol.drums"></div>
-        <div class="row"><button id="on-pad" class="on" aria-label="Activar o silenciar pad" data-i18n-aria="mute.pad">Pad</button><input type="range" id="v-pad" min="0" max="100" value="50" aria-label="Volumen pad" data-i18n-aria="vol.pad"></div>
+      <div class="group mix" id="mix"></div>
+      <p class="foot" data-i18n="mix.foot">Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar.</p>
+      <div class="cap" data-i18n="struct">Estructura de la canción</div>
+      <div class="group" id="struct">
+        <div class="tabsrow"><div class="seg" role="tablist" aria-label="Estructura de la canción" data-i18n-aria="struct"><button type="button" role="tab" id="t-orden" class="on" aria-selected="true" data-i18n="struct.order">Orden</button><button type="button" role="tab" id="t-partes" aria-selected="false" data-i18n="struct.parts">Partes</button></div></div>
+        <div id="p-orden"><div class="seqbox" id="seq"><button type="button" class="chip add" id="addchip" data-for="addpart" aria-haspopup="listbox" aria-expanded="false" aria-label="Añadir una parte al orden" data-i18n-aria="struct.add.aria"><span data-i18n="struct.add">+ Añadir</span></button></div><select id="addpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
+        <div id="p-partes" hidden><div id="partlist"></div><button type="button" class="row link addrow" id="newrow" data-for="newpart" aria-haspopup="listbox" aria-expanded="false"><span class="lbl" data-i18n="struct.new">+ Nueva parte</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="newpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
       </div>
-      <p class="foot" data-i18n="mix.foot">Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.</p>
+      <p class="foot" id="structfoot"></p>
       <div class="cap" data-i18n="app">App</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-lang" data-i18n="lang">Idioma</span><select id="lang" class="native" tabindex="-1" aria-hidden="true"><option value="es">Español</option><option value="en">English</option></select><button type="button" class="pd" data-for="lang" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-lang val-lang"><span class="pd-val" id="val-lang"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <button type="button" class="row link" id="version" data-go="version"><span class="lbl" data-i18n="version">Versión</span><span class="val" id="versionval"></span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
       </div>
       <p class="foot credits" data-i18n="credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-parte" data-parent="sonido" aria-labelledby="ptitle" hidden>
+    <div class="wrap">
+      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <h1 id="ptitle"></h1>
+      <div class="cap" data-i18n="part.tap">Toca un acorde para añadirlo</div>
+      <div class="group">
+        <div class="degs" id="degs"></div>
+        <div class="ask" id="ask" hidden></div>
+      </div>
+      <div class="cap" id="progcap"></div>
+      <div class="group" id="prog"></div>
+      <p class="foot" data-i18n="part.foot">La parte dura lo que suman sus acordes, redondeado al compás.</p>
+      <div class="group" style="margin-top:16px"><button type="button" class="row link danger" id="pdel" data-i18n="part.delete">Borrar esta parte</button></div>
     </div>
   </section>
 
@@ -305,7 +442,7 @@ select.native { display: none; }
 
 <script>
 (() => {
-  // A screen with data-parent (Versión) opens inside its tab: the tab bar keeps that tab selected.
+  // A screen with data-parent (Versión, a part of the song) opens inside its tab: the tab bar keeps that tab selected.
   const show = (name) => {
     let tab = name;
     document.querySelectorAll('.screen').forEach(s => {
@@ -332,7 +469,7 @@ select.native { display: none; }
     const o = sel.options[sel.selectedIndex];
     const txt = o ? o.textContent : '';
     if (sel.id === 'meter') document.getElementById('meterlbl').textContent = txt;
-    else btn.querySelector('.pd-val').textContent = txt;
+    else { const v = btn.querySelector('.pd-val'); if (v) v.textContent = txt; }
   }
   function close(focusBack) {
     if (!open) return;
@@ -356,6 +493,7 @@ select.native { display: none; }
       const it = document.createElement('div'); it.className = 'pd-item'; it.setAttribute('role', 'option'); it.tabIndex = -1;
       const on = o.value === sel.value; it.setAttribute('aria-selected', String(on));
       it.innerHTML = (on ? CHECK : '') + '<span></span>'; it.lastChild.textContent = o.textContent;
+      if (o.dataset.sub) { const sub = document.createElement('span'); sub.className = 'sub'; sub.textContent = o.dataset.sub; it.appendChild(sub); }
       it.addEventListener('click', () => pick(sel, o.value));
       if (on) current = it;
       box.appendChild(it);
@@ -396,7 +534,8 @@ select.native { display: none; }
       else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); close(true); }
     });
   }
-  document.querySelectorAll('.pd[data-for]').forEach(btn => {
+  // Any button with data-for opens the menu of that select; it shows the choice if it has a .pd-val.
+  document.querySelectorAll('[data-for]').forEach(btn => {
     const sel = document.getElementById(btn.dataset.for);
     const update = () => sync(sel, btn);
     sel.addEventListener('change', update); sel.addEventListener('pd-sync', update);
@@ -405,6 +544,9 @@ select.native { display: none; }
     (row || btn).addEventListener('click', () => openMenu(sel, btn));
     update();
   });
+  // The engine opens menus itself (the key dial) and moves between screens (the part editor).
+  window.acompMenu = (id, btn) => openMenu(document.getElementById(id), btn);
+  window.acompShow = show;
   addEventListener('resize', () => close(false));
   document.querySelectorAll('.screen').forEach(sc => sc.addEventListener('scroll', () => close(false), { passive: true }));
   let start = 'tocar';
@@ -432,6 +574,8 @@ select.native { display: none; }
     { d: 2, roman: 'iii', minor: true }, { d: 3, roman: 'IV', minor: false },
     { d: 4, roman: 'V', minor: false }, { d: 5, roman: 'vi', minor: true }
   ];
+  // Harmonic function of each degree, for the chord colours: rest (I, iii, vi), moves away (ii, IV), tension (V).
+  const FN = ['rest', 'away', 'rest', 'away', 'tense', 'rest'];
 
   // ---------- Rhythm styles ----------
   // One character per step: X strong, x normal, o soft, g ghost, . silence.
@@ -520,6 +664,40 @@ select.native { display: none; }
   const SEC_DYN = { intro: .75, estrofa: .85, coro: 1, puente: .9, final: 1 };
   const SEC_SHK = { intro: .7, estrofa: .85, coro: 1, puente: .8, final: 1 };
   const SEC_PAD = { intro: 650, estrofa: 1000, coro: 2300, puente: 800, final: 2300 };
+  // ---------- Song structure ----------
+  // A song is a list of parts played in order (S.song.seq); each kind of part is defined once (S.song.parts)
+  // with its chords as [degree index, length in bars], 0.5 being half a bar. A part lasts its chords rounded up
+  // to whole bars, so part changes always land on a bar line (the last chord holds the rest); a part without
+  // chords lasts `bars`. Every kind plays with the dynamics, patterns and fills of a base section.
+  // The keys are saved with the songs: never rename them.
+  const PART_SEC = { intro: 'intro', estrofa: 'estrofa', precoro: 'estrofa', coro: 'coro', puente: 'puente', interludio: 'intro', instrumental: 'coro', tag: 'coro', vamp: 'coro', outro: 'intro', final: 'final' };
+  const DEFAULT_SONG = () => ({
+    parts: {
+      intro: { ch: [[0, 2], [3, 2]] },
+      estrofa: { ch: [[0, 2], [4, 1], [5, 1], [3, 2], [0, 1], [4, 1]] },
+      coro: { ch: [[3, 1], [0, 1], [4, 1], [5, .5], [3, .5], [3, 1], [0, 1], [4, 2]] },
+      puente: { ch: [[5, .5], [3, .5], [0, 1], [5, .5], [3, .5], [4, 1]] },
+      final: { ch: [[0, 4]] }
+    },
+    seq: ['intro', 'estrofa', 'coro', 'estrofa', 'coro', 'puente', 'coro', 'final']
+  });
+  // Anything saved is checked here, so a broken or older song never breaks the app (songs before 1.6.0 have none).
+  function validSong(sg) {
+    const out = { parts: {}, seq: [] };
+    if (sg && sg.parts && typeof sg.parts === 'object') for (const [k, p] of Object.entries(sg.parts)) {
+      if (!PART_SEC[k] || !p || !Array.isArray(p.ch)) continue;
+      out.parts[k] = {
+        ch: p.ch.filter((c) => Array.isArray(c) && Number.isInteger(c[0]) && DEGREES[c[0]] && c[1] > 0 && c[1] <= 16 && Number.isInteger(c[1] * 2)).slice(0, 32).map((c) => [c[0], c[1]]),
+        bars: [1, 2, 4, 8, 16].includes(p.bars) ? p.bars : 4
+      };
+    }
+    if (sg && Array.isArray(sg.seq)) out.seq = sg.seq.filter((k) => out.parts[k]).slice(0, 40);
+    return out.seq.length ? out : DEFAULT_SONG();
+  }
+  const fmtBars = (b) => (b >= 1 ? String(Math.floor(b)) : '') + (b % 1 ? '½' : '');
+  // Mix channels; the click is the metronome. Sides: left, centre, right.
+  const CHANNELS = ['shaker', 'drums', 'pad', 'click'];
+  const PAN = { L: -1, C: 0, R: 1 };
   // Pad colours, grouped by the moment of the service they suit.
   // layers: [wave, detune list in cents, semitone offset, gain]. cutoff multiplies the per-part brightness.
   // Optional: air [gain, Hz] adds breathy filtered noise; formant [[Hz, Q, gain]…] shapes the layers like a choir "ah";
@@ -557,11 +735,18 @@ select.native { display: none; }
       'song.choose': 'Elegir canción', 'song.label': 'Canción', 'song.none': 'Sin canción guardada', meter: 'Compás', tempo: 'Tempo',
       'status.stopped': 'Detenido', 'status.playing': 'Tocando', 'status.loading': 'Cargando sonidos…',
       'bpm.m1': 'Bajar 1 BPM', 'bpm.m5': 'Bajar 5 BPM', 'bpm.p1': 'Subir 1 BPM', 'bpm.p5': 'Subir 5 BPM',
-      'unit.simple': 'BPM (negra)', 'unit.comp': 'BPM (negra con punto)', ready: 'Listo para empezar', tap: 'Marcar tempo',
-      live: 'Control en vivo', sections: 'Parte de la canción',
-      'sec.intro': 'Intro', 'sec.estrofa': 'Estrofa', 'sec.coro': 'Coro', 'sec.puente': 'Puente', 'sec.final': 'Final',
-      fill: 'Remate', 'fill.active': 'Rematando…', 'fill.queued': 'En espera', play: 'Tocar', stop: 'Parar', next: 'Siguiente parte',
-      counting: 'Conteo de entrada…', bar: (n, part, left) => `Compás ${n} · ${part}` + (left ? ` · remate en ${left}` : ''),
+      'unit.simple': 'BPM', 'unit.comp': 'BPM ♩.', tap: 'Marcar tempo', live: 'Control en vivo', map: 'Mapa de la canción',
+      'sec.intro': 'Intro', 'sec.estrofa': 'Estrofa', 'sec.precoro': 'Pre-coro', 'sec.coro': 'Coro', 'sec.puente': 'Puente', 'sec.interludio': 'Interludio',
+      'sec.instrumental': 'Instrumental', 'sec.tag': 'Tag', 'sec.vamp': 'Vamp', 'sec.outro': 'Outro', 'sec.final': 'Final',
+      'short.intro': 'I', 'short.estrofa': 'E', 'short.precoro': 'PC', 'short.coro': 'C', 'short.puente': 'P', 'short.interludio': 'In',
+      'short.instrumental': 'Ins', 'short.tag': 'T', 'short.vamp': 'V', 'short.outro': 'O', 'short.final': 'F',
+      fill: 'Remate', 'fill.active': 'Rematando…', 'fill.queued': 'En espera', 'fill.nodrums': 'sin batería', play: 'Tocar', stop: 'Parar',
+      'next.small': 'Siguiente', 'next.aria': (p) => 'Siguiente parte: ' + p, counting: 'Conteo…',
+      'pad.prev': 'Sonido de pad anterior', 'pad.next': 'Sonido de pad siguiente', 'pad.choose': 'Elegir sonido de pad', 'pad.of': (i, n) => `${i} de ${n}`,
+      'dial.aria': (k) => `Tono ${k} mayor. Desliza para cambiar de tono o toca para ver la lista`,
+      'fn.rest': 'Reposo', 'fn.away': 'Se aleja', 'fn.tense': 'Tensión', sounding: 'suena',
+      'mode.aria': 'Cómo cambia el pad', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Tónica + 5ª',
+      'hint.fifths': 'Tónica + 5ª: el pad no cambia de acorde', 'hint.held': 'Toca para cambiar · mantén uno y toca otro para sumar', 'hint.silent': 'Pad en silencio · toca un acorde',
       style: 'Estilo', 'shaker.pattern': 'Patrón de shaker', 'shaker.sound': 'Sonido del shaker', feel: 'Interpretación', human: 'Toque humano',
       countin: 'Conteo de entrada', autofill: 'Remate automático', 'autofill.0': 'Apagado', 'autofill.4': 'Cada 4 compases', 'autofill.8': 'Cada 8 compases',
       'mic.cap': 'Micrófono · beta', 'mic.listen': 'Escuchar mi tempo', 'mic.follow': 'La base me sigue',
@@ -571,15 +756,26 @@ select.native { display: none; }
       'mic.read': (det, set) => `Detecto <b>${det}</b> BPM · marcado ${set}`, 'mic.fast': 'Te estás acelerando', 'mic.slow': 'Te estás frenando',
       'mic.adjusted': ' · ajusté el tempo', 'mic.suggest': ' · activa "La base me sigue" para que la base te siga', 'mic.ok': 'Vas a tempo.',
       key: 'Tonalidad', 'key.opt': 'Tono', 'pad.sound': 'Sonido del pad', 'pad.fifths': 'Solo tónica y quinta', 'pad.move': 'Movimiento', 'pad.rich': 'Riqueza', names: 'Nombres de notas',
-      'pad.fifths.foot': 'Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde. Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene.',
-      mix: 'Mezcla', 'ch.shaker': 'Percusión', 'ch.drums': 'Batería', 'mute.shaker': 'Activar o silenciar percusión', 'mute.drums': 'Activar o silenciar batería', 'mute.pad': 'Activar o silenciar pad',
-      'vol.shaker': 'Volumen percusión', 'vol.drums': 'Volumen batería', 'vol.pad': 'Volumen pad',
-      'mix.foot': 'Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.', app: 'App', lang: 'Idioma',
+      'pad.foot': 'Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Tocar.',
+      mix: 'Mezcla', 'ch.shaker': 'Shaker', 'ch.drums': 'Batería', 'ch.pad': 'Pad', 'ch.click': 'Clic',
+      'ch.mute': (c) => `Encender o apagar ${c}`, 'ch.vol': (c) => `Volumen ${c}`,
+      pan: 'Paneo', 'pan.center': 'Todo al centro', 'pan.aria': (c) => `Lado de ${c}`, 'side.L': 'Izq', 'side.C': 'Centro', 'side.R': 'Der', 'tag.L': 'IZQ', 'tag.R': 'DER',
+      'pan.foot': 'Centro suena por los dos lados. Con el adaptador USB-C y un cable de 3.5 mm a dos plugs, cada lado entra a su propio canal de la mezcladora.',
+      'mix.foot': 'Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar. Clic es el metrónomo. En iPhone quita el modo silencio si no suena.',
+      struct: 'Estructura de la canción', 'struct.order': 'Orden', 'struct.parts': 'Partes', 'struct.add': '+ Añadir', 'struct.add.aria': 'Añadir una parte al orden', 'struct.new': '+ Nueva parte',
+      'struct.foot.order': 'El orden en que suenan las partes. Toca × para quitar una; Añadir pone una parte al final.',
+      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. Al tocar, la app pasa sola a la parte siguiente y el pad cambia de acorde cuando termina cada uno.',
+      'seq.remove': (p) => 'Quitar ' + p, 'bars.short': 'c.', 'bars.n': (n) => n === 1 ? '1 compás' : n === .5 ? 'medio compás' : `${fmtBars(n)} compases`,
+      'dur.half': 'medio', 'dur.one': 'compás', 'dur.many': 'compases',
+      'part.tap': 'Toca un acorde para añadirlo', 'part.ask': '¿cuántos compases?', cancel: 'Cancelar', 'part.sounds': 'Así suena', 'part.nochords': 'sin acordes',
+      'part.empty': 'Todavía no hay acordes. La parte dura 4 compases y el pad sigue con el que esté sonando.', 'part.remove': (c) => 'Quitar ' + c, 'part.delete': 'Borrar esta parte',
+      'part.foot': 'La parte dura lo que suman sus acordes, redondeado al compás. Al tocar, el pad cambia de acorde justo cuando termina cada uno.',
+      app: 'App', lang: 'Idioma',
       version: 'Versión', 'version.title': 'Novedades', 'version.installed': 'Versión instalada', 'version.build': 'Compilación', 'version.new': 'Nueva lista',
       'version.foot': 'La app se actualiza sola cuando hay internet. La versión nueva se usa la siguiente vez que la abres.',
       'version.ready': '<span class="ok">Ya se descargó una versión nueva.</span> Cierra la app por completo y vuelve a abrirla para usarla. Lo que suena ahora no se interrumpe.',
       credits: 'Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.',
-      'song.name': 'Nombre de la canción', save: 'Guardar', 'save.foot': 'Guarda el tempo, compás, estilo, tono, pad y shaker actuales.', mysongs: 'Mis canciones',
+      'song.name': 'Nombre de la canción', save: 'Guardar', 'save.foot': 'Guarda el tempo, compás, estilo, tono, pad, shaker y la estructura con sus acordes.', mysongs: 'Mis canciones',
       'songs.foot': 'Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.',
       'songs.empty': 'Todavía no hay canciones. Ajusta tempo, compás, estilo y tono, escribe el nombre y pulsa Guardar.',
       del: 'Borrar', 'del.aria': (name) => 'Borrar ' + name,
@@ -590,11 +786,18 @@ select.native { display: none; }
       'song.choose': 'Choose song', 'song.label': 'Song', 'song.none': 'No saved song', meter: 'Time signature', tempo: 'Tempo',
       'status.stopped': 'Stopped', 'status.playing': 'Playing', 'status.loading': 'Loading sounds…',
       'bpm.m1': 'Down 1 BPM', 'bpm.m5': 'Down 5 BPM', 'bpm.p1': 'Up 1 BPM', 'bpm.p5': 'Up 5 BPM',
-      'unit.simple': 'BPM (quarter note)', 'unit.comp': 'BPM (dotted quarter)', ready: 'Ready to start', tap: 'Tap tempo',
-      live: 'Live control', sections: 'Song part',
-      'sec.intro': 'Intro', 'sec.estrofa': 'Verse', 'sec.coro': 'Chorus', 'sec.puente': 'Bridge', 'sec.final': 'Ending',
-      fill: 'Fill', 'fill.active': 'Filling…', 'fill.queued': 'Queued', play: 'Play', stop: 'Stop', next: 'Next part',
-      counting: 'Count-in…', bar: (n, part, left) => `Bar ${n} · ${part}` + (left ? ` · fill in ${left}` : ''),
+      'unit.simple': 'BPM', 'unit.comp': 'BPM ♩.', tap: 'Tap tempo', live: 'Live control', map: 'Song map',
+      'sec.intro': 'Intro', 'sec.estrofa': 'Verse', 'sec.precoro': 'Pre-chorus', 'sec.coro': 'Chorus', 'sec.puente': 'Bridge', 'sec.interludio': 'Interlude',
+      'sec.instrumental': 'Instrumental', 'sec.tag': 'Tag', 'sec.vamp': 'Vamp', 'sec.outro': 'Outro', 'sec.final': 'Ending',
+      'short.intro': 'I', 'short.estrofa': 'V', 'short.precoro': 'PC', 'short.coro': 'C', 'short.puente': 'B', 'short.interludio': 'In',
+      'short.instrumental': 'Ins', 'short.tag': 'T', 'short.vamp': 'Vp', 'short.outro': 'O', 'short.final': 'E',
+      fill: 'Fill', 'fill.active': 'Filling…', 'fill.queued': 'Queued', 'fill.nodrums': 'no drums', play: 'Play', stop: 'Stop',
+      'next.small': 'Next', 'next.aria': (p) => 'Next part: ' + p, counting: 'Count-in…',
+      'pad.prev': 'Previous pad sound', 'pad.next': 'Next pad sound', 'pad.choose': 'Choose pad sound', 'pad.of': (i, n) => `${i} of ${n}`,
+      'dial.aria': (k) => `Key of ${k} major. Swipe to change key or tap for the list`,
+      'fn.rest': 'Rest', 'fn.away': 'Moves away', 'fn.tense': 'Tension', sounding: 'on',
+      'mode.aria': 'How the pad changes', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Root + 5th',
+      'hint.fifths': 'Root + 5th: the pad does not change chords', 'hint.held': 'Tap to change · hold one and tap another to add', 'hint.silent': 'Pad silent · tap a chord',
       style: 'Style', 'shaker.pattern': 'Shaker pattern', 'shaker.sound': 'Shaker sound', feel: 'Feel', human: 'Human feel',
       countin: 'Count-in', autofill: 'Auto fill', 'autofill.0': 'Off', 'autofill.4': 'Every 4 bars', 'autofill.8': 'Every 8 bars',
       'mic.cap': 'Microphone · beta', 'mic.listen': 'Listen to my tempo', 'mic.follow': 'Backing follows me',
@@ -604,15 +807,26 @@ select.native { display: none; }
       'mic.read': (det, set) => `Hearing <b>${det}</b> BPM · set ${set}`, 'mic.fast': 'You are speeding up', 'mic.slow': 'You are slowing down',
       'mic.adjusted': ' · tempo adjusted', 'mic.suggest': ' · turn on "Backing follows me" so the backing follows you', 'mic.ok': 'You are on tempo.',
       key: 'Key', 'key.opt': 'Key', 'pad.sound': 'Pad sound', 'pad.fifths': 'Root and fifth only', 'pad.move': 'Movement', 'pad.rich': 'Richness', names: 'Note names',
-      'pad.fifths.foot': 'With root and fifth only, one pad works for the whole song without changing chords. Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed.',
-      mix: 'Mix', 'ch.shaker': 'Percussion', 'ch.drums': 'Drums', 'mute.shaker': 'Mute or unmute percussion', 'mute.drums': 'Mute or unmute drums', 'mute.pad': 'Mute or unmute pad',
-      'vol.shaker': 'Percussion volume', 'vol.drums': 'Drums volume', 'vol.pad': 'Pad volume',
-      'mix.foot': 'Tap a channel name to mute it. On iPhone, turn off silent mode if there is no sound.', app: 'App', lang: 'Language',
+      'pad.foot': 'Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed. Root + 5th and Manual mode are on Play.',
+      mix: 'Mix', 'ch.shaker': 'Shaker', 'ch.drums': 'Drums', 'ch.pad': 'Pad', 'ch.click': 'Click',
+      'ch.mute': (c) => `Turn ${c} on or off`, 'ch.vol': (c) => `${c} volume`,
+      pan: 'Pan', 'pan.center': 'All centred', 'pan.aria': (c) => `${c} side`, 'side.L': 'Left', 'side.C': 'Centre', 'side.R': 'Right', 'tag.L': 'L', 'tag.R': 'R',
+      'pan.foot': 'Centre plays on both sides. With the USB-C adapter and a 3.5 mm to two-plug cable, each side goes into its own mixer channel.',
+      'mix.foot': 'Tap a channel name to turn it on or off; you can also do it from Play. Click is the metronome. On iPhone, turn off silent mode if there is no sound.',
+      struct: 'Song structure', 'struct.order': 'Order', 'struct.parts': 'Parts', 'struct.add': '+ Add', 'struct.add.aria': 'Add a part to the order', 'struct.new': '+ New part',
+      'struct.foot.order': 'The order the parts play in. Tap × to remove one; Add puts a part at the end.',
+      'struct.foot.parts': 'Each part has its chords and how long each one lasts. While playing, the app moves on to the next part by itself and the pad changes chord as each one ends.',
+      'seq.remove': (p) => 'Remove ' + p, 'bars.short': 'bars', 'bars.n': (n) => n === 1 ? '1 bar' : n === .5 ? 'half a bar' : `${fmtBars(n)} bars`,
+      'dur.half': 'half', 'dur.one': 'bar', 'dur.many': 'bars',
+      'part.tap': 'Tap a chord to add it', 'part.ask': 'how many bars?', cancel: 'Cancel', 'part.sounds': 'How it goes', 'part.nochords': 'no chords',
+      'part.empty': 'No chords yet. The part lasts 4 bars and the pad keeps whatever chord is playing.', 'part.remove': (c) => 'Remove ' + c, 'part.delete': 'Delete this part',
+      'part.foot': 'The part lasts as long as its chords add up to, rounded to the bar. While playing, the pad changes chord right as each one ends.',
+      app: 'App', lang: 'Language',
       version: 'Version', 'version.title': 'What’s new', 'version.installed': 'Installed version', 'version.build': 'Build', 'version.new': 'New one ready',
       'version.foot': 'The app updates itself when there is internet. The new version is used the next time you open it.',
       'version.ready': '<span class="ok">A new version has downloaded.</span> Close the app completely and open it again to use it. What is playing now is not interrupted.',
       credits: 'Free-to-use recordings (CC0): acoustic drums from freesound.org; shakers, cabasa, tambourine, conga and claps from the Versilian Community Sample Library.',
-      'song.name': 'Song name', save: 'Save', 'save.foot': 'Saves the current tempo, time signature, style, key, pad and shaker.', mysongs: 'My songs',
+      'song.name': 'Song name', save: 'Save', 'save.foot': 'Saves the current tempo, time signature, style, key, pad, shaker and the structure with its chords.', mysongs: 'My songs',
       'songs.foot': 'Tap a song to load it. Tap ✕ twice to delete it.',
       'songs.empty': 'No songs yet. Set the tempo, time signature, style and key, type a name and tap Save.',
       del: 'Delete', 'del.aria': (name) => 'Delete ' + name,
@@ -631,16 +845,16 @@ select.native { display: none; }
     $('songtitle').textContent = songTitle || T('song.none');
     $('status').textContent = T(playing ? 'status.playing' : 'status.stopped');
     $('play').setAttribute('aria-label', T(playing ? 'stop' : 'play'));
-    if (!playing) $('barinfo').textContent = T('ready');
     if (!micOn) $('micmsg').textContent = T('mic.hint');
-    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); renderSongs(); renderVersion();
+    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); buildWin(); drawTiles(); buildMix();
+    renderSeq(); renderParts(); tabTo(structTab); drawPos(); drawPart(); renderSongs(); renderVersion();
   }
 
   // ---------- Version ----------
   // tools/build.py fills CHANGELOG from src/changelog.json (newest first) and BUILD with the content hash
   // that also names the service worker's cache, so what the screen shows is what is cached offline.
-  const CHANGELOG = [{"version": "1.5.2", "date": "2026-10-27", "es": ["Con Movimiento alto, los pads oscuros (Senoidal, Quintas, Pad cálido, Cuerdas) ya no se apagan por ratos: el barrido del filtro se mueve en proporción a cada pad.", "Coro \"Aah\" más natural: la vocal se forma en cada nota, voces de hombres y mujeres a la vez, sin el vibrato que lo hacía sonar a una sola voz robótica."], "en": ["With high Movement, dark pads (Sine, Power 5th, Warm Pad, Strings) no longer drop out: the filter sweep now moves in proportion to each pad.", "More natural Choir Aahs: the vowel is shaped on each note, men's and women's voices together, without the vibrato that made it sound like one robotic voice."]}, {"version": "1.5.1", "date": "2026-10-27", "es": ["Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."], "en": ["Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."]}, {"version": "1.5.0", "date": "2026-10-27", "es": ["Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.", "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.", "Reverb nueva para el pad y la batería, con más sala y menos siseo."], "en": ["New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.", "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.", "New reverb for the pad and the drums, with more room and less hiss."]}, {"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
-  const BUILD = 'b4083b13';
+  const CHANGELOG = [{"version": "1.6.0", "date": "2026-10-27", "es": ["Tocar nuevo: tempo arriba, la parte que suena con su mapa de la canción, el selector de pad, un dial de tonalidad que se desliza y la ventana de acordes con colores por función (reposo, se aleja, tensión).", "Estructura de la canción en Sonido: Orden (qué partes y en qué orden) y Partes (los acordes de cada una, de medio compás a 4 compases). La app pasa sola a la parte siguiente y el pad cambia de acorde a tiempo. Partes nuevas: Pre-coro, Interludio, Instrumental, Tag, Vamp y Outro.", "Modo Manual: el pad no sigue la canción y tú eliges el acorde. Mantén uno y toca otro para sumar hasta tres; tocar el único que suena lo silencia.", "Canal Clic (metrónomo) y paneo: cada canal puede ir a la izquierda, al centro o a la derecha (Sonido › Mezcla › Paneo), para mandar cada lado a un canal de la mezcladora.", "Al abrir esta versión solo queda encendido el Pad; Shaker, Batería y Clic se encienden desde Tocar. Remate se apaga cuando la batería está apagada.", "Las canciones guardan su estructura y sus acordes; las que ya tenías cargan con una estructura de ejemplo."], "en": ["New Play screen: tempo on top, the playing part with a song map, the pad picker, a key dial you can swipe and a chord window coloured by function (rest, moves away, tension).", "Song structure in Sound: Order (which parts, in what order) and Parts (each part's chords, from half a bar to 4 bars). The app moves on to the next part by itself and the pad changes chord in time. New parts: Pre-chorus, Interlude, Instrumental, Tag, Vamp and Outro.", "Manual mode: the pad does not follow the song and you pick the chord. Hold one and tap another to stack up to three; tapping the only one playing silences it.", "Click channel (metronome) and pan: each channel can go left, centre or right (Sound › Mix › Pan), to send each side to its own mixer channel.", "When you open this version only the Pad is on; Shaker, Drums and Click turn on from Play. Fill is off while the drums are off.", "Songs save their structure and chords; the ones you already had load with an example structure."]}, {"version": "1.5.2", "date": "2026-10-27", "es": ["Con Movimiento alto, los pads oscuros (Senoidal, Quintas, Pad cálido, Cuerdas) ya no se apagan por ratos: el barrido del filtro se mueve en proporción a cada pad.", "Coro \"Aah\" más natural: la vocal se forma en cada nota, voces de hombres y mujeres a la vez, sin el vibrato que lo hacía sonar a una sola voz robótica."], "en": ["With high Movement, dark pads (Sine, Power 5th, Warm Pad, Strings) no longer drop out: the filter sweep now moves in proportion to each pad.", "More natural Choir Aahs: the vowel is shaped on each note, men's and women's voices together, without the vibrato that made it sound like one robotic voice."]}, {"version": "1.5.1", "date": "2026-10-27", "es": ["Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."], "en": ["Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."]}, {"version": "1.5.0", "date": "2026-10-27", "es": ["Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.", "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.", "Reverb nueva para el pad y la batería, con más sala y menos siseo."], "en": ["New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.", "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.", "New reverb for the pad and the drums, with more room and less hiss."]}, {"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
+  const BUILD = '577f7c8a';
   const RELEASE = CHANGELOG.length ? CHANGELOG[0].version : '';
   let updateReady = false;
   function renderVersion() {
@@ -673,13 +887,16 @@ select.native { display: none; }
   const firstStyle = (m) => Object.keys(STYLES).find(k => STYLES[k].meter === m);
 
   const S = {
-    bpm: 72, meter: '4/4', section: 'estrofa', pending: null, autoFill: 8,
+    bpm: 72, meter: '4/4', at: 0, autoFill: 8,
     key: 7, names: 'latin', chord: 0, style: 'balada44', shaker: 'auto', human: 40, countIn: true,
-    pad: 'atmos', padMode: 'chord', padMove: 50, padRich: 50, shkSound: 'small',
-    layers: { shaker: { on: true, vol: 60 }, drums: { on: true, vol: 75 }, pad: { on: true, vol: 50 } },
-    follow: false, lang: 'es'
+    pad: 'atmos', padMode: 'chord', padHand: 'auto', held: [0], padMove: 50, padRich: 50, shkSound: 'small',
+    // Only the pad on by default; everything in the centre except the click, on the left (the musician's ear).
+    layers: { shaker: { on: false, vol: 60, side: 'C' }, drums: { on: false, vol: 75, side: 'C' }, pad: { on: true, vol: 50, side: 'C' }, click: { on: false, vol: 60, side: 'L' } },
+    song: DEFAULT_SONG(), follow: false, lang: 'es'
   };
-  try { Object.assign(S, JSON.parse(localStorage.getItem('acomp') || '{}'), { pending: null }); } catch (e) {}
+  const LAYERS0 = JSON.parse(JSON.stringify(S.layers));
+  try { Object.assign(S, JSON.parse(localStorage.getItem('acomp') || '{}')); } catch (e) {}
+  delete S.section; delete S.pending;
   if (!STYLES[S.style] || STYLES[S.style].meter !== S.meter) S.style = firstStyle(S.meter);
   if (!SHAKERS[S.shaker]) S.shaker = 'auto';
   if (!PADS[S.pad]) S.pad = 'atmos';
@@ -687,10 +904,41 @@ select.native { display: none; }
   S.padMove = pct(S.padMove); S.padRich = pct(S.padRich);
   if (!SHK_SETS[S.shkSound]) S.shkSound = 'small';
   if (!I18N[S.lang]) S.lang = 'es';
+  {
+    // 1.6.0 added the click channel and the sides. A state saved before it starts with the new defaults
+    // (only the pad on) and keeps its volumes.
+    const old = S.layers && typeof S.layers === 'object' ? S.layers : {}, fresh = !old.click;
+    S.layers = {};
+    for (const k of CHANNELS) {
+      const L = old[k] || {}, D = LAYERS0[k];
+      S.layers[k] = { on: fresh ? D.on : !!L.on, vol: Number.isFinite(+L.vol) ? pct(L.vol) : D.vol, side: PAN[L.side] !== undefined ? L.side : D.side };
+    }
+  }
+  S.song = validSong(S.song);
+  if (!Number.isInteger(S.at) || S.at < 0 || S.at >= S.song.seq.length) S.at = 0;
+  if (S.padHand !== 'manual') S.padHand = 'auto';
+  if (!DEGREES[S.chord]) S.chord = 0;
+  S.held = Array.isArray(S.held) ? S.held.filter((c) => Number.isInteger(c) && DEGREES[c]).slice(0, 3) : [S.chord];
   const save = () => { try { localStorage.setItem('acomp', JSON.stringify(S)); } catch (e) {} };
 
+  // Where a song position points: the part at seq index i ('end' is the ending asked from the last part).
+  const partLen = (p) => p && p.ch.length ? Math.max(1, Math.ceil(p.ch.reduce((a, c) => a + c[1], 0) - 1e-9)) : (p && p.bars) || 4;
+  const seqAt = (i) => S.song.seq[Math.max(0, Math.min(i, S.song.seq.length - 1))];
+  const partOf = (i) => S.song.parts[seqAt(i)];
+  const secOf = (i) => i === 'end' ? 'final' : PART_SEC[seqAt(i)];
+  // After the last part, the last part repeats until Siguiente (the ending) or Stop.
+  const nextOf = (i) => i < S.song.seq.length - 1 ? i + 1 : i;
+  const partKeys = () => Object.keys(PART_SEC).filter((k) => S.song.parts[k]);
+  // Repeated parts get a number ("Coro 2"); the map uses short labels ("C2").
+  function partLabel(i, short) {
+    const k = S.song.seq[i];
+    if (!k) return T('sec.final');
+    const n = S.song.seq.filter((x) => x === k).length, nth = S.song.seq.slice(0, i + 1).filter((x) => x === k).length;
+    return T((short ? 'short.' : 'sec.') + k) + (n > 1 ? (short ? '' : ' ') + nth : '');
+  }
+
   // ---------- Audio engine ----------
-  let ctx, master, buses = {}, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
+  let ctx, master, buses = {}, pans = {}, meters = {}, countBus, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
   let playing = false, timer = null, rhythmIn;
   const uiQueue = [];
 
@@ -705,18 +953,30 @@ select.native { display: none; }
     const room = ctx.createConvolver(); room.buffer = makeRoom(1.3, 0.008);
     const roomGain = ctx.createGain(); roomGain.gain.value = 0.35;
     room.connect(roomGain); roomGain.connect(master);
+    // Each channel: bus (on/off and volume) → panner → out. The reverbs are fed after the panner, so a channel
+    // sent to one side keeps its echo on that side and each side can go to its own mixer channel.
+    for (const k of CHANNELS) {
+      buses[k] = ctx.createGain();
+      pans[k] = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
+      meters[k] = ctx.createAnalyser(); meters[k].fftSize = 512;
+      buses[k].connect(pans[k]); buses[k].connect(meters[k]);
+    }
     const sends = { shaker: 0.35, drums: 0.25, pad: 0.12 };
     for (const k of ['shaker', 'drums', 'pad']) {
-      buses[k] = ctx.createGain(); buses[k].connect(master);
-      const sg = ctx.createGain(); sg.gain.value = sends[k]; buses[k].connect(sg); sg.connect(room);
+      pans[k].connect(master);
+      const sg = ctx.createGain(); sg.gain.value = sends[k]; pans[k].connect(sg); sg.connect(room);
     }
-    padFilter = ctx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = (SEC_PAD[S.section] || 1000) * PADS[S.pad].cutoff; padFilter.Q.value = PADS[S.pad].q;
+    // The click skips the compressor, which would duck the other channels on every beat.
+    const clickOut = ctx.createGain(); clickOut.gain.value = 0.9; pans.click.connect(clickOut); clickOut.connect(ctx.destination);
+    // The count-in always sounds, even with the click channel off, on the click's side.
+    countBus = ctx.createGain(); countBus.connect(pans.click);
+    padFilter = ctx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = (SEC_PAD[secOf(S.at)] || 1000) * PADS[S.pad].cutoff; padFilter.Q.value = PADS[S.pad].q;
     padFilter.connect(buses.pad);
-    rhythmIn = ctx.createChannelSplitter(3);
-    rhythmIn.connect(buses.shaker, 0); rhythmIn.connect(buses.drums, 1); rhythmIn.connect(master, 2);
+    rhythmIn = ctx.createChannelSplitter(4);
+    rhythmIn.connect(buses.shaker, 0); rhythmIn.connect(buses.drums, 1); rhythmIn.connect(buses.click, 2); rhythmIn.connect(countBus, 3);
     hall = ctx.createConvolver(); hall.buffer = makeRoom(5, 0.025);
     hallSend = ctx.createGain(); hallSend.gain.value = PADS[S.pad].hall * 0.6;
-    buses.pad.connect(hallSend); hallSend.connect(hall); hall.connect(master);
+    pans.pad.connect(hallSend); hallSend.connect(hall); hall.connect(master);
     const lfo = ctx.createOscillator(); padLfo = ctx.createGain();
     // The slow sweep moves the filter in cents, so it scales with each pad's cutoff and never closes a dark pad.
     lfo.frequency.value = 0.08; padLfo.gain.value = sweepCents(); lfo.connect(padLfo); padLfo.connect(padFilter.detune); lfo.start();
@@ -727,9 +987,11 @@ select.native { display: none; }
   }
   function applyMix() {
     if (!ctx) return;
-    for (const k of ['shaker', 'drums', 'pad']) {
+    const t = ctx.currentTime;
+    for (const k of CHANNELS) {
       const L = S.layers[k];
-      buses[k].gain.setTargetAtTime(L.on ? (L.vol / 100) ** 1.5 : 0, ctx.currentTime, 0.05);
+      buses[k].gain.setTargetAtTime(L.on ? (L.vol / 100) ** 1.5 : 0, t, 0.05);
+      if (pans[k].pan) pans[k].pan.setTargetAtTime(PAN[L.side], t, 0.02);
     }
   }
   function env(g, t, peak, attack, decay) {
@@ -766,7 +1028,8 @@ select.native { display: none; }
     shaker: (t, v) => noiseHit(t, buses.shaker, 'bandpass', 6200, 1.2, 0.5 * v, 0.07),
     tamb: (t, v) => { noiseHit(t, buses.shaker, 'bandpass', 9500, 3, 0.5 * v, 0.16); noiseHit(t, buses.shaker, 'highpass', 6000, 0.7, 0.12 * v, 0.06); },
     conga: (t, v) => { toneHit(t, buses.shaker, 'sine', 360, 310, 0.6 * v, 0.2); noiseHit(t, buses.shaker, 'bandpass', 2500, 1, 0.1 * v, 0.02); },
-    click: (t, v) => toneHit(t, master, 'sine', v > .8 ? 2000 : 1500, v > .8 ? 1990 : 1490, 0.5 * v, 0.06)
+    click: (t, v) => toneHit(t, master, 'sine', v > .8 ? 2000 : 1500, v > .8 ? 1990 : 1490, 0.5 * v, 0.06),
+    metro: (t, v) => toneHit(t, buses.click, 'sine', v > .8 ? 2000 : 1500, v > .8 ? 1990 : 1490, 0.5 * v, 0.06)
   };
 
   // ---------- Real recordings, all CC0: acoustic kit from freesound.org (via Sonic Pi),
@@ -851,7 +1114,8 @@ select.native { display: none; }
     tamb: (t, v) => play(v >= .6 ? pick(['tambHit_1', 'tambHit_2']) : pick(['tambShk_1', 'tambShk_2']), t, vel(v) * .5, buses.shaker)
       || (tambBufs.length ? playBuf(pick(tambBufs), t, vel(v) * .4, buses.shaker) : SYN.tamb(t, v)),
     clap: (t, v) => play(pick(['clap_1', 'clap_2', 'clap_3', 'clap_4']), t, vel(v) * .6, buses.shaker) || SYN.rim(t, v),
-    click: SYN.click
+    click: SYN.click,
+    metro: SYN.metro
   };
   // Synthetic room: a short pre-delay, a few early reflections, then a diffuse tail whose highs die
   // sooner than its lows, as in a real hall. Each channel gets its own noise so the room is wide.
@@ -926,6 +1190,16 @@ select.native { display: none; }
       case 'power': return [sn(d) - 12, sn(d), sn(d + 4), sn(d) + 12];
       default: return [sn(d) - 12, sn(d), sn(d + 2), sn(d + 4), sn(d) + 12];
     }
+  }
+  // What the pad plays now: root and fifth, the chord the song is on (Auto), or the chords held by hand
+  // (Manual) merged into one chord: shared notes are not doubled and only the first keeps its low bass.
+  function curNotes() {
+    if (S.padMode === 'fifths') return padNotes();
+    if (S.padHand !== 'manual') return padNotes(S.chord);
+    if (!S.held.length) return null;
+    const set = new Set(padNotes(S.held[0]));
+    for (const c of S.held.slice(1)) for (const m of padNotes(c)) if (m >= sn(DEGREES[c].d)) set.add(m);
+    return [...set].sort((a, b) => a - b);
   }
   // ---------- PADsynth ----------
   // Every pad except those marked `osc` is rendered as one seamless stereo loop per chord, after
@@ -1025,6 +1299,7 @@ select.native { display: none; }
   function psPrepare() {
     if (!ctx || PADS[S.pad].osc) return;
     const wanted = S.padMode === 'fifths' ? [padNotes()] : DEGREES.map((_, c) => padNotes(c));
+    const cur = curNotes(); if (cur) wanted.push(cur);
     const keys = new Set(wanted.map(psKey));
     for (const k of psCache.keys()) if (!keys.has(k)) psCache.delete(k);
     psTodo = wanted.filter(n => !psCache.has(psKey(n)));
@@ -1042,16 +1317,17 @@ select.native { display: none; }
     for (const v of padVoices) v.vib.gain.setTargetAtTime(v.vibBase * moveF(), t, 0.2);
   }
   let padRelease = 1;
-  function padStop(fade) {
+  // from: start the fade later (the ending holds its chord a moment). Those voices stay listed, so Stop still cuts them.
+  function padStop(fade, from) {
     if (!ctx) return;
-    const t = ctx.currentTime;
+    const now = ctx.currentTime, t = Math.max(from || 0, now);
     for (const v of padVoices) {
       v.g.gain.cancelScheduledValues(t);
-      v.g.gain.setValueAtTime(v.g.gain.value, t);
+      v.g.gain.setValueAtTime(t > now ? v.lvl : v.g.gain.value, t);
       v.g.gain.linearRampToValueAtTime(0, t + fade);
       v.oscs.forEach(o => { try { o.stop(t + fade + 0.1); } catch (e) {} });
     }
-    padVoices = [];
+    if (t <= now) padVoices = [];
   }
   // swap: cross-fade into the same chord with a new sound (Richness changed) instead of a fresh attack.
   function padPlay(at, swap) {
@@ -1059,8 +1335,11 @@ select.native { display: none; }
     const P = PADS[S.pad];
     padStop(swap ? 1.5 : padRelease);
     padRelease = Math.min(P.release, 1.2);
-    const t = Math.max(at || 0, ctx.currentTime);
-    const notes = padNotes(), buf = !P.osc && psGet(notes);
+    const notes = curNotes();
+    if (!notes) return; // Manual with no chord held: the pad goes silent
+    const t = Math.max(at || 0, ctx.currentTime), buf = !P.osc && psGet(notes);
+    // A merged chord has more notes: keep it as loud as a single one.
+    const lvl = Math.min(1, Math.sqrt(5 / notes.length));
     // Vibrato in cents on oscillators; on a loop the same depth goes to its playback rate.
     const vibBase = buf ? P.vib[1] * Math.LN2 / 1200 : P.vib[1];
     const vib = ctx.createOscillator(), vibG = ctx.createGain();
@@ -1112,8 +1391,8 @@ select.native { display: none; }
       });
     }
     vg.gain.setValueAtTime(0, t);
-    vg.gain.linearRampToValueAtTime(1, t + (swap ? Math.min(P.attack, 1.5) : P.attack));
-    padVoices.push({ g: vg, oscs, vib: vibG, vibBase, kind: buf ? 'ps' : 'osc' });
+    vg.gain.linearRampToValueAtTime(lvl, t + (swap ? Math.min(P.attack, 1.5) : P.attack));
+    padVoices.push({ g: vg, oscs, vib: vibG, vibBase, lvl, kind: buf ? 'ps' : 'osc' });
     psPrepare();
   }
   function padSetup() {
@@ -1123,7 +1402,7 @@ select.native { display: none; }
     hallSend.gain.setTargetAtTime(P.hall * 0.6, ctx.currentTime, 0.3);
     padBright();
   }
-  function padBright(t, sec = S.section) { if (ctx) padFilter.frequency.setTargetAtTime(SEC_PAD[sec] * PADS[S.pad].cutoff * 2 ** (0.4 * richF()), Math.max(t || 0, ctx.currentTime), 0.6); }
+  function padBright(t, sec = secOf(S.at)) { if (ctx) padFilter.frequency.setTargetAtTime(SEC_PAD[sec] * PADS[S.pad].cutoff * 2 ** (0.4 * richF()), Math.max(t || 0, ctx.currentTime), 0.6); }
 
   // ---------- Scheduler ----------
   // The rhythm is rendered ahead as audio, in chunks of up to one phrase, and played by the
@@ -1133,14 +1412,23 @@ select.native { display: none; }
   // Any change cuts what is sounding at the next step and renders a new chunk from there.
   function stepDur() { return 60 / S.bpm / METERS[S.meter].div; }
   const PRE = 0.18, TAIL = 2.5, AHEAD = 4, MAXCHUNK = 16;
-  // q: the sequencer at the end of what is already rendered. The page shows S.section,
-  // S.pending and ui, which follow the audio as it plays.
-  let q = {}, chunks = [], evq = [], R = null, gen = 0, rendering = false, dirty = false, lastCut = 0, want = {};
-  const ui = { queued: false, active: false, counting: false };
+  // q: the sequencer at the end of what is already rendered. The page shows S.at, ui.pend and ui,
+  // which follow the audio as it plays.
+  let q = {}, chunks = [], evq = [], R = null, gen = 0, rendering = false, dirty = false, lastCut = 0, want = {}, endMoved = false;
+  const ui = { queued: false, active: false, counting: false, pend: null };
   const snap = (t) => ({ ...q, t });
   // Something to do when the audio reaches t: right on time (onTime) or just ahead, for audio.
   const ev = (t, fn, onTime) => R.events.push({ t, fn, onTime });
   const changed = () => { if (playing) dirty = true; };
+
+  // The song moves the pad to chord c at time at (Auto only). Returns whether the pad changed chord.
+  function autoChord(c, at, swap) {
+    if (S.padHand !== 'auto' || (c === S.chord && padVoices.length)) return false;
+    S.chord = c;
+    if (S.padMode === 'fifths') return false;
+    padPlay(at, swap);
+    return true;
+  }
 
   function scheduleStep(s, t) {
     const m = S.meter, M = METERS[m];
@@ -1150,24 +1438,34 @@ select.native { display: none; }
     }
     if (q.counting) {
       if (s % M.dotEvery === 0) INST.click(t, M.strong.includes(s) ? 1 : .6);
-      R.ui.push({ s, t, txt: T('counting') });
+      R.ui.push({ s, t, counting: true });
       return;
     }
     if (s === 0) {
       q.bar++; q.phraseBar++;
-      if (q.pend) {
-        const to = q.pend;
-        q.sec = to; q.pend = null; q.phraseBar = 1;
-        if (to === 'final') q.ending = true;
-        ev(t, (at) => padBright(at, to));
-        ev(t, () => { S.section = to; if (S.pending === to) S.pending = null; refreshSections(); }, true);
+      // The part changes on this bar line when asked (q.pend) or when the current part is over.
+      let to = q.pend;
+      if (to === null && q.phraseBar > partLen(partOf(q.at))) to = nextOf(q.at);
+      if (to !== null) {
+        const sec = secOf(to);
+        q.pend = null; q.phraseBar = 1; q.sec = sec;
+        if (to !== 'end') q.at = to;
+        if (sec === 'final') q.ending = true;
+        const at = q.at;
+        ev(t, (when) => padBright(when, sec));
+        ev(t, () => { S.at = at; if (ui.pend === to) ui.pend = null; drawPos(); }, true);
       }
       if (q.crashNext) { INST.crash(t, 1); INST.kick(t, 1); q.crashNext = false; }
       if (q.ending) {
         if (S.layers.shaker.on) INST.shaker(t, .8);
         q.done = true;
-        ev(t, () => padStop(4), true);
-        ev(t + 4.2, () => stop(true), true);
+        // The pad moves to the ending's chord (Auto), holds it a moment and fades out; then the app stops.
+        const fin = to !== 'end' && partOf(q.at).ch[0];
+        ev(t, (when) => { endMoved = !!fin && autoChord(fin[0], when, true); });
+        ev(t, () => { padStop(4, endMoved ? ctx.currentTime + 1.6 : 0); paintWin(); }, true);
+        ev(t + 4.2, () => { if (!endMoved) stop(true); }, true);
+        ev(t + 5.8, () => stop(true), true);
+        R.ui.push({ s, t, at: q.at, bar: 1 });
         return;
       }
     }
@@ -1175,20 +1473,35 @@ select.native { display: none; }
     const pat = secPat(st, q.sec);
     const tt = t + (st.swing && m !== '6/8' && s % 4 === 2 ? st.swing * stepDur() : 0)
       + (st.swing16 && s % 2 === 1 ? st.swing16 * stepDur() : 0);
+    const cur = partOf(q.at);
 
-    // Decide a fill when its start step arrives
+    // Chord changes inside the part, on the half bar at the finest.
+    if (cur.ch.length && s % (M.steps / 2) === 0) {
+      const off = q.phraseBar - 1 + s / M.steps;
+      let b = 0;
+      for (const [c, n] of cur.ch) {
+        if (Math.abs(b - off) < 1e-6) { ev(t, (when) => autoChord(c, when)); ev(t, paintWin, true); break; }
+        b += n; if (b > off + 1e-6) break;
+      }
+    }
+    // Decide a fill when its start step arrives: before a part change (asked, or at the end of a part with
+    // Remate automático on), every S.autoFill bars, or when Remate was tapped. Never with the drums off.
     if (!q.fillActive) {
-      const target = q.pend || q.sec;
+      const to = q.pend !== null ? q.pend : q.phraseBar >= partLen(cur) ? nextOf(q.at) : null;
+      const target = to === null ? q.sec : secOf(to);
       const f = buildFill(target, m);
       if (s === f.start) {
-        const auto = S.autoFill > 0 && q.phraseBar % S.autoFill === 0;
-        if (q.fillQueued || q.pend || auto) {
+        const auto = S.autoFill > 0 && (to !== null || q.phraseBar % S.autoFill === 0);
+        if (!S.layers.drums.on) q.fillQueued = false;
+        else if (q.fillQueued || q.pend !== null || auto) {
           q.fillActive = f; q.fillQueued = false;
           q.crashNext = target !== 'intro' && (target !== 'estrofa' || q.pend !== null);
           ev(t, () => { ui.active = true; ui.queued = false; setFillUi(); }, true);
         }
       }
     }
+    // Click (metronome): always rendered into its own stem; the Clic channel decides whether it is heard.
+    if (s % M.dotEvery === 0) INST.metro(t, M.strong.includes(s) ? 1 : .6);
     // Shaker and hand percussion
     const shk = SEC_SHK[q.sec];
     const sh = shakerStr(st, q.sec);
@@ -1209,37 +1522,36 @@ select.native { display: none; }
       if (q.sec === 'coro' && pat.kick && s === M.steps - 1 && Math.random() < 0.2 * h) hit('kick', tt, .45);
     }
     if (s === M.steps - 1 && q.fillActive) { q.fillActive = null; ev(t + 0.06, () => { ui.active = false; setFillUi(); }, true); }
-    const left = S.autoFill ? S.autoFill - ((q.phraseBar - 1) % S.autoFill) : 0;
-    R.ui.push({ s, t, txt: T('bar', q.bar, T('sec.' + q.sec), left) });
+    R.ui.push({ s, t, at: q.at, bar: q.phraseBar });
   }
 
   // How many steps the next chunk holds: the rest of the bar, one bar when it must sound soon
-  // (start, or right after a change), or up to the end of the phrase (so a background loop
-  // repeats whole phrases, auto fill included).
+  // (start, or right after a change), or up to the end of the part (so a background loop repeats
+  // the end of the part, its fill included), or a whole next part.
   function chunkSteps(soon) {
     const M = METERS[S.meter];
     if (q.step) return M.steps - q.step;
     if (soon || q.countBars > 0) return M.steps;
-    const P = S.autoFill || 4;
-    const bars = q.pend ? P : P - (q.phraseBar % P);
+    const left = partLen(partOf(q.at)) - q.phraseBar;
+    const bars = q.pend !== null ? 1 : left > 0 ? left : partLen(partOf(nextOf(q.at)));
     return Math.max(1, Math.min(bars, Math.floor(MAXCHUNK / (M.steps * stepDur())))) * M.steps;
   }
   const renderOff = (off) => new Promise((res, rej) => {
     off.oncomplete = (e) => res(e.renderedBuffer);
     const p = off.startRendering(); if (p && p.catch) p.catch(rej);
   });
-  // Renders the next chunk with the same instruments, into three stems: percussion, drums, click.
+  // Renders the next chunk with the same instruments, into four stems: percussion, drums, click, count-in.
   async function renderNext(t0, cut) {
     const my = gen;
     rendering = true;
     try {
       const M = METERS[S.meter], n = chunkSteps(cut || !chunks.length), loopable = !q.step && !q.countBars;
       const sr = ctx.sampleRate, OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-      const off = new OAC(3, Math.ceil((PRE + n * stepDur() + TAIL) * sr), sr);
-      const merge = off.createChannelMerger(3); merge.connect(off.destination);
-      const outs = [0, 1, 2].map((i) => { const g = off.createGain(); g.connect(merge, 0, i); return g; });
+      const off = new OAC(4, Math.ceil((PRE + n * stepDur() + TAIL) * sr), sr);
+      const merge = off.createChannelMerger(4); merge.connect(off.destination);
+      const outs = [0, 1, 2, 3].map((i) => { const g = off.createGain(); g.connect(merge, 0, i); return g; });
       const live = { ctx, buses, master };
-      ctx = off; buses = { shaker: outs[0], drums: outs[1] }; master = outs[2]; openHat = null;
+      ctx = off; buses = { shaker: outs[0], drums: outs[1], click: outs[2] }; master = outs[3]; openHat = null;
       R = { events: [], ui: [], snaps: [] };
       let t = PRE;
       try {
@@ -1340,7 +1652,10 @@ select.native { display: none; }
     gen++; lastCut = ctx.currentTime;
     cutAt(st.t);
     const { t, ...rest } = st; q = rest;
-    if ('pend' in want) q.pend = want.pend === q.sec ? null : want.pend;
+    if ('at' in want) { q.at = want.at; q.sec = secOf(q.at); }
+    q.at = Math.min(q.at, S.song.seq.length - 1);
+    if ('pend' in want) q.pend = want.pend === q.at ? null : want.pend;
+    if (typeof q.pend === 'number' && q.pend >= S.song.seq.length) q.pend = null;
     if ('fill' in want) q.fillQueued = want.fill;
     if (want.reset) { q.step = 0; q.fillActive = null; }
     want = {};
@@ -1390,18 +1705,21 @@ select.native { display: none; }
     $('status').textContent = T('status.loading');
     await loadSamples();
     playing = true;
-    if (S.section === 'final') S.section = 'coro';
-    S.pending = null; refreshSections();
-    q = { step: 0, bar: 0, phraseBar: 0, sec: S.section, pend: null, fillQueued: false, fillActive: null, crashNext: false, ending: false, counting: false, countBars: S.countIn ? 1 : 0, done: false };
-    Object.assign(ui, { queued: false, active: false, counting: S.countIn });
-    chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false; gen++;
+    if (secOf(S.at) === 'final') S.at = 0;
+    const first = partOf(S.at).ch[0];
+    if (first && S.padHand === 'auto') S.chord = first[0];
+    q = { step: 0, bar: 0, phraseBar: 0, at: S.at, sec: secOf(S.at), pend: null, fillQueued: false, fillActive: null, crashNext: false, ending: false, counting: false, countBars: S.countIn ? 1 : 0, done: false };
+    Object.assign(ui, { queued: false, active: false, counting: S.countIn, pend: null }); pos = null;
+    chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false; endMoved = false; gen++;
     padBright();
     clockStart(); renderNext();
     if (!S.countIn) padPlay();
     $('play').classList.add('stop'); $('play').setAttribute('aria-label', T('stop'));
     $('status').textContent = T('status.playing');
+    paintWin(); drawPos(); setFillUi();
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
   }
+  // soft: the song reached its ending, so the next Play starts from the top.
   function stop(soft) {
     playing = false; gen++; rendering = false;
     clockStop();
@@ -1414,36 +1732,82 @@ select.native { display: none; }
     }
     chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false;
     padStop(soft ? 0.1 : 0.4);
-    Object.assign(ui, { queued: false, active: false, counting: false });
-    if (S.section === 'final') { S.section = 'estrofa'; }
-    S.pending = null; refreshSections(); setFillUi();
+    Object.assign(ui, { queued: false, active: false, counting: false, pend: null }); pos = null;
+    if (soft) S.at = 0;
+    save(); setFillUi(); paintWin(); drawPos();
     $('play').classList.remove('stop'); $('play').setAttribute('aria-label', T('play'));
     $('status').textContent = T('status.stopped');
-    drawDots(-1); $('barinfo').textContent = T('ready');
     try { wakeLock?.release(); } catch (e) {}
   }
 
   // ---------- UI ----------
-  function drawDots(curStep) {
-    const M = METERS[S.meter];
-    const n = M.steps / M.dotEvery;
-    const box = $('dots');
-    if (box.children.length !== n) {
-      box.innerHTML = '';
-      for (let i = 0; i < n; i++) { const d = document.createElement('div'); d.className = 'dot'; box.appendChild(d); }
-    }
-    [...box.children].forEach((d, i) => {
-      d.classList.toggle('strong', M.strong.includes(i * M.dotEvery));
-      d.classList.toggle('now', curStep >= 0 && Math.floor(curStep / M.dotEvery) === i);
-    });
-  }
+  const CHEV = '<svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg>';
+  // pos: the step the audio is on (from uiQueue), so the screen follows what is heard.
+  let pos = null, flashT = null, nextPart = null;
   function frame() {
     if (ctx && playing) {
       let cur = null;
       while (uiQueue.length && uiQueue[0].t <= ctx.currentTime) cur = uiQueue.shift();
-      if (cur) { drawDots(cur.s); $('barinfo').textContent = cur.txt; }
+      if (cur) {
+        const M = METERS[S.meter];
+        pos = cur; drawPos();
+        if (cur.s % (cur.counting ? M.dotEvery : M.div) === 0) {
+          $('bpm').classList.add('flash'); clearTimeout(flashT); flashT = setTimeout(() => $('bpm').classList.remove('flash'), 110);
+        }
+      }
     }
+    drawLeds();
     requestAnimationFrame(frame);
+  }
+  // Part line, song map and Siguiente: where the song is, what comes next, what is waiting for the next bar.
+  function drawPos() {
+    const seq = S.song.seq, steps = METERS[S.meter].steps, live = playing && pos && !pos.counting;
+    const at = Math.min(live ? pos.at : S.at, seq.length - 1), len = partLen(partOf(at)), bar = live ? pos.bar : 0;
+    const nx = ui.pend !== null ? ui.pend : at < seq.length - 1 ? at + 1 : null;
+    const box = $('map');
+    if (box.children.length !== seq.length) {
+      box.textContent = '';
+      seq.forEach((_, i) => {
+        const b = document.createElement('button'); b.type = 'button';
+        b.innerHTML = '<span class="seg-bar"><i></i></span><span class="lb"></span>';
+        b.addEventListener('click', () => choosePart(i));
+        box.appendChild(b);
+      });
+    }
+    [...box.children].forEach((b, i) => {
+      b.style.flex = partLen(partOf(i));
+      b.className = i === at ? 'now' : i === ui.pend ? 'pending' : i === nx ? 'next' : '';
+      b.setAttribute('aria-label', partLabel(i)); b.lastChild.textContent = partLabel(i, true);
+      b.firstChild.firstChild.style.width = i === at && live ? Math.min(100, (bar - 1 + (pos.s + 1) / steps) / len * 100) + '%' : '0';
+    });
+    $('partname').textContent = partLabel(at);
+    const pp = $('partpos'); pp.textContent = '';
+    if (playing && pos && pos.counting) pp.textContent = T('counting');
+    else {
+      pp.append(`${bar}/${len}`);
+      if (nx !== null) { const b = document.createElement('b'); b.textContent = partLabel(nx); pp.append(' → ', b); }
+    }
+    const base = ui.pend !== null ? ui.pend : at;
+    const nb = base === 'end' ? null : base < seq.length - 1 ? base + 1 : secOf(base) === 'final' ? null : 'end';
+    nextPart = nb === null || (!playing && nb === 'end') ? null : nb;
+    $('next').disabled = nextPart === null;
+    $('nextname').textContent = nextPart === null ? '—' : partLabel(nextPart);
+    $('next').setAttribute('aria-label', T('next.aria', $('nextname').textContent));
+  }
+  // A part on the map (or Siguiente). Stopped: Play starts there. Playing: it comes in on the next bar, with a
+  // fill before it. The part that is playing asks for a fill instead.
+  function choosePart(i) {
+    if (!playing) {
+      if (i === 'end') return;
+      S.at = i;
+      const first = partOf(i).ch[0];
+      if (first && S.padHand === 'auto') S.chord = first[0];
+      save(); padBright(); drawPos(); paintWin();
+      return;
+    }
+    const at = pos && !pos.counting ? pos.at : S.at;
+    if (i === at && ui.pend === null) { $('fill').click(); return; }
+    ui.pend = i === at ? null : i; want.pend = i; drawPos(); changed();
   }
 
   function setBpm(v) {
@@ -1451,34 +1815,348 @@ select.native { display: none; }
     $('bpm').textContent = Number.isInteger(S.bpm) ? S.bpm : S.bpm.toFixed(1);
     save(); changed();
   }
-  function refreshSections() {
-    document.querySelectorAll('#sections button').forEach(b => {
-      b.classList.toggle('on', b.dataset.s === S.section);
-      b.classList.toggle('pending', b.dataset.s === S.pending);
-    });
+  // Remate needs the drums: with them off it is greyed and says so.
+  function setFillUi() {
+    const off = !S.layers.drums.on, f = $('fill');
+    f.disabled = off; $('fillnote').hidden = !off;
+    f.classList.toggle('armed', !off && (ui.queued || ui.active));
+    $('filllbl').textContent = T(ui.active ? 'fill.active' : ui.queued ? 'fill.queued' : 'fill');
   }
-  function setFillUi() { $('fill').classList.toggle('armed', ui.queued || ui.active); $('filllbl').textContent = T(ui.active ? 'fill.active' : ui.queued ? 'fill.queued' : 'fill'); }
-  function chooseSection(s) {
-    if (!playing) { S.section = s === 'final' ? 'coro' : s; refreshSections(); padBright(); save(); return; }
-    if (s === S.section && !S.pending) { ui.queued = want.fill = true; setFillUi(); changed(); return; }
-    S.pending = want.pend = s; refreshSections(); changed();
-  }
+
+  // ---------- Key: list in circle-of-fifths order, and the dial on Tocar ----------
+  const FIFTHS = [0, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10, 5];
+  const SIG = ['', '1♯', '2♯', '3♯', '4♯', '5♯', '6♯', '5♭', '4♭', '3♭', '2♭', '1♭'];
   function buildKeys() {
     const k = $('key'); k.innerHTML = '';
-    NAMES[S.names].forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = T('key.opt') + ' ' + n; k.appendChild(o); });
+    FIFTHS.forEach((i, n) => { const o = document.createElement('option'); o.value = i; o.textContent = NAMES[S.names][i]; o.dataset.sub = SIG[n]; k.appendChild(o); });
     k.value = S.key; $('names').value = S.names;
+    drawDial();
   }
-  function buildChords() {
-    const box = $('chords'); box.innerHTML = '';
-    DEGREES.forEach((g, i) => {
-      const b = document.createElement('button');
-      const name = NAMES[S.names][(S.key + SCALE[g.d]) % 12] + (g.minor ? 'm' : '');
-      b.innerHTML = `<b></b><span>${g.roman}</span>`; b.querySelector('b').textContent = name;
-      b.classList.toggle('on', i === S.chord);
-      b.addEventListener('click', () => { S.chord = i; save(); buildChords(); padPlay(); });
-      box.appendChild(b);
+  function drawDial() {
+    const N = NAMES[S.names], box = $('dialnames'); box.textContent = '';
+    for (let k = -4; k <= 4; k++) {
+      const el = document.createElement('span'); el.className = 'd' + Math.abs(k); el.textContent = N[(S.key + 7 * k + 120) % 12];
+      box.appendChild(el);
+    }
+    $('dial').setAttribute('aria-label', T('dial.aria', N[S.key]));
+  }
+  function setKey(k) {
+    S.key = ((k % 12) + 12) % 12; $('key').value = S.key;
+    save(); drawDial(); buildWin(); renderParts(); drawPart(); padPlay();
+  }
+  // Drag sideways to move along the circle of fifths (it sounds when you let go); tap to open the list.
+  {
+    const dial = $('dial'), names = $('dialnames');
+    let drag = null;
+    const end = (tap) => {
+      if (!drag) return;
+      const d = drag; drag = null; names.style.transform = '';
+      if (d.moved) { if (S.key !== d.key) setKey(S.key); } else if (tap) window.acompMenu?.('key', dial);
+    };
+    dial.addEventListener('pointerdown', (e) => {
+      drag = { x: e.clientX, moved: false, cell: dial.clientWidth / 9, key: S.key };
+      try { dial.setPointerCapture(e.pointerId); } catch (x) {}
+    });
+    dial.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (Math.abs(dx) > 6) drag.moved = true;
+      if (Math.abs(dx) >= drag.cell * .8) { S.key = (S.key + (dx < 0 ? 7 : 5)) % 12; drag.x = e.clientX; names.style.transform = ''; drawDial(); buildWin(); }
+      else if (drag.moved) names.style.transform = `translateX(${dx}px)`;
+    });
+    dial.addEventListener('pointerup', () => end(true));
+    dial.addEventListener('pointercancel', () => end(false));
+    dial.addEventListener('click', (e) => { if (e.detail === 0) window.acompMenu?.('key', dial); });
+    dial.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); setKey(S.key + 7); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); setKey(S.key + 5); }
     });
   }
+
+  // ---------- Chord window ----------
+  // IV I V over ii vi iii: the key's chords in circle-of-fifths order, with the neighbours outside the key
+  // greyed at the sides. Colours by function: rest, moves away, tension. The chord that sounds is lit.
+  const chordName = (c) => NAMES[S.names][(S.key + SCALE[DEGREES[c].d]) % 12] + (DEGREES[c].minor ? 'm' : '');
+  const noteName = (pc) => NAMES[S.names][((pc % 12) + 12) % 12];
+  const sounding = () => S.padMode === 'fifths' ? [] : S.padHand === 'manual' ? S.held : [S.chord];
+  const press = new Map(); // Manual: chords under a finger → long-press timer (null once it counts as held)
+  function buildWin() {
+    press.clear();
+    const cell = (c, size) => `<button type="button" class="${FN[c]} ${size}" data-c="${c}"><b></b><span></span></button>`;
+    const w = $('win');
+    w.innerHTML = '<span class="frame"></span>'
+      + `<div class="col nb l" aria-hidden="true"><span class="big"></span><span class="small"></span></div>`
+      + `<div class="col">${cell(3, 'big')}${cell(1, 'small')}</div><div class="col">${cell(0, 'big')}${cell(5, 'small')}</div><div class="col">${cell(4, 'big')}${cell(2, 'small')}</div>`
+      + `<div class="col nb r" aria-hidden="true"><span class="big"></span><span class="small"></span></div>`;
+    const nb = w.querySelectorAll('.nb span');
+    nb[0].textContent = noteName(S.key + 10); nb[1].textContent = noteName(S.key + 7) + 'm';
+    nb[2].textContent = noteName(S.key + 2); nb[3].textContent = noteName(S.key + 11) + 'm';
+    w.querySelectorAll('button').forEach((b) => {
+      const c = +b.dataset.c;
+      b.firstChild.textContent = chordName(c);
+      const pickOne = () => {
+        if (S.padHand === 'auto') { S.chord = c; save(); paintWin(); padPlay(); return; }
+        S.held = S.held.length === 1 && S.held[0] === c ? [] : [c]; heldChanged();
+      };
+      b.addEventListener('pointerdown', (e) => {
+        if (S.padMode === 'fifths') return;
+        if (S.padHand === 'auto') { pickOne(); return; }
+        // Manual: a tap replaces the chord (tapping the only one silences the pad); holding one chord down,
+        // or a long press, adds or removes another, up to three.
+        try { b.setPointerCapture(e.pointerId); } catch (x) {}
+        if (press.size) {
+          for (const [k, tm] of press) { clearTimeout(tm); press.set(k, null); }
+          press.set(c, null); toggleHeld(c); return;
+        }
+        press.set(c, setTimeout(() => { press.set(c, null); toggleHeld(c); }, 450));
+      });
+      b.addEventListener('pointerup', () => {
+        if (!press.has(c)) return;
+        const tm = press.get(c); press.delete(c);
+        if (tm) { clearTimeout(tm); pickOne(); }
+      });
+      b.addEventListener('pointercancel', () => { clearTimeout(press.get(c)); press.delete(c); });
+      b.addEventListener('click', (e) => { if (e.detail === 0 && S.padMode !== 'fifths') pickOne(); });
+      b.addEventListener('contextmenu', (e) => e.preventDefault());
+    });
+    paintWin();
+  }
+  function paintWin() {
+    const on = sounding(), fifths = S.padMode === 'fifths';
+    $('win').classList.toggle('off', fifths);
+    $('win').querySelectorAll('button').forEach((b) => {
+      const c = +b.dataset.c, lit = on.includes(c);
+      b.classList.toggle('on', lit); b.setAttribute('aria-pressed', String(lit));
+      b.lastChild.textContent = DEGREES[c].roman + (lit && playing ? ' · ' + T('sounding') : '');
+    });
+    const manual = S.padHand === 'manual';
+    $('legend').hidden = manual; $('hint').hidden = !manual;
+    $('hint').textContent = T(fifths ? 'hint.fifths' : S.held.length ? 'hint.held' : 'hint.silent');
+    document.querySelectorAll('#mode button').forEach((b) => { const o = b.dataset.m === S.padHand; b.classList.toggle('on', o); b.setAttribute('aria-checked', String(o)); });
+    $('padmode').setAttribute('aria-checked', String(fifths));
+  }
+  function toggleHeld(c) {
+    const i = S.held.indexOf(c);
+    if (i >= 0) S.held.splice(i, 1); else { S.held.push(c); if (S.held.length > 3) S.held.shift(); }
+    heldChanged();
+  }
+  function heldChanged() { save(); paintWin(); padPlay(); }
+  // The chord the song is on right now (or where Play starts), for going back to Auto.
+  function songChord() {
+    const live = playing && pos && !pos.counting, P = partOf(live ? pos.at : S.at);
+    if (!P.ch.length) return S.chord;
+    let off = live ? pos.bar - 1 + pos.s / METERS[S.meter].steps : 0, last = P.ch[0][0];
+    for (const [c, n] of P.ch) { if (off < n - 1e-6) return c; off -= n; last = c; }
+    return last;
+  }
+  function setHand(m) {
+    if (S.padHand === m) return;
+    S.padHand = m;
+    if (m === 'manual') S.held = [S.chord]; else S.chord = songChord();
+    save(); paintWin(); padPlay();
+  }
+
+  // ---------- Channels: tiles on Tocar, mix and pan in Sonido ----------
+  const leds = {};
+  function drawTiles() {
+    const box = $('tiles');
+    if (!box.children.length) for (const k of CHANNELS) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'tile'; b.dataset.ch = k;
+      b.innerHTML = '<span class="led"></span><span class="tl"></span><span class="side"></span>';
+      b.addEventListener('click', () => setLayer(k, !S.layers[k].on));
+      leds[k] = b.firstChild; box.appendChild(b);
+    }
+    for (const b of box.children) {
+      const L = S.layers[b.dataset.ch];
+      b.classList.toggle('on', L.on); b.setAttribute('aria-pressed', String(L.on));
+      b.children[1].textContent = T('ch.' + b.dataset.ch);
+      b.children[2].textContent = L.side === 'C' ? '' : T('tag.' + L.side);
+    }
+  }
+  // The green LED on each tile follows that channel's level, so a channel that is on but silent is easy to spot.
+  const lvBuf = new Float32Array(512);
+  function drawLeds() {
+    if (!ctx) return;
+    for (const k of CHANNELS) {
+      if (!S.layers[k].on || !leds[k]) continue;
+      meters[k].getFloatTimeDomainData(lvBuf);
+      let e = 0; for (let i = 0; i < lvBuf.length; i++) e += lvBuf[i] * lvBuf[i];
+      const db = 20 * Math.log10(Math.sqrt(e / lvBuf.length) + 1e-6);
+      leds[k].style.opacity = playing ? Math.max(.25, Math.min(1, (db + 50) / 30)) : 1;
+    }
+  }
+  function setLayer(k, on) {
+    S.layers[k].on = on; applyMix(); save(); drawTiles(); paintMix();
+    if (k === 'drums') { if (!on) { ui.queued = false; if (playing) want.fill = false; } setFillUi(); changed(); }
+  }
+  let panOpen = false;
+  function buildMix() {
+    const box = $('mix'); box.textContent = '';
+    for (const k of CHANNELS) {
+      const r = document.createElement('div'); r.className = 'row';
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ch'; b.id = 'on-' + k; b.setAttribute('role', 'switch');
+      b.textContent = T('ch.' + k); b.setAttribute('aria-label', T('ch.mute', T('ch.' + k)));
+      b.addEventListener('click', () => setLayer(k, !S.layers[k].on));
+      const v = document.createElement('input'); v.type = 'range'; v.min = 0; v.max = 100; v.id = 'v-' + k; v.value = S.layers[k].vol;
+      v.setAttribute('aria-label', T('ch.vol', T('ch.' + k)));
+      v.addEventListener('input', () => { S.layers[k].vol = +v.value; applyMix(); save(); });
+      const tag = document.createElement('span'); tag.className = 'tag'; tag.id = 'tag-' + k;
+      r.append(b, v, tag); box.appendChild(r);
+    }
+    // Pan sides fold away under one row; folded, the row sums up what is not in the centre.
+    const f = document.createElement('button'); f.type = 'button'; f.className = 'row link fold'; f.id = 'panfold';
+    f.innerHTML = `<span class="lbl"></span><span class="val" id="pansum"></span>${CHEV}`; f.firstChild.textContent = T('pan');
+    f.addEventListener('click', () => { panOpen = !panOpen; paintMix(); });
+    const pr = document.createElement('div'); pr.className = 'panrows'; pr.id = 'panrows';
+    for (const k of CHANNELS) {
+      const r = document.createElement('div'); r.className = 'row';
+      const l = document.createElement('span'); l.className = 'lbl'; l.textContent = T('ch.' + k);
+      const seg = document.createElement('div'); seg.className = 'seg'; seg.setAttribute('role', 'radiogroup'); seg.setAttribute('aria-label', T('pan.aria', T('ch.' + k)));
+      for (const sd of ['L', 'C', 'R']) {
+        const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.ch = k; b.dataset.side = sd; b.textContent = T('side.' + sd);
+        b.addEventListener('click', () => { S.layers[k].side = sd; applyMix(); save(); paintMix(); drawTiles(); });
+        seg.appendChild(b);
+      }
+      r.append(l, seg); pr.appendChild(r);
+    }
+    const n = document.createElement('p'); n.className = 'panfoot'; n.textContent = T('pan.foot'); pr.appendChild(n);
+    box.append(f, pr);
+    paintMix();
+  }
+  function paintMix() {
+    for (const k of CHANNELS) {
+      const L = S.layers[k], b = $('on-' + k);
+      b.classList.toggle('on', L.on); b.setAttribute('aria-checked', String(L.on));
+      $('tag-' + k).textContent = L.side === 'C' ? '' : T('side.' + L.side);
+    }
+    document.querySelectorAll('#panrows button').forEach((b) => { const o = S.layers[b.dataset.ch].side === b.dataset.side; b.classList.toggle('on', o); b.setAttribute('aria-checked', String(o)); });
+    $('panfold').setAttribute('aria-expanded', String(panOpen)); $('panrows').hidden = !panOpen;
+    $('pansum').textContent = panOpen ? '' : CHANNELS.filter((k) => S.layers[k].side !== 'C').map((k) => `${T('ch.' + k)} ${T('side.' + S.layers[k].side).toLowerCase()}`).join(', ') || T('pan.center');
+  }
+
+  // ---------- Song structure (Sonido): Orden and Partes, and the part editor ----------
+  let structTab = 'orden', editing = null, adding = null, selChord = null;
+  const addChip = $('addchip');
+  function tabTo(w) {
+    structTab = w; const o = w === 'orden';
+    $('t-orden').classList.toggle('on', o); $('t-partes').classList.toggle('on', !o);
+    $('t-orden').setAttribute('aria-selected', String(o)); $('t-partes').setAttribute('aria-selected', String(!o));
+    $('p-orden').hidden = !o; $('p-partes').hidden = o;
+    $('structfoot').textContent = T(o ? 'struct.foot.order' : 'struct.foot.parts');
+  }
+  function renderSeq() {
+    const box = $('seq'); box.textContent = '';
+    S.song.seq.forEach((k, i) => {
+      const c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.setAttribute('aria-label', T('seq.remove', partLabel(i)));
+      c.innerHTML = '<span class="n"></span><span></span><span class="x" aria-hidden="true">×</span>';
+      c.children[0].textContent = i + 1; c.children[1].textContent = partLabel(i);
+      c.disabled = S.song.seq.length <= 1;
+      c.addEventListener('click', () => { if (S.song.seq.length > 1) dropFromSeq((_, j) => j === i); });
+      box.appendChild(c);
+    });
+    box.appendChild(addChip);
+    // "+ Añadir" opens a menu of the parts already defined.
+    const sel = $('addpart'); sel.textContent = '';
+    for (const k of partKeys()) { const o = new Option(T('sec.' + k), k); o.dataset.sub = T('bars.n', partLen(S.song.parts[k])); sel.appendChild(o); }
+    sel.selectedIndex = -1;
+  }
+  function renderParts() {
+    const box = $('partlist'); box.textContent = '';
+    for (const k of partKeys()) {
+      const P = S.song.parts[k], r = document.createElement('button'); r.type = 'button'; r.className = 'row link';
+      r.innerHTML = `<span class="lbl"></span><span class="val"></span>${CHEV}`;
+      r.children[0].textContent = T('sec.' + k);
+      r.children[1].textContent = `${partLen(P)} ${T('bars.short')} · ` + (P.ch.map(([c, n]) => chordName(c) + (n === 1 ? '' : ' ' + fmtBars(n))).join(' · ') || T('part.nochords'));
+      r.addEventListener('click', () => editPart(k));
+      box.appendChild(r);
+    }
+    const sel = $('newpart'); sel.textContent = '';
+    for (const k of Object.keys(PART_SEC)) if (!S.song.parts[k]) sel.appendChild(new Option(T('sec.' + k), k));
+    sel.selectedIndex = -1; $('newrow').hidden = !sel.options.length;
+  }
+  // Removes the matching items of the order and keeps Play (or what is playing) on the same part.
+  function dropFromSeq(pred) {
+    const old = S.song.seq, gone = old.map((k, i) => pred(k, i));
+    const at = S.at - gone.slice(0, S.at).filter(Boolean).length;
+    S.song.seq = old.filter((_, i) => !gone[i]);
+    if (!S.song.seq.length) S.song.seq = [partKeys()[0]];
+    S.at = Math.max(0, Math.min(at, S.song.seq.length - 1));
+    songChanged(true);
+  }
+  function songChanged(moved) {
+    save(); renderSeq(); renderParts(); drawPos();
+    if (playing) { if (moved) { ui.pend = null; want.pend = null; want.at = S.at; } changed(); }
+  }
+  function editPart(k) { editing = k; adding = null; selChord = null; drawPart(); window.acompShow?.('parte'); }
+  // Part editor: chords first. Tapping one asks how long it lasts and adds it; tapping one already in the
+  // list opens its length and Quitar. The part lasts what its chords add up to.
+  const DUR_BTN = [[.5, '½', 'dur.half'], [1, '1', 'dur.one'], [2, '2', 'dur.many'], [4, '4', 'dur.many']];
+  function durButtons(cur, onPick) {
+    const box = document.createElement('div'); box.className = 'durs';
+    for (const [n, big, small] of DUR_BTN) {
+      const x = document.createElement('button'); x.type = 'button'; x.className = cur === n ? 'on' : ''; x.setAttribute('aria-label', T('bars.n', n));
+      x.innerHTML = `<b>${big}</b><span></span>`; x.lastChild.textContent = T(small);
+      x.addEventListener('click', () => onPick(n)); box.appendChild(x);
+    }
+    return box;
+  }
+  function drawPart() {
+    const P = editing && S.song.parts[editing];
+    if (!P) return;
+    $('ptitle').textContent = T('sec.' + editing);
+    const degs = $('degs'); degs.textContent = '';
+    DEGREES.forEach((g, c) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = FN[c] + (adding === c ? ' on' : '');
+      b.innerHTML = '<b></b><span></span>'; b.firstChild.textContent = chordName(c); b.lastChild.textContent = g.roman;
+      b.addEventListener('click', () => { adding = adding === c ? null : c; selChord = null; drawPart(); });
+      degs.appendChild(b);
+    });
+    const ask = $('ask'); ask.textContent = ''; ask.hidden = adding === null;
+    if (adding !== null) {
+      const h = document.createElement('div'); h.className = 'askh';
+      const label = document.createElement('span'), name = document.createElement('b');
+      name.textContent = chordName(adding); label.append(name, ' · ' + T('part.ask'));
+      const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'cancel'; cancel.textContent = T('cancel');
+      cancel.addEventListener('click', () => { adding = null; drawPart(); });
+      h.append(label, cancel);
+      ask.append(h, durButtons(null, (n) => { if (P.ch.length < 32) P.ch.push([adding, n]); adding = null; partEdited(); }));
+    }
+    const box = $('prog'); box.textContent = '';
+    $('progcap').textContent = T('part.sounds') + (P.ch.length ? ' · ' + T('bars.n', partLen(P)) : '');
+    if (!P.ch.length) {
+      const r = document.createElement('div'); r.className = 'row';
+      r.innerHTML = '<span class="lbl empty"></span>'; r.firstChild.textContent = T('part.empty'); box.appendChild(r);
+    }
+    P.ch.forEach(([c, n], i) => {
+      const r = document.createElement('button'); r.type = 'button'; r.className = 'row link prow' + (i === selChord ? ' sel' : '');
+      r.setAttribute('aria-expanded', String(i === selChord));
+      r.innerHTML = `<span class="n"></span><span class="cn ${FN[c]}"></span><span class="lbl"></span><span class="val"></span>${CHEV}`;
+      r.children[0].textContent = i + 1; r.children[1].textContent = chordName(c); r.children[3].textContent = T('bars.n', n);
+      r.addEventListener('click', () => { selChord = i === selChord ? null : i; adding = null; drawPart(); });
+      box.appendChild(r);
+      if (i === selChord) {
+        const ed = document.createElement('div'); ed.className = 'edit';
+        const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = T('part.remove', chordName(c));
+        rm.addEventListener('click', () => { P.ch.splice(i, 1); selChord = null; partEdited(); });
+        ed.append(durButtons(n, (m) => { P.ch[i][1] = m; selChord = null; partEdited(); }), rm);
+        box.appendChild(ed);
+      }
+    });
+    $('pdel').hidden = partKeys().length <= 1;
+  }
+  function partEdited() { drawPart(); songChanged(false); }
+  $('t-orden').addEventListener('click', () => tabTo('orden'));
+  $('t-partes').addEventListener('click', () => tabTo('partes'));
+  $('addpart').addEventListener('change', (e) => { if (S.song.seq.length < 40) S.song.seq.push(e.target.value); songChanged(false); });
+  $('newpart').addEventListener('change', (e) => { const k = e.target.value; S.song.parts[k] = { ch: [], bars: 4 }; songChanged(false); editPart(k); });
+  $('pdel').addEventListener('click', () => {
+    const k = editing;
+    if (!k || partKeys().length <= 1) return;
+    delete S.song.parts[k]; editing = null;
+    dropFromSeq((x) => x === k);
+    window.acompShow?.('sonido');
+  });
+
   function buildStyles() {
     const sel = $('style'); sel.innerHTML = '';
     for (const [id, st] of Object.entries(STYLES)) {
@@ -1496,7 +2174,7 @@ select.native { display: none; }
   function setMeter(m) {
     S.meter = m; if (playing) { want.reset = true; changed(); }
     $('meter').value = m;
-    setUnit(); buildStyles(); drawDots(-1); save();
+    setUnit(); buildStyles(); drawPos(); save();
   }
   function setUnit() { $('bpmunit').textContent = T(S.meter === '6/8' ? 'unit.comp' : 'unit.simple'); }
   function buildPadUi() {
@@ -1510,23 +2188,20 @@ select.native { display: none; }
     const shs = $('shksound'); shs.innerHTML = '';
     for (const [id, x] of Object.entries(SHK_SETS)) { const o = document.createElement('option'); o.value = id; o.textContent = NM(x); shs.appendChild(o); }
     shs.value = S.shkSound;
-    $('padmode').setAttribute('aria-checked', String(S.padMode === 'fifths'));
     $('padmove').value = S.padMove; $('padmoveval').textContent = S.padMove + ' %';
     $('padrich').value = S.padRich; $('padrichval').textContent = S.padRich + ' %';
-    $('padinfo').textContent = NAMES[S.names][S.key] + ' · ' + NM(PADS[S.pad]);
-    $('chords').classList.toggle('muted', S.padMode === 'fifths');
+    const ids = Object.keys(PADS), P = PADS[S.pad];
+    $('padname').textContent = NM(P);
+    $('padsub').textContent = `${T('groups')[P.group] || P.group} · ${T('pad.of', ids.indexOf(S.pad) + 1, ids.length)}`;
+    paintWin();
   }
+  const stepPad = (n) => { const ids = Object.keys(PADS), s = $('padtype'); s.value = ids[(ids.indexOf(S.pad) + n + ids.length) % ids.length]; s.dispatchEvent(new Event('change')); };
   function setCountUi() { $('countin').setAttribute('aria-checked', String(S.countIn)); }
-  function bindLayer(k) {
-    const btn = $('on-' + k), sl = $('v-' + k);
-    btn.classList.toggle('on', S.layers[k].on); sl.value = S.layers[k].vol;
-    btn.addEventListener('click', () => { S.layers[k].on = !S.layers[k].on; btn.classList.toggle('on', S.layers[k].on); applyMix(); save(); });
-    sl.addEventListener('input', () => { S.layers[k].vol = +sl.value; applyMix(); save(); });
-  }
 
   // ---------- Song list (kept in this browser) ----------
   let songs = [], songTitle = null;
   try { songs = JSON.parse(localStorage.getItem('acomp-songs') || '[]'); } catch (e) {}
+  if (!Array.isArray(songs)) songs = [];
   const saveSongs = () => { try { localStorage.setItem('acomp-songs', JSON.stringify(songs)); } catch (e) {} };
   function renderSongs() {
     const box = $('songs'); box.innerHTML = '';
@@ -1542,10 +2217,16 @@ select.native { display: none; }
       load.innerHTML = '<b></b><span></span>'; load.querySelector('b').textContent = sg.name; load.querySelector('span').textContent = meta;
       load.addEventListener('click', () => {
         setBpm(sg.bpm); setMeter(sg.meter);
-        S.style = sg.style; S.key = sg.key; S.shaker = sg.shaker || 'auto'; S.chord = 0;
+        S.style = sg.style; S.key = sg.key; S.shaker = sg.shaker || 'auto';
         if (PADS[sg.pad]) S.pad = sg.pad; if (sg.padMode) S.padMode = sg.padMode; S.padMove = pct(sg.padMove); S.padRich = pct(sg.padRich); if (SHK_SETS[sg.shkSound]) S.shkSound = sg.shkSound;
+        if (sg.padHand === 'auto' || sg.padHand === 'manual') S.padHand = sg.padHand;
+        // Songs saved before 1.6.0 have no structure: they get the default one.
+        S.song = validSong(sg.song);
+        S.at = playing ? Math.min(S.at, S.song.seq.length - 1) : 0;
+        S.chord = partOf(S.at).ch.length ? partOf(S.at).ch[0][0] : 0; S.held = [S.chord];
         buildPadUi(); padSetup();
-        buildStyles(); buildShakers(); buildKeys(); buildChords(); save(); padPlay();
+        buildStyles(); buildShakers(); buildKeys(); buildWin(); renderSeq(); renderParts(); drawPos(); save(); padPlay();
+        if (playing) { ui.pend = null; want.pend = null; want.at = S.at; changed(); }
         $('songname').value = sg.name; songTitle = sg.name; $('songtitle').textContent = sg.name;
       });
       const del = document.createElement('button'); del.className = 'songdel'; del.textContent = '✕'; del.setAttribute('aria-label', T('del.aria', sg.name));
@@ -1559,7 +2240,7 @@ select.native { display: none; }
   $('savesong').addEventListener('click', () => {
     const name = $('songname').value.trim();
     if (!name) { $('songname').focus(); return; }
-    const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, padMove: S.padMove, padRich: S.padRich, shkSound: S.shkSound };
+    const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, padHand: S.padHand, padMove: S.padMove, padRich: S.padRich, shkSound: S.shkSound, song: JSON.parse(JSON.stringify(S.song)) };
     const at = songs.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
     if (at >= 0) songs[at] = sg; else songs.push(sg);
     saveSongs(); renderSongs(); songTitle = name; $('songtitle').textContent = name;
@@ -1587,28 +2268,29 @@ select.native { display: none; }
   $('shaker').addEventListener('change', (e) => { S.shaker = e.target.value; save(); changed(); });
   $('shksound').addEventListener('change', (e) => { S.shkSound = e.target.value; save(); changed(); });
   $('padtype').addEventListener('change', (e) => { S.pad = e.target.value; save(); buildPadUi(); padSetup(); padPlay(); });
+  $('padprev').addEventListener('click', () => stepPad(-1));
+  $('padnext').addEventListener('click', () => stepPad(1));
   $('padmove').addEventListener('input', (e) => { S.padMove = +e.target.value; $('padmoveval').textContent = S.padMove + ' %'; save(); padMotion(); });
   $('padrich').addEventListener('input', (e) => { $('padrichval').textContent = e.target.value + ' %'; });
   $('padrich').addEventListener('change', (e) => { S.padRich = +e.target.value; save(); padBright(); padPlay(0, true); });
-  $('padmode').addEventListener('click', () => { S.padMode = S.padMode === 'fifths' ? 'chord' : 'fifths'; save(); buildPadUi(); padPlay(); });
+  $('padmode').addEventListener('click', () => { S.padMode = S.padMode === 'fifths' ? 'chord' : 'fifths'; save(); paintWin(); padPlay(); });
+  document.querySelectorAll('#mode button').forEach((b) => b.addEventListener('click', () => setHand(b.dataset.m)));
   $('human').addEventListener('input', (e) => { S.human = +e.target.value; $('humanval').textContent = S.human + ' %'; save(); changed(); });
-  $('next').addEventListener('click', () => { const order = ['intro', 'estrofa', 'coro', 'puente', 'final']; const cur = S.pending || S.section; chooseSection(order[Math.min(4, order.indexOf(cur) + 1)]); });
+  $('next').addEventListener('click', () => { if (nextPart !== null) choosePart(nextPart); });
   $('countin').addEventListener('click', () => { S.countIn = !S.countIn; setCountUi(); save(); });
   $('autofill').addEventListener('change', (e) => { S.autoFill = +e.target.value; save(); changed(); });
-  $('fill').addEventListener('click', () => { if (playing && !ui.active && !ui.counting) { ui.queued = want.fill = !ui.queued; setFillUi(); changed(); } });
-  document.querySelectorAll('#sections button').forEach(b => b.addEventListener('click', () => chooseSection(b.dataset.s)));
-  $('key').addEventListener('change', (e) => { S.key = +e.target.value; save(); buildChords(); buildPadUi(); padPlay(); });
-  $('names').addEventListener('change', (e) => { S.names = e.target.value; save(); buildKeys(); buildChords(); renderSongs(); });
-  ['shaker', 'drums', 'pad'].forEach(bindLayer);
+  $('fill').addEventListener('click', () => { if (playing && !ui.active && !ui.counting && S.layers.drums.on) { ui.queued = want.fill = !ui.queued; setFillUi(); changed(); } });
+  $('key').addEventListener('change', (e) => setKey(+e.target.value));
+  $('names').addEventListener('change', (e) => { S.names = e.target.value; save(); buildKeys(); buildWin(); renderParts(); drawPart(); renderSongs(); });
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.closest?.('.pd')) return;
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.closest?.('[data-for]')) return;
     const k = e.key.toLowerCase();
     if (k === ' ') { e.preventDefault(); playing ? stop() : start(); }
     else if (k === 'r') $('fill').click();
     else if (k === 't') tap();
     else if (k === 'arrowup') { e.preventDefault(); setBpm(S.bpm + 1); }
     else if (k === 'arrowdown') { e.preventDefault(); setBpm(S.bpm - 1); }
-    else if (k.length === 1 && '12345'.includes(k)) chooseSection(['intro', 'estrofa', 'coro', 'puente', 'final'][+k - 1]);
+    else if (k.length === 1 && '123456789'.includes(k) && S.song.seq[+k - 1]) choosePart(+k - 1);
   });
 
   // ---------- Microphone tempo listener (beta) ----------
@@ -1698,14 +2380,11 @@ select.native { display: none; }
   // ---------- Boot ----------
   setBpm(S.bpm);
   setMeter(S.meter);
-  buildShakers();
-  buildPadUi();
   $('human').value = S.human; $('humanval').textContent = S.human + ' %';
   setCountUi();
   $('autofill').value = String(S.autoFill);
   $('follow').setAttribute('aria-checked', String(S.follow));
-  if (S.section === 'final') S.section = 'estrofa';
-  buildKeys(); buildChords(); refreshSections(); setFillUi(); renderSongs(); applyLang();
+  applyLang();
   window.acompLoaded = () => Object.keys(SB).length;
   window.acompVersion = () => ({ release: RELEASE, build: BUILD, versions: CHANGELOG.length });
   // For the smoke test: stop the clock as iOS does in the background, and read the rhythm's level.
@@ -1713,7 +2392,9 @@ select.native { display: none; }
   window.acompTest = {
     freeze: clockStop, thaw: clockStart,
     chunks: () => chunks.map((c) => [c.t0, c.t1]),
-    pad: () => ({ kind: padVoices.length ? padVoices[padVoices.length - 1].kind : null, cached: psCache.size, ms: Math.round(psMs) }),
+    pad: () => ({ kind: padVoices.length ? padVoices[padVoices.length - 1].kind : null, cached: psCache.size, ms: Math.round(psMs), notes: (curNotes() || []).length, voices: padVoices.length }),
+    pan: () => CHANNELS.map((k) => (pans[k] && pans[k].pan ? Math.round(pans[k].pan.value * 100) / 100 : 0)),
+    song: () => ({ at: S.at, pend: ui.pend, chord: S.chord, held: [...S.held], seq: [...S.song.seq] }),
     padLevel() {
       if (!padProbe) { padProbe = ctx.createAnalyser(); padProbe.fftSize = 2048; buses.pad.connect(padProbe); }
       const d = new Float32Array(padProbe.fftSize); padProbe.getFloatTimeDomainData(d);

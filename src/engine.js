@@ -15,6 +15,8 @@
     { d: 2, roman: 'iii', minor: true }, { d: 3, roman: 'IV', minor: false },
     { d: 4, roman: 'V', minor: false }, { d: 5, roman: 'vi', minor: true }
   ];
+  // Harmonic function of each degree, for the chord colours: rest (I, iii, vi), moves away (ii, IV), tension (V).
+  const FN = ['rest', 'away', 'rest', 'away', 'tense', 'rest'];
 
   // ---------- Rhythm styles ----------
   // One character per step: X strong, x normal, o soft, g ghost, . silence.
@@ -103,6 +105,40 @@
   const SEC_DYN = { intro: .75, estrofa: .85, coro: 1, puente: .9, final: 1 };
   const SEC_SHK = { intro: .7, estrofa: .85, coro: 1, puente: .8, final: 1 };
   const SEC_PAD = { intro: 650, estrofa: 1000, coro: 2300, puente: 800, final: 2300 };
+  // ---------- Song structure ----------
+  // A song is a list of parts played in order (S.song.seq); each kind of part is defined once (S.song.parts)
+  // with its chords as [degree index, length in bars], 0.5 being half a bar. A part lasts its chords rounded up
+  // to whole bars, so part changes always land on a bar line (the last chord holds the rest); a part without
+  // chords lasts `bars`. Every kind plays with the dynamics, patterns and fills of a base section.
+  // The keys are saved with the songs: never rename them.
+  const PART_SEC = { intro: 'intro', estrofa: 'estrofa', precoro: 'estrofa', coro: 'coro', puente: 'puente', interludio: 'intro', instrumental: 'coro', tag: 'coro', vamp: 'coro', outro: 'intro', final: 'final' };
+  const DEFAULT_SONG = () => ({
+    parts: {
+      intro: { ch: [[0, 2], [3, 2]] },
+      estrofa: { ch: [[0, 2], [4, 1], [5, 1], [3, 2], [0, 1], [4, 1]] },
+      coro: { ch: [[3, 1], [0, 1], [4, 1], [5, .5], [3, .5], [3, 1], [0, 1], [4, 2]] },
+      puente: { ch: [[5, .5], [3, .5], [0, 1], [5, .5], [3, .5], [4, 1]] },
+      final: { ch: [[0, 4]] }
+    },
+    seq: ['intro', 'estrofa', 'coro', 'estrofa', 'coro', 'puente', 'coro', 'final']
+  });
+  // Anything saved is checked here, so a broken or older song never breaks the app (songs before 1.6.0 have none).
+  function validSong(sg) {
+    const out = { parts: {}, seq: [] };
+    if (sg && sg.parts && typeof sg.parts === 'object') for (const [k, p] of Object.entries(sg.parts)) {
+      if (!PART_SEC[k] || !p || !Array.isArray(p.ch)) continue;
+      out.parts[k] = {
+        ch: p.ch.filter((c) => Array.isArray(c) && Number.isInteger(c[0]) && DEGREES[c[0]] && c[1] > 0 && c[1] <= 16 && Number.isInteger(c[1] * 2)).slice(0, 32).map((c) => [c[0], c[1]]),
+        bars: [1, 2, 4, 8, 16].includes(p.bars) ? p.bars : 4
+      };
+    }
+    if (sg && Array.isArray(sg.seq)) out.seq = sg.seq.filter((k) => out.parts[k]).slice(0, 40);
+    return out.seq.length ? out : DEFAULT_SONG();
+  }
+  const fmtBars = (b) => (b >= 1 ? String(Math.floor(b)) : '') + (b % 1 ? '½' : '');
+  // Mix channels; the click is the metronome. Sides: left, centre, right.
+  const CHANNELS = ['shaker', 'drums', 'pad', 'click'];
+  const PAN = { L: -1, C: 0, R: 1 };
   // Pad colours, grouped by the moment of the service they suit.
   // layers: [wave, detune list in cents, semitone offset, gain]. cutoff multiplies the per-part brightness.
   // Optional: air [gain, Hz] adds breathy filtered noise; formant [[Hz, Q, gain]…] shapes the layers like a choir "ah";
@@ -140,11 +176,18 @@
       'song.choose': 'Elegir canción', 'song.label': 'Canción', 'song.none': 'Sin canción guardada', meter: 'Compás', tempo: 'Tempo',
       'status.stopped': 'Detenido', 'status.playing': 'Tocando', 'status.loading': 'Cargando sonidos…',
       'bpm.m1': 'Bajar 1 BPM', 'bpm.m5': 'Bajar 5 BPM', 'bpm.p1': 'Subir 1 BPM', 'bpm.p5': 'Subir 5 BPM',
-      'unit.simple': 'BPM (negra)', 'unit.comp': 'BPM (negra con punto)', ready: 'Listo para empezar', tap: 'Marcar tempo',
-      live: 'Control en vivo', sections: 'Parte de la canción',
-      'sec.intro': 'Intro', 'sec.estrofa': 'Estrofa', 'sec.coro': 'Coro', 'sec.puente': 'Puente', 'sec.final': 'Final',
-      fill: 'Remate', 'fill.active': 'Rematando…', 'fill.queued': 'En espera', play: 'Tocar', stop: 'Parar', next: 'Siguiente parte',
-      counting: 'Conteo de entrada…', bar: (n, part, left) => `Compás ${n} · ${part}` + (left ? ` · remate en ${left}` : ''),
+      'unit.simple': 'BPM', 'unit.comp': 'BPM ♩.', tap: 'Marcar tempo', live: 'Control en vivo', map: 'Mapa de la canción',
+      'sec.intro': 'Intro', 'sec.estrofa': 'Estrofa', 'sec.precoro': 'Pre-coro', 'sec.coro': 'Coro', 'sec.puente': 'Puente', 'sec.interludio': 'Interludio',
+      'sec.instrumental': 'Instrumental', 'sec.tag': 'Tag', 'sec.vamp': 'Vamp', 'sec.outro': 'Outro', 'sec.final': 'Final',
+      'short.intro': 'I', 'short.estrofa': 'E', 'short.precoro': 'PC', 'short.coro': 'C', 'short.puente': 'P', 'short.interludio': 'In',
+      'short.instrumental': 'Ins', 'short.tag': 'T', 'short.vamp': 'V', 'short.outro': 'O', 'short.final': 'F',
+      fill: 'Remate', 'fill.active': 'Rematando…', 'fill.queued': 'En espera', 'fill.nodrums': 'sin batería', play: 'Tocar', stop: 'Parar',
+      'next.small': 'Siguiente', 'next.aria': (p) => 'Siguiente parte: ' + p, counting: 'Conteo…',
+      'pad.prev': 'Sonido de pad anterior', 'pad.next': 'Sonido de pad siguiente', 'pad.choose': 'Elegir sonido de pad', 'pad.of': (i, n) => `${i} de ${n}`,
+      'dial.aria': (k) => `Tono ${k} mayor. Desliza para cambiar de tono o toca para ver la lista`,
+      'fn.rest': 'Reposo', 'fn.away': 'Se aleja', 'fn.tense': 'Tensión', sounding: 'suena',
+      'mode.aria': 'Cómo cambia el pad', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Tónica + 5ª',
+      'hint.fifths': 'Tónica + 5ª: el pad no cambia de acorde', 'hint.held': 'Toca para cambiar · mantén uno y toca otro para sumar', 'hint.silent': 'Pad en silencio · toca un acorde',
       style: 'Estilo', 'shaker.pattern': 'Patrón de shaker', 'shaker.sound': 'Sonido del shaker', feel: 'Interpretación', human: 'Toque humano',
       countin: 'Conteo de entrada', autofill: 'Remate automático', 'autofill.0': 'Apagado', 'autofill.4': 'Cada 4 compases', 'autofill.8': 'Cada 8 compases',
       'mic.cap': 'Micrófono · beta', 'mic.listen': 'Escuchar mi tempo', 'mic.follow': 'La base me sigue',
@@ -154,15 +197,26 @@
       'mic.read': (det, set) => `Detecto <b>${det}</b> BPM · marcado ${set}`, 'mic.fast': 'Te estás acelerando', 'mic.slow': 'Te estás frenando',
       'mic.adjusted': ' · ajusté el tempo', 'mic.suggest': ' · activa "La base me sigue" para que la base te siga', 'mic.ok': 'Vas a tempo.',
       key: 'Tonalidad', 'key.opt': 'Tono', 'pad.sound': 'Sonido del pad', 'pad.fifths': 'Solo tónica y quinta', 'pad.move': 'Movimiento', 'pad.rich': 'Riqueza', names: 'Nombres de notas',
-      'pad.fifths.foot': 'Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde. Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene.',
-      mix: 'Mezcla', 'ch.shaker': 'Percusión', 'ch.drums': 'Batería', 'mute.shaker': 'Activar o silenciar percusión', 'mute.drums': 'Activar o silenciar batería', 'mute.pad': 'Activar o silenciar pad',
-      'vol.shaker': 'Volumen percusión', 'vol.drums': 'Volumen batería', 'vol.pad': 'Volumen pad',
-      'mix.foot': 'Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.', app: 'App', lang: 'Idioma',
+      'pad.foot': 'Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Tocar.',
+      mix: 'Mezcla', 'ch.shaker': 'Shaker', 'ch.drums': 'Batería', 'ch.pad': 'Pad', 'ch.click': 'Clic',
+      'ch.mute': (c) => `Encender o apagar ${c}`, 'ch.vol': (c) => `Volumen ${c}`,
+      pan: 'Paneo', 'pan.center': 'Todo al centro', 'pan.aria': (c) => `Lado de ${c}`, 'side.L': 'Izq', 'side.C': 'Centro', 'side.R': 'Der', 'tag.L': 'IZQ', 'tag.R': 'DER',
+      'pan.foot': 'Centro suena por los dos lados. Con el adaptador USB-C y un cable de 3.5 mm a dos plugs, cada lado entra a su propio canal de la mezcladora.',
+      'mix.foot': 'Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar. Clic es el metrónomo. En iPhone quita el modo silencio si no suena.',
+      struct: 'Estructura de la canción', 'struct.order': 'Orden', 'struct.parts': 'Partes', 'struct.add': '+ Añadir', 'struct.add.aria': 'Añadir una parte al orden', 'struct.new': '+ Nueva parte',
+      'struct.foot.order': 'El orden en que suenan las partes. Toca × para quitar una; Añadir pone una parte al final.',
+      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. Al tocar, la app pasa sola a la parte siguiente y el pad cambia de acorde cuando termina cada uno.',
+      'seq.remove': (p) => 'Quitar ' + p, 'bars.short': 'c.', 'bars.n': (n) => n === 1 ? '1 compás' : n === .5 ? 'medio compás' : `${fmtBars(n)} compases`,
+      'dur.half': 'medio', 'dur.one': 'compás', 'dur.many': 'compases',
+      'part.tap': 'Toca un acorde para añadirlo', 'part.ask': '¿cuántos compases?', cancel: 'Cancelar', 'part.sounds': 'Así suena', 'part.nochords': 'sin acordes',
+      'part.empty': 'Todavía no hay acordes. La parte dura 4 compases y el pad sigue con el que esté sonando.', 'part.remove': (c) => 'Quitar ' + c, 'part.delete': 'Borrar esta parte',
+      'part.foot': 'La parte dura lo que suman sus acordes, redondeado al compás. Al tocar, el pad cambia de acorde justo cuando termina cada uno.',
+      app: 'App', lang: 'Idioma',
       version: 'Versión', 'version.title': 'Novedades', 'version.installed': 'Versión instalada', 'version.build': 'Compilación', 'version.new': 'Nueva lista',
       'version.foot': 'La app se actualiza sola cuando hay internet. La versión nueva se usa la siguiente vez que la abres.',
       'version.ready': '<span class="ok">Ya se descargó una versión nueva.</span> Cierra la app por completo y vuelve a abrirla para usarla. Lo que suena ahora no se interrumpe.',
       credits: 'Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.',
-      'song.name': 'Nombre de la canción', save: 'Guardar', 'save.foot': 'Guarda el tempo, compás, estilo, tono, pad y shaker actuales.', mysongs: 'Mis canciones',
+      'song.name': 'Nombre de la canción', save: 'Guardar', 'save.foot': 'Guarda el tempo, compás, estilo, tono, pad, shaker y la estructura con sus acordes.', mysongs: 'Mis canciones',
       'songs.foot': 'Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.',
       'songs.empty': 'Todavía no hay canciones. Ajusta tempo, compás, estilo y tono, escribe el nombre y pulsa Guardar.',
       del: 'Borrar', 'del.aria': (name) => 'Borrar ' + name,
@@ -173,11 +227,18 @@
       'song.choose': 'Choose song', 'song.label': 'Song', 'song.none': 'No saved song', meter: 'Time signature', tempo: 'Tempo',
       'status.stopped': 'Stopped', 'status.playing': 'Playing', 'status.loading': 'Loading sounds…',
       'bpm.m1': 'Down 1 BPM', 'bpm.m5': 'Down 5 BPM', 'bpm.p1': 'Up 1 BPM', 'bpm.p5': 'Up 5 BPM',
-      'unit.simple': 'BPM (quarter note)', 'unit.comp': 'BPM (dotted quarter)', ready: 'Ready to start', tap: 'Tap tempo',
-      live: 'Live control', sections: 'Song part',
-      'sec.intro': 'Intro', 'sec.estrofa': 'Verse', 'sec.coro': 'Chorus', 'sec.puente': 'Bridge', 'sec.final': 'Ending',
-      fill: 'Fill', 'fill.active': 'Filling…', 'fill.queued': 'Queued', play: 'Play', stop: 'Stop', next: 'Next part',
-      counting: 'Count-in…', bar: (n, part, left) => `Bar ${n} · ${part}` + (left ? ` · fill in ${left}` : ''),
+      'unit.simple': 'BPM', 'unit.comp': 'BPM ♩.', tap: 'Tap tempo', live: 'Live control', map: 'Song map',
+      'sec.intro': 'Intro', 'sec.estrofa': 'Verse', 'sec.precoro': 'Pre-chorus', 'sec.coro': 'Chorus', 'sec.puente': 'Bridge', 'sec.interludio': 'Interlude',
+      'sec.instrumental': 'Instrumental', 'sec.tag': 'Tag', 'sec.vamp': 'Vamp', 'sec.outro': 'Outro', 'sec.final': 'Ending',
+      'short.intro': 'I', 'short.estrofa': 'V', 'short.precoro': 'PC', 'short.coro': 'C', 'short.puente': 'B', 'short.interludio': 'In',
+      'short.instrumental': 'Ins', 'short.tag': 'T', 'short.vamp': 'Vp', 'short.outro': 'O', 'short.final': 'E',
+      fill: 'Fill', 'fill.active': 'Filling…', 'fill.queued': 'Queued', 'fill.nodrums': 'no drums', play: 'Play', stop: 'Stop',
+      'next.small': 'Next', 'next.aria': (p) => 'Next part: ' + p, counting: 'Count-in…',
+      'pad.prev': 'Previous pad sound', 'pad.next': 'Next pad sound', 'pad.choose': 'Choose pad sound', 'pad.of': (i, n) => `${i} of ${n}`,
+      'dial.aria': (k) => `Key of ${k} major. Swipe to change key or tap for the list`,
+      'fn.rest': 'Rest', 'fn.away': 'Moves away', 'fn.tense': 'Tension', sounding: 'on',
+      'mode.aria': 'How the pad changes', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Root + 5th',
+      'hint.fifths': 'Root + 5th: the pad does not change chords', 'hint.held': 'Tap to change · hold one and tap another to add', 'hint.silent': 'Pad silent · tap a chord',
       style: 'Style', 'shaker.pattern': 'Shaker pattern', 'shaker.sound': 'Shaker sound', feel: 'Feel', human: 'Human feel',
       countin: 'Count-in', autofill: 'Auto fill', 'autofill.0': 'Off', 'autofill.4': 'Every 4 bars', 'autofill.8': 'Every 8 bars',
       'mic.cap': 'Microphone · beta', 'mic.listen': 'Listen to my tempo', 'mic.follow': 'Backing follows me',
@@ -187,15 +248,26 @@
       'mic.read': (det, set) => `Hearing <b>${det}</b> BPM · set ${set}`, 'mic.fast': 'You are speeding up', 'mic.slow': 'You are slowing down',
       'mic.adjusted': ' · tempo adjusted', 'mic.suggest': ' · turn on "Backing follows me" so the backing follows you', 'mic.ok': 'You are on tempo.',
       key: 'Key', 'key.opt': 'Key', 'pad.sound': 'Pad sound', 'pad.fifths': 'Root and fifth only', 'pad.move': 'Movement', 'pad.rich': 'Richness', names: 'Note names',
-      'pad.fifths.foot': 'With root and fifth only, one pad works for the whole song without changing chords. Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed.',
-      mix: 'Mix', 'ch.shaker': 'Percussion', 'ch.drums': 'Drums', 'mute.shaker': 'Mute or unmute percussion', 'mute.drums': 'Mute or unmute drums', 'mute.pad': 'Mute or unmute pad',
-      'vol.shaker': 'Percussion volume', 'vol.drums': 'Drums volume', 'vol.pad': 'Pad volume',
-      'mix.foot': 'Tap a channel name to mute it. On iPhone, turn off silent mode if there is no sound.', app: 'App', lang: 'Language',
+      'pad.foot': 'Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed. Root + 5th and Manual mode are on Play.',
+      mix: 'Mix', 'ch.shaker': 'Shaker', 'ch.drums': 'Drums', 'ch.pad': 'Pad', 'ch.click': 'Click',
+      'ch.mute': (c) => `Turn ${c} on or off`, 'ch.vol': (c) => `${c} volume`,
+      pan: 'Pan', 'pan.center': 'All centred', 'pan.aria': (c) => `${c} side`, 'side.L': 'Left', 'side.C': 'Centre', 'side.R': 'Right', 'tag.L': 'L', 'tag.R': 'R',
+      'pan.foot': 'Centre plays on both sides. With the USB-C adapter and a 3.5 mm to two-plug cable, each side goes into its own mixer channel.',
+      'mix.foot': 'Tap a channel name to turn it on or off; you can also do it from Play. Click is the metronome. On iPhone, turn off silent mode if there is no sound.',
+      struct: 'Song structure', 'struct.order': 'Order', 'struct.parts': 'Parts', 'struct.add': '+ Add', 'struct.add.aria': 'Add a part to the order', 'struct.new': '+ New part',
+      'struct.foot.order': 'The order the parts play in. Tap × to remove one; Add puts a part at the end.',
+      'struct.foot.parts': 'Each part has its chords and how long each one lasts. While playing, the app moves on to the next part by itself and the pad changes chord as each one ends.',
+      'seq.remove': (p) => 'Remove ' + p, 'bars.short': 'bars', 'bars.n': (n) => n === 1 ? '1 bar' : n === .5 ? 'half a bar' : `${fmtBars(n)} bars`,
+      'dur.half': 'half', 'dur.one': 'bar', 'dur.many': 'bars',
+      'part.tap': 'Tap a chord to add it', 'part.ask': 'how many bars?', cancel: 'Cancel', 'part.sounds': 'How it goes', 'part.nochords': 'no chords',
+      'part.empty': 'No chords yet. The part lasts 4 bars and the pad keeps whatever chord is playing.', 'part.remove': (c) => 'Remove ' + c, 'part.delete': 'Delete this part',
+      'part.foot': 'The part lasts as long as its chords add up to, rounded to the bar. While playing, the pad changes chord right as each one ends.',
+      app: 'App', lang: 'Language',
       version: 'Version', 'version.title': 'What’s new', 'version.installed': 'Installed version', 'version.build': 'Build', 'version.new': 'New one ready',
       'version.foot': 'The app updates itself when there is internet. The new version is used the next time you open it.',
       'version.ready': '<span class="ok">A new version has downloaded.</span> Close the app completely and open it again to use it. What is playing now is not interrupted.',
       credits: 'Free-to-use recordings (CC0): acoustic drums from freesound.org; shakers, cabasa, tambourine, conga and claps from the Versilian Community Sample Library.',
-      'song.name': 'Song name', save: 'Save', 'save.foot': 'Saves the current tempo, time signature, style, key, pad and shaker.', mysongs: 'My songs',
+      'song.name': 'Song name', save: 'Save', 'save.foot': 'Saves the current tempo, time signature, style, key, pad, shaker and the structure with its chords.', mysongs: 'My songs',
       'songs.foot': 'Tap a song to load it. Tap ✕ twice to delete it.',
       'songs.empty': 'No songs yet. Set the tempo, time signature, style and key, type a name and tap Save.',
       del: 'Delete', 'del.aria': (name) => 'Delete ' + name,
@@ -214,9 +286,9 @@
     $('songtitle').textContent = songTitle || T('song.none');
     $('status').textContent = T(playing ? 'status.playing' : 'status.stopped');
     $('play').setAttribute('aria-label', T(playing ? 'stop' : 'play'));
-    if (!playing) $('barinfo').textContent = T('ready');
     if (!micOn) $('micmsg').textContent = T('mic.hint');
-    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); renderSongs(); renderVersion();
+    setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); buildWin(); drawTiles(); buildMix();
+    renderSeq(); renderParts(); tabTo(structTab); drawPos(); drawPart(); renderSongs(); renderVersion();
   }
 
   // ---------- Version ----------
@@ -256,13 +328,16 @@
   const firstStyle = (m) => Object.keys(STYLES).find(k => STYLES[k].meter === m);
 
   const S = {
-    bpm: 72, meter: '4/4', section: 'estrofa', pending: null, autoFill: 8,
+    bpm: 72, meter: '4/4', at: 0, autoFill: 8,
     key: 7, names: 'latin', chord: 0, style: 'balada44', shaker: 'auto', human: 40, countIn: true,
-    pad: 'atmos', padMode: 'chord', padMove: 50, padRich: 50, shkSound: 'small',
-    layers: { shaker: { on: true, vol: 60 }, drums: { on: true, vol: 75 }, pad: { on: true, vol: 50 } },
-    follow: false, lang: 'es'
+    pad: 'atmos', padMode: 'chord', padHand: 'auto', held: [0], padMove: 50, padRich: 50, shkSound: 'small',
+    // Only the pad on by default; everything in the centre except the click, on the left (the musician's ear).
+    layers: { shaker: { on: false, vol: 60, side: 'C' }, drums: { on: false, vol: 75, side: 'C' }, pad: { on: true, vol: 50, side: 'C' }, click: { on: false, vol: 60, side: 'L' } },
+    song: DEFAULT_SONG(), follow: false, lang: 'es'
   };
-  try { Object.assign(S, JSON.parse(localStorage.getItem('acomp') || '{}'), { pending: null }); } catch (e) {}
+  const LAYERS0 = JSON.parse(JSON.stringify(S.layers));
+  try { Object.assign(S, JSON.parse(localStorage.getItem('acomp') || '{}')); } catch (e) {}
+  delete S.section; delete S.pending;
   if (!STYLES[S.style] || STYLES[S.style].meter !== S.meter) S.style = firstStyle(S.meter);
   if (!SHAKERS[S.shaker]) S.shaker = 'auto';
   if (!PADS[S.pad]) S.pad = 'atmos';
@@ -270,10 +345,41 @@
   S.padMove = pct(S.padMove); S.padRich = pct(S.padRich);
   if (!SHK_SETS[S.shkSound]) S.shkSound = 'small';
   if (!I18N[S.lang]) S.lang = 'es';
+  {
+    // 1.6.0 added the click channel and the sides. A state saved before it starts with the new defaults
+    // (only the pad on) and keeps its volumes.
+    const old = S.layers && typeof S.layers === 'object' ? S.layers : {}, fresh = !old.click;
+    S.layers = {};
+    for (const k of CHANNELS) {
+      const L = old[k] || {}, D = LAYERS0[k];
+      S.layers[k] = { on: fresh ? D.on : !!L.on, vol: Number.isFinite(+L.vol) ? pct(L.vol) : D.vol, side: PAN[L.side] !== undefined ? L.side : D.side };
+    }
+  }
+  S.song = validSong(S.song);
+  if (!Number.isInteger(S.at) || S.at < 0 || S.at >= S.song.seq.length) S.at = 0;
+  if (S.padHand !== 'manual') S.padHand = 'auto';
+  if (!DEGREES[S.chord]) S.chord = 0;
+  S.held = Array.isArray(S.held) ? S.held.filter((c) => Number.isInteger(c) && DEGREES[c]).slice(0, 3) : [S.chord];
   const save = () => { try { localStorage.setItem('acomp', JSON.stringify(S)); } catch (e) {} };
 
+  // Where a song position points: the part at seq index i ('end' is the ending asked from the last part).
+  const partLen = (p) => p && p.ch.length ? Math.max(1, Math.ceil(p.ch.reduce((a, c) => a + c[1], 0) - 1e-9)) : (p && p.bars) || 4;
+  const seqAt = (i) => S.song.seq[Math.max(0, Math.min(i, S.song.seq.length - 1))];
+  const partOf = (i) => S.song.parts[seqAt(i)];
+  const secOf = (i) => i === 'end' ? 'final' : PART_SEC[seqAt(i)];
+  // After the last part, the last part repeats until Siguiente (the ending) or Stop.
+  const nextOf = (i) => i < S.song.seq.length - 1 ? i + 1 : i;
+  const partKeys = () => Object.keys(PART_SEC).filter((k) => S.song.parts[k]);
+  // Repeated parts get a number ("Coro 2"); the map uses short labels ("C2").
+  function partLabel(i, short) {
+    const k = S.song.seq[i];
+    if (!k) return T('sec.final');
+    const n = S.song.seq.filter((x) => x === k).length, nth = S.song.seq.slice(0, i + 1).filter((x) => x === k).length;
+    return T((short ? 'short.' : 'sec.') + k) + (n > 1 ? (short ? '' : ' ') + nth : '');
+  }
+
   // ---------- Audio engine ----------
-  let ctx, master, buses = {}, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
+  let ctx, master, buses = {}, pans = {}, meters = {}, countBus, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
   let playing = false, timer = null, rhythmIn;
   const uiQueue = [];
 
@@ -288,18 +394,30 @@
     const room = ctx.createConvolver(); room.buffer = makeRoom(1.3, 0.008);
     const roomGain = ctx.createGain(); roomGain.gain.value = 0.35;
     room.connect(roomGain); roomGain.connect(master);
+    // Each channel: bus (on/off and volume) → panner → out. The reverbs are fed after the panner, so a channel
+    // sent to one side keeps its echo on that side and each side can go to its own mixer channel.
+    for (const k of CHANNELS) {
+      buses[k] = ctx.createGain();
+      pans[k] = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
+      meters[k] = ctx.createAnalyser(); meters[k].fftSize = 512;
+      buses[k].connect(pans[k]); buses[k].connect(meters[k]);
+    }
     const sends = { shaker: 0.35, drums: 0.25, pad: 0.12 };
     for (const k of ['shaker', 'drums', 'pad']) {
-      buses[k] = ctx.createGain(); buses[k].connect(master);
-      const sg = ctx.createGain(); sg.gain.value = sends[k]; buses[k].connect(sg); sg.connect(room);
+      pans[k].connect(master);
+      const sg = ctx.createGain(); sg.gain.value = sends[k]; pans[k].connect(sg); sg.connect(room);
     }
-    padFilter = ctx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = (SEC_PAD[S.section] || 1000) * PADS[S.pad].cutoff; padFilter.Q.value = PADS[S.pad].q;
+    // The click skips the compressor, which would duck the other channels on every beat.
+    const clickOut = ctx.createGain(); clickOut.gain.value = 0.9; pans.click.connect(clickOut); clickOut.connect(ctx.destination);
+    // The count-in always sounds, even with the click channel off, on the click's side.
+    countBus = ctx.createGain(); countBus.connect(pans.click);
+    padFilter = ctx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = (SEC_PAD[secOf(S.at)] || 1000) * PADS[S.pad].cutoff; padFilter.Q.value = PADS[S.pad].q;
     padFilter.connect(buses.pad);
-    rhythmIn = ctx.createChannelSplitter(3);
-    rhythmIn.connect(buses.shaker, 0); rhythmIn.connect(buses.drums, 1); rhythmIn.connect(master, 2);
+    rhythmIn = ctx.createChannelSplitter(4);
+    rhythmIn.connect(buses.shaker, 0); rhythmIn.connect(buses.drums, 1); rhythmIn.connect(buses.click, 2); rhythmIn.connect(countBus, 3);
     hall = ctx.createConvolver(); hall.buffer = makeRoom(5, 0.025);
     hallSend = ctx.createGain(); hallSend.gain.value = PADS[S.pad].hall * 0.6;
-    buses.pad.connect(hallSend); hallSend.connect(hall); hall.connect(master);
+    pans.pad.connect(hallSend); hallSend.connect(hall); hall.connect(master);
     const lfo = ctx.createOscillator(); padLfo = ctx.createGain();
     // The slow sweep moves the filter in cents, so it scales with each pad's cutoff and never closes a dark pad.
     lfo.frequency.value = 0.08; padLfo.gain.value = sweepCents(); lfo.connect(padLfo); padLfo.connect(padFilter.detune); lfo.start();
@@ -310,9 +428,11 @@
   }
   function applyMix() {
     if (!ctx) return;
-    for (const k of ['shaker', 'drums', 'pad']) {
+    const t = ctx.currentTime;
+    for (const k of CHANNELS) {
       const L = S.layers[k];
-      buses[k].gain.setTargetAtTime(L.on ? (L.vol / 100) ** 1.5 : 0, ctx.currentTime, 0.05);
+      buses[k].gain.setTargetAtTime(L.on ? (L.vol / 100) ** 1.5 : 0, t, 0.05);
+      if (pans[k].pan) pans[k].pan.setTargetAtTime(PAN[L.side], t, 0.02);
     }
   }
   function env(g, t, peak, attack, decay) {
@@ -349,7 +469,8 @@
     shaker: (t, v) => noiseHit(t, buses.shaker, 'bandpass', 6200, 1.2, 0.5 * v, 0.07),
     tamb: (t, v) => { noiseHit(t, buses.shaker, 'bandpass', 9500, 3, 0.5 * v, 0.16); noiseHit(t, buses.shaker, 'highpass', 6000, 0.7, 0.12 * v, 0.06); },
     conga: (t, v) => { toneHit(t, buses.shaker, 'sine', 360, 310, 0.6 * v, 0.2); noiseHit(t, buses.shaker, 'bandpass', 2500, 1, 0.1 * v, 0.02); },
-    click: (t, v) => toneHit(t, master, 'sine', v > .8 ? 2000 : 1500, v > .8 ? 1990 : 1490, 0.5 * v, 0.06)
+    click: (t, v) => toneHit(t, master, 'sine', v > .8 ? 2000 : 1500, v > .8 ? 1990 : 1490, 0.5 * v, 0.06),
+    metro: (t, v) => toneHit(t, buses.click, 'sine', v > .8 ? 2000 : 1500, v > .8 ? 1990 : 1490, 0.5 * v, 0.06)
   };
 
   // ---------- Real recordings, all CC0: acoustic kit from freesound.org (via Sonic Pi),
@@ -434,7 +555,8 @@
     tamb: (t, v) => play(v >= .6 ? pick(['tambHit_1', 'tambHit_2']) : pick(['tambShk_1', 'tambShk_2']), t, vel(v) * .5, buses.shaker)
       || (tambBufs.length ? playBuf(pick(tambBufs), t, vel(v) * .4, buses.shaker) : SYN.tamb(t, v)),
     clap: (t, v) => play(pick(['clap_1', 'clap_2', 'clap_3', 'clap_4']), t, vel(v) * .6, buses.shaker) || SYN.rim(t, v),
-    click: SYN.click
+    click: SYN.click,
+    metro: SYN.metro
   };
   // Synthetic room: a short pre-delay, a few early reflections, then a diffuse tail whose highs die
   // sooner than its lows, as in a real hall. Each channel gets its own noise so the room is wide.
@@ -509,6 +631,16 @@
       case 'power': return [sn(d) - 12, sn(d), sn(d + 4), sn(d) + 12];
       default: return [sn(d) - 12, sn(d), sn(d + 2), sn(d + 4), sn(d) + 12];
     }
+  }
+  // What the pad plays now: root and fifth, the chord the song is on (Auto), or the chords held by hand
+  // (Manual) merged into one chord: shared notes are not doubled and only the first keeps its low bass.
+  function curNotes() {
+    if (S.padMode === 'fifths') return padNotes();
+    if (S.padHand !== 'manual') return padNotes(S.chord);
+    if (!S.held.length) return null;
+    const set = new Set(padNotes(S.held[0]));
+    for (const c of S.held.slice(1)) for (const m of padNotes(c)) if (m >= sn(DEGREES[c].d)) set.add(m);
+    return [...set].sort((a, b) => a - b);
   }
   // ---------- PADsynth ----------
   // Every pad except those marked `osc` is rendered as one seamless stereo loop per chord, after
@@ -608,6 +740,7 @@
   function psPrepare() {
     if (!ctx || PADS[S.pad].osc) return;
     const wanted = S.padMode === 'fifths' ? [padNotes()] : DEGREES.map((_, c) => padNotes(c));
+    const cur = curNotes(); if (cur) wanted.push(cur);
     const keys = new Set(wanted.map(psKey));
     for (const k of psCache.keys()) if (!keys.has(k)) psCache.delete(k);
     psTodo = wanted.filter(n => !psCache.has(psKey(n)));
@@ -625,16 +758,17 @@
     for (const v of padVoices) v.vib.gain.setTargetAtTime(v.vibBase * moveF(), t, 0.2);
   }
   let padRelease = 1;
-  function padStop(fade) {
+  // from: start the fade later (the ending holds its chord a moment). Those voices stay listed, so Stop still cuts them.
+  function padStop(fade, from) {
     if (!ctx) return;
-    const t = ctx.currentTime;
+    const now = ctx.currentTime, t = Math.max(from || 0, now);
     for (const v of padVoices) {
       v.g.gain.cancelScheduledValues(t);
-      v.g.gain.setValueAtTime(v.g.gain.value, t);
+      v.g.gain.setValueAtTime(t > now ? v.lvl : v.g.gain.value, t);
       v.g.gain.linearRampToValueAtTime(0, t + fade);
       v.oscs.forEach(o => { try { o.stop(t + fade + 0.1); } catch (e) {} });
     }
-    padVoices = [];
+    if (t <= now) padVoices = [];
   }
   // swap: cross-fade into the same chord with a new sound (Richness changed) instead of a fresh attack.
   function padPlay(at, swap) {
@@ -642,8 +776,11 @@
     const P = PADS[S.pad];
     padStop(swap ? 1.5 : padRelease);
     padRelease = Math.min(P.release, 1.2);
-    const t = Math.max(at || 0, ctx.currentTime);
-    const notes = padNotes(), buf = !P.osc && psGet(notes);
+    const notes = curNotes();
+    if (!notes) return; // Manual with no chord held: the pad goes silent
+    const t = Math.max(at || 0, ctx.currentTime), buf = !P.osc && psGet(notes);
+    // A merged chord has more notes: keep it as loud as a single one.
+    const lvl = Math.min(1, Math.sqrt(5 / notes.length));
     // Vibrato in cents on oscillators; on a loop the same depth goes to its playback rate.
     const vibBase = buf ? P.vib[1] * Math.LN2 / 1200 : P.vib[1];
     const vib = ctx.createOscillator(), vibG = ctx.createGain();
@@ -695,8 +832,8 @@
       });
     }
     vg.gain.setValueAtTime(0, t);
-    vg.gain.linearRampToValueAtTime(1, t + (swap ? Math.min(P.attack, 1.5) : P.attack));
-    padVoices.push({ g: vg, oscs, vib: vibG, vibBase, kind: buf ? 'ps' : 'osc' });
+    vg.gain.linearRampToValueAtTime(lvl, t + (swap ? Math.min(P.attack, 1.5) : P.attack));
+    padVoices.push({ g: vg, oscs, vib: vibG, vibBase, lvl, kind: buf ? 'ps' : 'osc' });
     psPrepare();
   }
   function padSetup() {
@@ -706,7 +843,7 @@
     hallSend.gain.setTargetAtTime(P.hall * 0.6, ctx.currentTime, 0.3);
     padBright();
   }
-  function padBright(t, sec = S.section) { if (ctx) padFilter.frequency.setTargetAtTime(SEC_PAD[sec] * PADS[S.pad].cutoff * 2 ** (0.4 * richF()), Math.max(t || 0, ctx.currentTime), 0.6); }
+  function padBright(t, sec = secOf(S.at)) { if (ctx) padFilter.frequency.setTargetAtTime(SEC_PAD[sec] * PADS[S.pad].cutoff * 2 ** (0.4 * richF()), Math.max(t || 0, ctx.currentTime), 0.6); }
 
   // ---------- Scheduler ----------
   // The rhythm is rendered ahead as audio, in chunks of up to one phrase, and played by the
@@ -716,14 +853,23 @@
   // Any change cuts what is sounding at the next step and renders a new chunk from there.
   function stepDur() { return 60 / S.bpm / METERS[S.meter].div; }
   const PRE = 0.18, TAIL = 2.5, AHEAD = 4, MAXCHUNK = 16;
-  // q: the sequencer at the end of what is already rendered. The page shows S.section,
-  // S.pending and ui, which follow the audio as it plays.
-  let q = {}, chunks = [], evq = [], R = null, gen = 0, rendering = false, dirty = false, lastCut = 0, want = {};
-  const ui = { queued: false, active: false, counting: false };
+  // q: the sequencer at the end of what is already rendered. The page shows S.at, ui.pend and ui,
+  // which follow the audio as it plays.
+  let q = {}, chunks = [], evq = [], R = null, gen = 0, rendering = false, dirty = false, lastCut = 0, want = {}, endMoved = false;
+  const ui = { queued: false, active: false, counting: false, pend: null };
   const snap = (t) => ({ ...q, t });
   // Something to do when the audio reaches t: right on time (onTime) or just ahead, for audio.
   const ev = (t, fn, onTime) => R.events.push({ t, fn, onTime });
   const changed = () => { if (playing) dirty = true; };
+
+  // The song moves the pad to chord c at time at (Auto only). Returns whether the pad changed chord.
+  function autoChord(c, at, swap) {
+    if (S.padHand !== 'auto' || (c === S.chord && padVoices.length)) return false;
+    S.chord = c;
+    if (S.padMode === 'fifths') return false;
+    padPlay(at, swap);
+    return true;
+  }
 
   function scheduleStep(s, t) {
     const m = S.meter, M = METERS[m];
@@ -733,24 +879,34 @@
     }
     if (q.counting) {
       if (s % M.dotEvery === 0) INST.click(t, M.strong.includes(s) ? 1 : .6);
-      R.ui.push({ s, t, txt: T('counting') });
+      R.ui.push({ s, t, counting: true });
       return;
     }
     if (s === 0) {
       q.bar++; q.phraseBar++;
-      if (q.pend) {
-        const to = q.pend;
-        q.sec = to; q.pend = null; q.phraseBar = 1;
-        if (to === 'final') q.ending = true;
-        ev(t, (at) => padBright(at, to));
-        ev(t, () => { S.section = to; if (S.pending === to) S.pending = null; refreshSections(); }, true);
+      // The part changes on this bar line when asked (q.pend) or when the current part is over.
+      let to = q.pend;
+      if (to === null && q.phraseBar > partLen(partOf(q.at))) to = nextOf(q.at);
+      if (to !== null) {
+        const sec = secOf(to);
+        q.pend = null; q.phraseBar = 1; q.sec = sec;
+        if (to !== 'end') q.at = to;
+        if (sec === 'final') q.ending = true;
+        const at = q.at;
+        ev(t, (when) => padBright(when, sec));
+        ev(t, () => { S.at = at; if (ui.pend === to) ui.pend = null; drawPos(); }, true);
       }
       if (q.crashNext) { INST.crash(t, 1); INST.kick(t, 1); q.crashNext = false; }
       if (q.ending) {
         if (S.layers.shaker.on) INST.shaker(t, .8);
         q.done = true;
-        ev(t, () => padStop(4), true);
-        ev(t + 4.2, () => stop(true), true);
+        // The pad moves to the ending's chord (Auto), holds it a moment and fades out; then the app stops.
+        const fin = to !== 'end' && partOf(q.at).ch[0];
+        ev(t, (when) => { endMoved = !!fin && autoChord(fin[0], when, true); });
+        ev(t, () => { padStop(4, endMoved ? ctx.currentTime + 1.6 : 0); paintWin(); }, true);
+        ev(t + 4.2, () => { if (!endMoved) stop(true); }, true);
+        ev(t + 5.8, () => stop(true), true);
+        R.ui.push({ s, t, at: q.at, bar: 1 });
         return;
       }
     }
@@ -758,20 +914,35 @@
     const pat = secPat(st, q.sec);
     const tt = t + (st.swing && m !== '6/8' && s % 4 === 2 ? st.swing * stepDur() : 0)
       + (st.swing16 && s % 2 === 1 ? st.swing16 * stepDur() : 0);
+    const cur = partOf(q.at);
 
-    // Decide a fill when its start step arrives
+    // Chord changes inside the part, on the half bar at the finest.
+    if (cur.ch.length && s % (M.steps / 2) === 0) {
+      const off = q.phraseBar - 1 + s / M.steps;
+      let b = 0;
+      for (const [c, n] of cur.ch) {
+        if (Math.abs(b - off) < 1e-6) { ev(t, (when) => autoChord(c, when)); ev(t, paintWin, true); break; }
+        b += n; if (b > off + 1e-6) break;
+      }
+    }
+    // Decide a fill when its start step arrives: before a part change (asked, or at the end of a part with
+    // Remate automático on), every S.autoFill bars, or when Remate was tapped. Never with the drums off.
     if (!q.fillActive) {
-      const target = q.pend || q.sec;
+      const to = q.pend !== null ? q.pend : q.phraseBar >= partLen(cur) ? nextOf(q.at) : null;
+      const target = to === null ? q.sec : secOf(to);
       const f = buildFill(target, m);
       if (s === f.start) {
-        const auto = S.autoFill > 0 && q.phraseBar % S.autoFill === 0;
-        if (q.fillQueued || q.pend || auto) {
+        const auto = S.autoFill > 0 && (to !== null || q.phraseBar % S.autoFill === 0);
+        if (!S.layers.drums.on) q.fillQueued = false;
+        else if (q.fillQueued || q.pend !== null || auto) {
           q.fillActive = f; q.fillQueued = false;
           q.crashNext = target !== 'intro' && (target !== 'estrofa' || q.pend !== null);
           ev(t, () => { ui.active = true; ui.queued = false; setFillUi(); }, true);
         }
       }
     }
+    // Click (metronome): always rendered into its own stem; the Clic channel decides whether it is heard.
+    if (s % M.dotEvery === 0) INST.metro(t, M.strong.includes(s) ? 1 : .6);
     // Shaker and hand percussion
     const shk = SEC_SHK[q.sec];
     const sh = shakerStr(st, q.sec);
@@ -792,37 +963,36 @@
       if (q.sec === 'coro' && pat.kick && s === M.steps - 1 && Math.random() < 0.2 * h) hit('kick', tt, .45);
     }
     if (s === M.steps - 1 && q.fillActive) { q.fillActive = null; ev(t + 0.06, () => { ui.active = false; setFillUi(); }, true); }
-    const left = S.autoFill ? S.autoFill - ((q.phraseBar - 1) % S.autoFill) : 0;
-    R.ui.push({ s, t, txt: T('bar', q.bar, T('sec.' + q.sec), left) });
+    R.ui.push({ s, t, at: q.at, bar: q.phraseBar });
   }
 
   // How many steps the next chunk holds: the rest of the bar, one bar when it must sound soon
-  // (start, or right after a change), or up to the end of the phrase (so a background loop
-  // repeats whole phrases, auto fill included).
+  // (start, or right after a change), or up to the end of the part (so a background loop repeats
+  // the end of the part, its fill included), or a whole next part.
   function chunkSteps(soon) {
     const M = METERS[S.meter];
     if (q.step) return M.steps - q.step;
     if (soon || q.countBars > 0) return M.steps;
-    const P = S.autoFill || 4;
-    const bars = q.pend ? P : P - (q.phraseBar % P);
+    const left = partLen(partOf(q.at)) - q.phraseBar;
+    const bars = q.pend !== null ? 1 : left > 0 ? left : partLen(partOf(nextOf(q.at)));
     return Math.max(1, Math.min(bars, Math.floor(MAXCHUNK / (M.steps * stepDur())))) * M.steps;
   }
   const renderOff = (off) => new Promise((res, rej) => {
     off.oncomplete = (e) => res(e.renderedBuffer);
     const p = off.startRendering(); if (p && p.catch) p.catch(rej);
   });
-  // Renders the next chunk with the same instruments, into three stems: percussion, drums, click.
+  // Renders the next chunk with the same instruments, into four stems: percussion, drums, click, count-in.
   async function renderNext(t0, cut) {
     const my = gen;
     rendering = true;
     try {
       const M = METERS[S.meter], n = chunkSteps(cut || !chunks.length), loopable = !q.step && !q.countBars;
       const sr = ctx.sampleRate, OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-      const off = new OAC(3, Math.ceil((PRE + n * stepDur() + TAIL) * sr), sr);
-      const merge = off.createChannelMerger(3); merge.connect(off.destination);
-      const outs = [0, 1, 2].map((i) => { const g = off.createGain(); g.connect(merge, 0, i); return g; });
+      const off = new OAC(4, Math.ceil((PRE + n * stepDur() + TAIL) * sr), sr);
+      const merge = off.createChannelMerger(4); merge.connect(off.destination);
+      const outs = [0, 1, 2, 3].map((i) => { const g = off.createGain(); g.connect(merge, 0, i); return g; });
       const live = { ctx, buses, master };
-      ctx = off; buses = { shaker: outs[0], drums: outs[1] }; master = outs[2]; openHat = null;
+      ctx = off; buses = { shaker: outs[0], drums: outs[1], click: outs[2] }; master = outs[3]; openHat = null;
       R = { events: [], ui: [], snaps: [] };
       let t = PRE;
       try {
@@ -923,7 +1093,10 @@
     gen++; lastCut = ctx.currentTime;
     cutAt(st.t);
     const { t, ...rest } = st; q = rest;
-    if ('pend' in want) q.pend = want.pend === q.sec ? null : want.pend;
+    if ('at' in want) { q.at = want.at; q.sec = secOf(q.at); }
+    q.at = Math.min(q.at, S.song.seq.length - 1);
+    if ('pend' in want) q.pend = want.pend === q.at ? null : want.pend;
+    if (typeof q.pend === 'number' && q.pend >= S.song.seq.length) q.pend = null;
     if ('fill' in want) q.fillQueued = want.fill;
     if (want.reset) { q.step = 0; q.fillActive = null; }
     want = {};
@@ -973,18 +1146,21 @@
     $('status').textContent = T('status.loading');
     await loadSamples();
     playing = true;
-    if (S.section === 'final') S.section = 'coro';
-    S.pending = null; refreshSections();
-    q = { step: 0, bar: 0, phraseBar: 0, sec: S.section, pend: null, fillQueued: false, fillActive: null, crashNext: false, ending: false, counting: false, countBars: S.countIn ? 1 : 0, done: false };
-    Object.assign(ui, { queued: false, active: false, counting: S.countIn });
-    chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false; gen++;
+    if (secOf(S.at) === 'final') S.at = 0;
+    const first = partOf(S.at).ch[0];
+    if (first && S.padHand === 'auto') S.chord = first[0];
+    q = { step: 0, bar: 0, phraseBar: 0, at: S.at, sec: secOf(S.at), pend: null, fillQueued: false, fillActive: null, crashNext: false, ending: false, counting: false, countBars: S.countIn ? 1 : 0, done: false };
+    Object.assign(ui, { queued: false, active: false, counting: S.countIn, pend: null }); pos = null;
+    chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false; endMoved = false; gen++;
     padBright();
     clockStart(); renderNext();
     if (!S.countIn) padPlay();
     $('play').classList.add('stop'); $('play').setAttribute('aria-label', T('stop'));
     $('status').textContent = T('status.playing');
+    paintWin(); drawPos(); setFillUi();
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
   }
+  // soft: the song reached its ending, so the next Play starts from the top.
   function stop(soft) {
     playing = false; gen++; rendering = false;
     clockStop();
@@ -997,36 +1173,82 @@
     }
     chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false;
     padStop(soft ? 0.1 : 0.4);
-    Object.assign(ui, { queued: false, active: false, counting: false });
-    if (S.section === 'final') { S.section = 'estrofa'; }
-    S.pending = null; refreshSections(); setFillUi();
+    Object.assign(ui, { queued: false, active: false, counting: false, pend: null }); pos = null;
+    if (soft) S.at = 0;
+    save(); setFillUi(); paintWin(); drawPos();
     $('play').classList.remove('stop'); $('play').setAttribute('aria-label', T('play'));
     $('status').textContent = T('status.stopped');
-    drawDots(-1); $('barinfo').textContent = T('ready');
     try { wakeLock?.release(); } catch (e) {}
   }
 
   // ---------- UI ----------
-  function drawDots(curStep) {
-    const M = METERS[S.meter];
-    const n = M.steps / M.dotEvery;
-    const box = $('dots');
-    if (box.children.length !== n) {
-      box.innerHTML = '';
-      for (let i = 0; i < n; i++) { const d = document.createElement('div'); d.className = 'dot'; box.appendChild(d); }
-    }
-    [...box.children].forEach((d, i) => {
-      d.classList.toggle('strong', M.strong.includes(i * M.dotEvery));
-      d.classList.toggle('now', curStep >= 0 && Math.floor(curStep / M.dotEvery) === i);
-    });
-  }
+  const CHEV = '<svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg>';
+  // pos: the step the audio is on (from uiQueue), so the screen follows what is heard.
+  let pos = null, flashT = null, nextPart = null;
   function frame() {
     if (ctx && playing) {
       let cur = null;
       while (uiQueue.length && uiQueue[0].t <= ctx.currentTime) cur = uiQueue.shift();
-      if (cur) { drawDots(cur.s); $('barinfo').textContent = cur.txt; }
+      if (cur) {
+        const M = METERS[S.meter];
+        pos = cur; drawPos();
+        if (cur.s % (cur.counting ? M.dotEvery : M.div) === 0) {
+          $('bpm').classList.add('flash'); clearTimeout(flashT); flashT = setTimeout(() => $('bpm').classList.remove('flash'), 110);
+        }
+      }
     }
+    drawLeds();
     requestAnimationFrame(frame);
+  }
+  // Part line, song map and Siguiente: where the song is, what comes next, what is waiting for the next bar.
+  function drawPos() {
+    const seq = S.song.seq, steps = METERS[S.meter].steps, live = playing && pos && !pos.counting;
+    const at = Math.min(live ? pos.at : S.at, seq.length - 1), len = partLen(partOf(at)), bar = live ? pos.bar : 0;
+    const nx = ui.pend !== null ? ui.pend : at < seq.length - 1 ? at + 1 : null;
+    const box = $('map');
+    if (box.children.length !== seq.length) {
+      box.textContent = '';
+      seq.forEach((_, i) => {
+        const b = document.createElement('button'); b.type = 'button';
+        b.innerHTML = '<span class="seg-bar"><i></i></span><span class="lb"></span>';
+        b.addEventListener('click', () => choosePart(i));
+        box.appendChild(b);
+      });
+    }
+    [...box.children].forEach((b, i) => {
+      b.style.flex = partLen(partOf(i));
+      b.className = i === at ? 'now' : i === ui.pend ? 'pending' : i === nx ? 'next' : '';
+      b.setAttribute('aria-label', partLabel(i)); b.lastChild.textContent = partLabel(i, true);
+      b.firstChild.firstChild.style.width = i === at && live ? Math.min(100, (bar - 1 + (pos.s + 1) / steps) / len * 100) + '%' : '0';
+    });
+    $('partname').textContent = partLabel(at);
+    const pp = $('partpos'); pp.textContent = '';
+    if (playing && pos && pos.counting) pp.textContent = T('counting');
+    else {
+      pp.append(`${bar}/${len}`);
+      if (nx !== null) { const b = document.createElement('b'); b.textContent = partLabel(nx); pp.append(' → ', b); }
+    }
+    const base = ui.pend !== null ? ui.pend : at;
+    const nb = base === 'end' ? null : base < seq.length - 1 ? base + 1 : secOf(base) === 'final' ? null : 'end';
+    nextPart = nb === null || (!playing && nb === 'end') ? null : nb;
+    $('next').disabled = nextPart === null;
+    $('nextname').textContent = nextPart === null ? '—' : partLabel(nextPart);
+    $('next').setAttribute('aria-label', T('next.aria', $('nextname').textContent));
+  }
+  // A part on the map (or Siguiente). Stopped: Play starts there. Playing: it comes in on the next bar, with a
+  // fill before it. The part that is playing asks for a fill instead.
+  function choosePart(i) {
+    if (!playing) {
+      if (i === 'end') return;
+      S.at = i;
+      const first = partOf(i).ch[0];
+      if (first && S.padHand === 'auto') S.chord = first[0];
+      save(); padBright(); drawPos(); paintWin();
+      return;
+    }
+    const at = pos && !pos.counting ? pos.at : S.at;
+    if (i === at && ui.pend === null) { $('fill').click(); return; }
+    ui.pend = i === at ? null : i; want.pend = i; drawPos(); changed();
   }
 
   function setBpm(v) {
@@ -1034,34 +1256,348 @@
     $('bpm').textContent = Number.isInteger(S.bpm) ? S.bpm : S.bpm.toFixed(1);
     save(); changed();
   }
-  function refreshSections() {
-    document.querySelectorAll('#sections button').forEach(b => {
-      b.classList.toggle('on', b.dataset.s === S.section);
-      b.classList.toggle('pending', b.dataset.s === S.pending);
-    });
+  // Remate needs the drums: with them off it is greyed and says so.
+  function setFillUi() {
+    const off = !S.layers.drums.on, f = $('fill');
+    f.disabled = off; $('fillnote').hidden = !off;
+    f.classList.toggle('armed', !off && (ui.queued || ui.active));
+    $('filllbl').textContent = T(ui.active ? 'fill.active' : ui.queued ? 'fill.queued' : 'fill');
   }
-  function setFillUi() { $('fill').classList.toggle('armed', ui.queued || ui.active); $('filllbl').textContent = T(ui.active ? 'fill.active' : ui.queued ? 'fill.queued' : 'fill'); }
-  function chooseSection(s) {
-    if (!playing) { S.section = s === 'final' ? 'coro' : s; refreshSections(); padBright(); save(); return; }
-    if (s === S.section && !S.pending) { ui.queued = want.fill = true; setFillUi(); changed(); return; }
-    S.pending = want.pend = s; refreshSections(); changed();
-  }
+
+  // ---------- Key: list in circle-of-fifths order, and the dial on Tocar ----------
+  const FIFTHS = [0, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10, 5];
+  const SIG = ['', '1♯', '2♯', '3♯', '4♯', '5♯', '6♯', '5♭', '4♭', '3♭', '2♭', '1♭'];
   function buildKeys() {
     const k = $('key'); k.innerHTML = '';
-    NAMES[S.names].forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = T('key.opt') + ' ' + n; k.appendChild(o); });
+    FIFTHS.forEach((i, n) => { const o = document.createElement('option'); o.value = i; o.textContent = NAMES[S.names][i]; o.dataset.sub = SIG[n]; k.appendChild(o); });
     k.value = S.key; $('names').value = S.names;
+    drawDial();
   }
-  function buildChords() {
-    const box = $('chords'); box.innerHTML = '';
-    DEGREES.forEach((g, i) => {
-      const b = document.createElement('button');
-      const name = NAMES[S.names][(S.key + SCALE[g.d]) % 12] + (g.minor ? 'm' : '');
-      b.innerHTML = `<b></b><span>${g.roman}</span>`; b.querySelector('b').textContent = name;
-      b.classList.toggle('on', i === S.chord);
-      b.addEventListener('click', () => { S.chord = i; save(); buildChords(); padPlay(); });
-      box.appendChild(b);
+  function drawDial() {
+    const N = NAMES[S.names], box = $('dialnames'); box.textContent = '';
+    for (let k = -4; k <= 4; k++) {
+      const el = document.createElement('span'); el.className = 'd' + Math.abs(k); el.textContent = N[(S.key + 7 * k + 120) % 12];
+      box.appendChild(el);
+    }
+    $('dial').setAttribute('aria-label', T('dial.aria', N[S.key]));
+  }
+  function setKey(k) {
+    S.key = ((k % 12) + 12) % 12; $('key').value = S.key;
+    save(); drawDial(); buildWin(); renderParts(); drawPart(); padPlay();
+  }
+  // Drag sideways to move along the circle of fifths (it sounds when you let go); tap to open the list.
+  {
+    const dial = $('dial'), names = $('dialnames');
+    let drag = null;
+    const end = (tap) => {
+      if (!drag) return;
+      const d = drag; drag = null; names.style.transform = '';
+      if (d.moved) { if (S.key !== d.key) setKey(S.key); } else if (tap) window.acompMenu?.('key', dial);
+    };
+    dial.addEventListener('pointerdown', (e) => {
+      drag = { x: e.clientX, moved: false, cell: dial.clientWidth / 9, key: S.key };
+      try { dial.setPointerCapture(e.pointerId); } catch (x) {}
+    });
+    dial.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (Math.abs(dx) > 6) drag.moved = true;
+      if (Math.abs(dx) >= drag.cell * .8) { S.key = (S.key + (dx < 0 ? 7 : 5)) % 12; drag.x = e.clientX; names.style.transform = ''; drawDial(); buildWin(); }
+      else if (drag.moved) names.style.transform = `translateX(${dx}px)`;
+    });
+    dial.addEventListener('pointerup', () => end(true));
+    dial.addEventListener('pointercancel', () => end(false));
+    dial.addEventListener('click', (e) => { if (e.detail === 0) window.acompMenu?.('key', dial); });
+    dial.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); setKey(S.key + 7); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); setKey(S.key + 5); }
     });
   }
+
+  // ---------- Chord window ----------
+  // IV I V over ii vi iii: the key's chords in circle-of-fifths order, with the neighbours outside the key
+  // greyed at the sides. Colours by function: rest, moves away, tension. The chord that sounds is lit.
+  const chordName = (c) => NAMES[S.names][(S.key + SCALE[DEGREES[c].d]) % 12] + (DEGREES[c].minor ? 'm' : '');
+  const noteName = (pc) => NAMES[S.names][((pc % 12) + 12) % 12];
+  const sounding = () => S.padMode === 'fifths' ? [] : S.padHand === 'manual' ? S.held : [S.chord];
+  const press = new Map(); // Manual: chords under a finger → long-press timer (null once it counts as held)
+  function buildWin() {
+    press.clear();
+    const cell = (c, size) => `<button type="button" class="${FN[c]} ${size}" data-c="${c}"><b></b><span></span></button>`;
+    const w = $('win');
+    w.innerHTML = '<span class="frame"></span>'
+      + `<div class="col nb l" aria-hidden="true"><span class="big"></span><span class="small"></span></div>`
+      + `<div class="col">${cell(3, 'big')}${cell(1, 'small')}</div><div class="col">${cell(0, 'big')}${cell(5, 'small')}</div><div class="col">${cell(4, 'big')}${cell(2, 'small')}</div>`
+      + `<div class="col nb r" aria-hidden="true"><span class="big"></span><span class="small"></span></div>`;
+    const nb = w.querySelectorAll('.nb span');
+    nb[0].textContent = noteName(S.key + 10); nb[1].textContent = noteName(S.key + 7) + 'm';
+    nb[2].textContent = noteName(S.key + 2); nb[3].textContent = noteName(S.key + 11) + 'm';
+    w.querySelectorAll('button').forEach((b) => {
+      const c = +b.dataset.c;
+      b.firstChild.textContent = chordName(c);
+      const pickOne = () => {
+        if (S.padHand === 'auto') { S.chord = c; save(); paintWin(); padPlay(); return; }
+        S.held = S.held.length === 1 && S.held[0] === c ? [] : [c]; heldChanged();
+      };
+      b.addEventListener('pointerdown', (e) => {
+        if (S.padMode === 'fifths') return;
+        if (S.padHand === 'auto') { pickOne(); return; }
+        // Manual: a tap replaces the chord (tapping the only one silences the pad); holding one chord down,
+        // or a long press, adds or removes another, up to three.
+        try { b.setPointerCapture(e.pointerId); } catch (x) {}
+        if (press.size) {
+          for (const [k, tm] of press) { clearTimeout(tm); press.set(k, null); }
+          press.set(c, null); toggleHeld(c); return;
+        }
+        press.set(c, setTimeout(() => { press.set(c, null); toggleHeld(c); }, 450));
+      });
+      b.addEventListener('pointerup', () => {
+        if (!press.has(c)) return;
+        const tm = press.get(c); press.delete(c);
+        if (tm) { clearTimeout(tm); pickOne(); }
+      });
+      b.addEventListener('pointercancel', () => { clearTimeout(press.get(c)); press.delete(c); });
+      b.addEventListener('click', (e) => { if (e.detail === 0 && S.padMode !== 'fifths') pickOne(); });
+      b.addEventListener('contextmenu', (e) => e.preventDefault());
+    });
+    paintWin();
+  }
+  function paintWin() {
+    const on = sounding(), fifths = S.padMode === 'fifths';
+    $('win').classList.toggle('off', fifths);
+    $('win').querySelectorAll('button').forEach((b) => {
+      const c = +b.dataset.c, lit = on.includes(c);
+      b.classList.toggle('on', lit); b.setAttribute('aria-pressed', String(lit));
+      b.lastChild.textContent = DEGREES[c].roman + (lit && playing ? ' · ' + T('sounding') : '');
+    });
+    const manual = S.padHand === 'manual';
+    $('legend').hidden = manual; $('hint').hidden = !manual;
+    $('hint').textContent = T(fifths ? 'hint.fifths' : S.held.length ? 'hint.held' : 'hint.silent');
+    document.querySelectorAll('#mode button').forEach((b) => { const o = b.dataset.m === S.padHand; b.classList.toggle('on', o); b.setAttribute('aria-checked', String(o)); });
+    $('padmode').setAttribute('aria-checked', String(fifths));
+  }
+  function toggleHeld(c) {
+    const i = S.held.indexOf(c);
+    if (i >= 0) S.held.splice(i, 1); else { S.held.push(c); if (S.held.length > 3) S.held.shift(); }
+    heldChanged();
+  }
+  function heldChanged() { save(); paintWin(); padPlay(); }
+  // The chord the song is on right now (or where Play starts), for going back to Auto.
+  function songChord() {
+    const live = playing && pos && !pos.counting, P = partOf(live ? pos.at : S.at);
+    if (!P.ch.length) return S.chord;
+    let off = live ? pos.bar - 1 + pos.s / METERS[S.meter].steps : 0, last = P.ch[0][0];
+    for (const [c, n] of P.ch) { if (off < n - 1e-6) return c; off -= n; last = c; }
+    return last;
+  }
+  function setHand(m) {
+    if (S.padHand === m) return;
+    S.padHand = m;
+    if (m === 'manual') S.held = [S.chord]; else S.chord = songChord();
+    save(); paintWin(); padPlay();
+  }
+
+  // ---------- Channels: tiles on Tocar, mix and pan in Sonido ----------
+  const leds = {};
+  function drawTiles() {
+    const box = $('tiles');
+    if (!box.children.length) for (const k of CHANNELS) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'tile'; b.dataset.ch = k;
+      b.innerHTML = '<span class="led"></span><span class="tl"></span><span class="side"></span>';
+      b.addEventListener('click', () => setLayer(k, !S.layers[k].on));
+      leds[k] = b.firstChild; box.appendChild(b);
+    }
+    for (const b of box.children) {
+      const L = S.layers[b.dataset.ch];
+      b.classList.toggle('on', L.on); b.setAttribute('aria-pressed', String(L.on));
+      b.children[1].textContent = T('ch.' + b.dataset.ch);
+      b.children[2].textContent = L.side === 'C' ? '' : T('tag.' + L.side);
+    }
+  }
+  // The green LED on each tile follows that channel's level, so a channel that is on but silent is easy to spot.
+  const lvBuf = new Float32Array(512);
+  function drawLeds() {
+    if (!ctx) return;
+    for (const k of CHANNELS) {
+      if (!S.layers[k].on || !leds[k]) continue;
+      meters[k].getFloatTimeDomainData(lvBuf);
+      let e = 0; for (let i = 0; i < lvBuf.length; i++) e += lvBuf[i] * lvBuf[i];
+      const db = 20 * Math.log10(Math.sqrt(e / lvBuf.length) + 1e-6);
+      leds[k].style.opacity = playing ? Math.max(.25, Math.min(1, (db + 50) / 30)) : 1;
+    }
+  }
+  function setLayer(k, on) {
+    S.layers[k].on = on; applyMix(); save(); drawTiles(); paintMix();
+    if (k === 'drums') { if (!on) { ui.queued = false; if (playing) want.fill = false; } setFillUi(); changed(); }
+  }
+  let panOpen = false;
+  function buildMix() {
+    const box = $('mix'); box.textContent = '';
+    for (const k of CHANNELS) {
+      const r = document.createElement('div'); r.className = 'row';
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ch'; b.id = 'on-' + k; b.setAttribute('role', 'switch');
+      b.textContent = T('ch.' + k); b.setAttribute('aria-label', T('ch.mute', T('ch.' + k)));
+      b.addEventListener('click', () => setLayer(k, !S.layers[k].on));
+      const v = document.createElement('input'); v.type = 'range'; v.min = 0; v.max = 100; v.id = 'v-' + k; v.value = S.layers[k].vol;
+      v.setAttribute('aria-label', T('ch.vol', T('ch.' + k)));
+      v.addEventListener('input', () => { S.layers[k].vol = +v.value; applyMix(); save(); });
+      const tag = document.createElement('span'); tag.className = 'tag'; tag.id = 'tag-' + k;
+      r.append(b, v, tag); box.appendChild(r);
+    }
+    // Pan sides fold away under one row; folded, the row sums up what is not in the centre.
+    const f = document.createElement('button'); f.type = 'button'; f.className = 'row link fold'; f.id = 'panfold';
+    f.innerHTML = `<span class="lbl"></span><span class="val" id="pansum"></span>${CHEV}`; f.firstChild.textContent = T('pan');
+    f.addEventListener('click', () => { panOpen = !panOpen; paintMix(); });
+    const pr = document.createElement('div'); pr.className = 'panrows'; pr.id = 'panrows';
+    for (const k of CHANNELS) {
+      const r = document.createElement('div'); r.className = 'row';
+      const l = document.createElement('span'); l.className = 'lbl'; l.textContent = T('ch.' + k);
+      const seg = document.createElement('div'); seg.className = 'seg'; seg.setAttribute('role', 'radiogroup'); seg.setAttribute('aria-label', T('pan.aria', T('ch.' + k)));
+      for (const sd of ['L', 'C', 'R']) {
+        const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.ch = k; b.dataset.side = sd; b.textContent = T('side.' + sd);
+        b.addEventListener('click', () => { S.layers[k].side = sd; applyMix(); save(); paintMix(); drawTiles(); });
+        seg.appendChild(b);
+      }
+      r.append(l, seg); pr.appendChild(r);
+    }
+    const n = document.createElement('p'); n.className = 'panfoot'; n.textContent = T('pan.foot'); pr.appendChild(n);
+    box.append(f, pr);
+    paintMix();
+  }
+  function paintMix() {
+    for (const k of CHANNELS) {
+      const L = S.layers[k], b = $('on-' + k);
+      b.classList.toggle('on', L.on); b.setAttribute('aria-checked', String(L.on));
+      $('tag-' + k).textContent = L.side === 'C' ? '' : T('side.' + L.side);
+    }
+    document.querySelectorAll('#panrows button').forEach((b) => { const o = S.layers[b.dataset.ch].side === b.dataset.side; b.classList.toggle('on', o); b.setAttribute('aria-checked', String(o)); });
+    $('panfold').setAttribute('aria-expanded', String(panOpen)); $('panrows').hidden = !panOpen;
+    $('pansum').textContent = panOpen ? '' : CHANNELS.filter((k) => S.layers[k].side !== 'C').map((k) => `${T('ch.' + k)} ${T('side.' + S.layers[k].side).toLowerCase()}`).join(', ') || T('pan.center');
+  }
+
+  // ---------- Song structure (Sonido): Orden and Partes, and the part editor ----------
+  let structTab = 'orden', editing = null, adding = null, selChord = null;
+  const addChip = $('addchip');
+  function tabTo(w) {
+    structTab = w; const o = w === 'orden';
+    $('t-orden').classList.toggle('on', o); $('t-partes').classList.toggle('on', !o);
+    $('t-orden').setAttribute('aria-selected', String(o)); $('t-partes').setAttribute('aria-selected', String(!o));
+    $('p-orden').hidden = !o; $('p-partes').hidden = o;
+    $('structfoot').textContent = T(o ? 'struct.foot.order' : 'struct.foot.parts');
+  }
+  function renderSeq() {
+    const box = $('seq'); box.textContent = '';
+    S.song.seq.forEach((k, i) => {
+      const c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.setAttribute('aria-label', T('seq.remove', partLabel(i)));
+      c.innerHTML = '<span class="n"></span><span></span><span class="x" aria-hidden="true">×</span>';
+      c.children[0].textContent = i + 1; c.children[1].textContent = partLabel(i);
+      c.disabled = S.song.seq.length <= 1;
+      c.addEventListener('click', () => { if (S.song.seq.length > 1) dropFromSeq((_, j) => j === i); });
+      box.appendChild(c);
+    });
+    box.appendChild(addChip);
+    // "+ Añadir" opens a menu of the parts already defined.
+    const sel = $('addpart'); sel.textContent = '';
+    for (const k of partKeys()) { const o = new Option(T('sec.' + k), k); o.dataset.sub = T('bars.n', partLen(S.song.parts[k])); sel.appendChild(o); }
+    sel.selectedIndex = -1;
+  }
+  function renderParts() {
+    const box = $('partlist'); box.textContent = '';
+    for (const k of partKeys()) {
+      const P = S.song.parts[k], r = document.createElement('button'); r.type = 'button'; r.className = 'row link';
+      r.innerHTML = `<span class="lbl"></span><span class="val"></span>${CHEV}`;
+      r.children[0].textContent = T('sec.' + k);
+      r.children[1].textContent = `${partLen(P)} ${T('bars.short')} · ` + (P.ch.map(([c, n]) => chordName(c) + (n === 1 ? '' : ' ' + fmtBars(n))).join(' · ') || T('part.nochords'));
+      r.addEventListener('click', () => editPart(k));
+      box.appendChild(r);
+    }
+    const sel = $('newpart'); sel.textContent = '';
+    for (const k of Object.keys(PART_SEC)) if (!S.song.parts[k]) sel.appendChild(new Option(T('sec.' + k), k));
+    sel.selectedIndex = -1; $('newrow').hidden = !sel.options.length;
+  }
+  // Removes the matching items of the order and keeps Play (or what is playing) on the same part.
+  function dropFromSeq(pred) {
+    const old = S.song.seq, gone = old.map((k, i) => pred(k, i));
+    const at = S.at - gone.slice(0, S.at).filter(Boolean).length;
+    S.song.seq = old.filter((_, i) => !gone[i]);
+    if (!S.song.seq.length) S.song.seq = [partKeys()[0]];
+    S.at = Math.max(0, Math.min(at, S.song.seq.length - 1));
+    songChanged(true);
+  }
+  function songChanged(moved) {
+    save(); renderSeq(); renderParts(); drawPos();
+    if (playing) { if (moved) { ui.pend = null; want.pend = null; want.at = S.at; } changed(); }
+  }
+  function editPart(k) { editing = k; adding = null; selChord = null; drawPart(); window.acompShow?.('parte'); }
+  // Part editor: chords first. Tapping one asks how long it lasts and adds it; tapping one already in the
+  // list opens its length and Quitar. The part lasts what its chords add up to.
+  const DUR_BTN = [[.5, '½', 'dur.half'], [1, '1', 'dur.one'], [2, '2', 'dur.many'], [4, '4', 'dur.many']];
+  function durButtons(cur, onPick) {
+    const box = document.createElement('div'); box.className = 'durs';
+    for (const [n, big, small] of DUR_BTN) {
+      const x = document.createElement('button'); x.type = 'button'; x.className = cur === n ? 'on' : ''; x.setAttribute('aria-label', T('bars.n', n));
+      x.innerHTML = `<b>${big}</b><span></span>`; x.lastChild.textContent = T(small);
+      x.addEventListener('click', () => onPick(n)); box.appendChild(x);
+    }
+    return box;
+  }
+  function drawPart() {
+    const P = editing && S.song.parts[editing];
+    if (!P) return;
+    $('ptitle').textContent = T('sec.' + editing);
+    const degs = $('degs'); degs.textContent = '';
+    DEGREES.forEach((g, c) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = FN[c] + (adding === c ? ' on' : '');
+      b.innerHTML = '<b></b><span></span>'; b.firstChild.textContent = chordName(c); b.lastChild.textContent = g.roman;
+      b.addEventListener('click', () => { adding = adding === c ? null : c; selChord = null; drawPart(); });
+      degs.appendChild(b);
+    });
+    const ask = $('ask'); ask.textContent = ''; ask.hidden = adding === null;
+    if (adding !== null) {
+      const h = document.createElement('div'); h.className = 'askh';
+      const label = document.createElement('span'), name = document.createElement('b');
+      name.textContent = chordName(adding); label.append(name, ' · ' + T('part.ask'));
+      const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'cancel'; cancel.textContent = T('cancel');
+      cancel.addEventListener('click', () => { adding = null; drawPart(); });
+      h.append(label, cancel);
+      ask.append(h, durButtons(null, (n) => { if (P.ch.length < 32) P.ch.push([adding, n]); adding = null; partEdited(); }));
+    }
+    const box = $('prog'); box.textContent = '';
+    $('progcap').textContent = T('part.sounds') + (P.ch.length ? ' · ' + T('bars.n', partLen(P)) : '');
+    if (!P.ch.length) {
+      const r = document.createElement('div'); r.className = 'row';
+      r.innerHTML = '<span class="lbl empty"></span>'; r.firstChild.textContent = T('part.empty'); box.appendChild(r);
+    }
+    P.ch.forEach(([c, n], i) => {
+      const r = document.createElement('button'); r.type = 'button'; r.className = 'row link prow' + (i === selChord ? ' sel' : '');
+      r.setAttribute('aria-expanded', String(i === selChord));
+      r.innerHTML = `<span class="n"></span><span class="cn ${FN[c]}"></span><span class="lbl"></span><span class="val"></span>${CHEV}`;
+      r.children[0].textContent = i + 1; r.children[1].textContent = chordName(c); r.children[3].textContent = T('bars.n', n);
+      r.addEventListener('click', () => { selChord = i === selChord ? null : i; adding = null; drawPart(); });
+      box.appendChild(r);
+      if (i === selChord) {
+        const ed = document.createElement('div'); ed.className = 'edit';
+        const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = T('part.remove', chordName(c));
+        rm.addEventListener('click', () => { P.ch.splice(i, 1); selChord = null; partEdited(); });
+        ed.append(durButtons(n, (m) => { P.ch[i][1] = m; selChord = null; partEdited(); }), rm);
+        box.appendChild(ed);
+      }
+    });
+    $('pdel').hidden = partKeys().length <= 1;
+  }
+  function partEdited() { drawPart(); songChanged(false); }
+  $('t-orden').addEventListener('click', () => tabTo('orden'));
+  $('t-partes').addEventListener('click', () => tabTo('partes'));
+  $('addpart').addEventListener('change', (e) => { if (S.song.seq.length < 40) S.song.seq.push(e.target.value); songChanged(false); });
+  $('newpart').addEventListener('change', (e) => { const k = e.target.value; S.song.parts[k] = { ch: [], bars: 4 }; songChanged(false); editPart(k); });
+  $('pdel').addEventListener('click', () => {
+    const k = editing;
+    if (!k || partKeys().length <= 1) return;
+    delete S.song.parts[k]; editing = null;
+    dropFromSeq((x) => x === k);
+    window.acompShow?.('sonido');
+  });
+
   function buildStyles() {
     const sel = $('style'); sel.innerHTML = '';
     for (const [id, st] of Object.entries(STYLES)) {
@@ -1079,7 +1615,7 @@
   function setMeter(m) {
     S.meter = m; if (playing) { want.reset = true; changed(); }
     $('meter').value = m;
-    setUnit(); buildStyles(); drawDots(-1); save();
+    setUnit(); buildStyles(); drawPos(); save();
   }
   function setUnit() { $('bpmunit').textContent = T(S.meter === '6/8' ? 'unit.comp' : 'unit.simple'); }
   function buildPadUi() {
@@ -1093,23 +1629,20 @@
     const shs = $('shksound'); shs.innerHTML = '';
     for (const [id, x] of Object.entries(SHK_SETS)) { const o = document.createElement('option'); o.value = id; o.textContent = NM(x); shs.appendChild(o); }
     shs.value = S.shkSound;
-    $('padmode').setAttribute('aria-checked', String(S.padMode === 'fifths'));
     $('padmove').value = S.padMove; $('padmoveval').textContent = S.padMove + ' %';
     $('padrich').value = S.padRich; $('padrichval').textContent = S.padRich + ' %';
-    $('padinfo').textContent = NAMES[S.names][S.key] + ' · ' + NM(PADS[S.pad]);
-    $('chords').classList.toggle('muted', S.padMode === 'fifths');
+    const ids = Object.keys(PADS), P = PADS[S.pad];
+    $('padname').textContent = NM(P);
+    $('padsub').textContent = `${T('groups')[P.group] || P.group} · ${T('pad.of', ids.indexOf(S.pad) + 1, ids.length)}`;
+    paintWin();
   }
+  const stepPad = (n) => { const ids = Object.keys(PADS), s = $('padtype'); s.value = ids[(ids.indexOf(S.pad) + n + ids.length) % ids.length]; s.dispatchEvent(new Event('change')); };
   function setCountUi() { $('countin').setAttribute('aria-checked', String(S.countIn)); }
-  function bindLayer(k) {
-    const btn = $('on-' + k), sl = $('v-' + k);
-    btn.classList.toggle('on', S.layers[k].on); sl.value = S.layers[k].vol;
-    btn.addEventListener('click', () => { S.layers[k].on = !S.layers[k].on; btn.classList.toggle('on', S.layers[k].on); applyMix(); save(); });
-    sl.addEventListener('input', () => { S.layers[k].vol = +sl.value; applyMix(); save(); });
-  }
 
   // ---------- Song list (kept in this browser) ----------
   let songs = [], songTitle = null;
   try { songs = JSON.parse(localStorage.getItem('acomp-songs') || '[]'); } catch (e) {}
+  if (!Array.isArray(songs)) songs = [];
   const saveSongs = () => { try { localStorage.setItem('acomp-songs', JSON.stringify(songs)); } catch (e) {} };
   function renderSongs() {
     const box = $('songs'); box.innerHTML = '';
@@ -1125,10 +1658,16 @@
       load.innerHTML = '<b></b><span></span>'; load.querySelector('b').textContent = sg.name; load.querySelector('span').textContent = meta;
       load.addEventListener('click', () => {
         setBpm(sg.bpm); setMeter(sg.meter);
-        S.style = sg.style; S.key = sg.key; S.shaker = sg.shaker || 'auto'; S.chord = 0;
+        S.style = sg.style; S.key = sg.key; S.shaker = sg.shaker || 'auto';
         if (PADS[sg.pad]) S.pad = sg.pad; if (sg.padMode) S.padMode = sg.padMode; S.padMove = pct(sg.padMove); S.padRich = pct(sg.padRich); if (SHK_SETS[sg.shkSound]) S.shkSound = sg.shkSound;
+        if (sg.padHand === 'auto' || sg.padHand === 'manual') S.padHand = sg.padHand;
+        // Songs saved before 1.6.0 have no structure: they get the default one.
+        S.song = validSong(sg.song);
+        S.at = playing ? Math.min(S.at, S.song.seq.length - 1) : 0;
+        S.chord = partOf(S.at).ch.length ? partOf(S.at).ch[0][0] : 0; S.held = [S.chord];
         buildPadUi(); padSetup();
-        buildStyles(); buildShakers(); buildKeys(); buildChords(); save(); padPlay();
+        buildStyles(); buildShakers(); buildKeys(); buildWin(); renderSeq(); renderParts(); drawPos(); save(); padPlay();
+        if (playing) { ui.pend = null; want.pend = null; want.at = S.at; changed(); }
         $('songname').value = sg.name; songTitle = sg.name; $('songtitle').textContent = sg.name;
       });
       const del = document.createElement('button'); del.className = 'songdel'; del.textContent = '✕'; del.setAttribute('aria-label', T('del.aria', sg.name));
@@ -1142,7 +1681,7 @@
   $('savesong').addEventListener('click', () => {
     const name = $('songname').value.trim();
     if (!name) { $('songname').focus(); return; }
-    const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, padMove: S.padMove, padRich: S.padRich, shkSound: S.shkSound };
+    const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, padHand: S.padHand, padMove: S.padMove, padRich: S.padRich, shkSound: S.shkSound, song: JSON.parse(JSON.stringify(S.song)) };
     const at = songs.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
     if (at >= 0) songs[at] = sg; else songs.push(sg);
     saveSongs(); renderSongs(); songTitle = name; $('songtitle').textContent = name;
@@ -1170,28 +1709,29 @@
   $('shaker').addEventListener('change', (e) => { S.shaker = e.target.value; save(); changed(); });
   $('shksound').addEventListener('change', (e) => { S.shkSound = e.target.value; save(); changed(); });
   $('padtype').addEventListener('change', (e) => { S.pad = e.target.value; save(); buildPadUi(); padSetup(); padPlay(); });
+  $('padprev').addEventListener('click', () => stepPad(-1));
+  $('padnext').addEventListener('click', () => stepPad(1));
   $('padmove').addEventListener('input', (e) => { S.padMove = +e.target.value; $('padmoveval').textContent = S.padMove + ' %'; save(); padMotion(); });
   $('padrich').addEventListener('input', (e) => { $('padrichval').textContent = e.target.value + ' %'; });
   $('padrich').addEventListener('change', (e) => { S.padRich = +e.target.value; save(); padBright(); padPlay(0, true); });
-  $('padmode').addEventListener('click', () => { S.padMode = S.padMode === 'fifths' ? 'chord' : 'fifths'; save(); buildPadUi(); padPlay(); });
+  $('padmode').addEventListener('click', () => { S.padMode = S.padMode === 'fifths' ? 'chord' : 'fifths'; save(); paintWin(); padPlay(); });
+  document.querySelectorAll('#mode button').forEach((b) => b.addEventListener('click', () => setHand(b.dataset.m)));
   $('human').addEventListener('input', (e) => { S.human = +e.target.value; $('humanval').textContent = S.human + ' %'; save(); changed(); });
-  $('next').addEventListener('click', () => { const order = ['intro', 'estrofa', 'coro', 'puente', 'final']; const cur = S.pending || S.section; chooseSection(order[Math.min(4, order.indexOf(cur) + 1)]); });
+  $('next').addEventListener('click', () => { if (nextPart !== null) choosePart(nextPart); });
   $('countin').addEventListener('click', () => { S.countIn = !S.countIn; setCountUi(); save(); });
   $('autofill').addEventListener('change', (e) => { S.autoFill = +e.target.value; save(); changed(); });
-  $('fill').addEventListener('click', () => { if (playing && !ui.active && !ui.counting) { ui.queued = want.fill = !ui.queued; setFillUi(); changed(); } });
-  document.querySelectorAll('#sections button').forEach(b => b.addEventListener('click', () => chooseSection(b.dataset.s)));
-  $('key').addEventListener('change', (e) => { S.key = +e.target.value; save(); buildChords(); buildPadUi(); padPlay(); });
-  $('names').addEventListener('change', (e) => { S.names = e.target.value; save(); buildKeys(); buildChords(); renderSongs(); });
-  ['shaker', 'drums', 'pad'].forEach(bindLayer);
+  $('fill').addEventListener('click', () => { if (playing && !ui.active && !ui.counting && S.layers.drums.on) { ui.queued = want.fill = !ui.queued; setFillUi(); changed(); } });
+  $('key').addEventListener('change', (e) => setKey(+e.target.value));
+  $('names').addEventListener('change', (e) => { S.names = e.target.value; save(); buildKeys(); buildWin(); renderParts(); drawPart(); renderSongs(); });
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.closest?.('.pd')) return;
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.closest?.('[data-for]')) return;
     const k = e.key.toLowerCase();
     if (k === ' ') { e.preventDefault(); playing ? stop() : start(); }
     else if (k === 'r') $('fill').click();
     else if (k === 't') tap();
     else if (k === 'arrowup') { e.preventDefault(); setBpm(S.bpm + 1); }
     else if (k === 'arrowdown') { e.preventDefault(); setBpm(S.bpm - 1); }
-    else if (k.length === 1 && '12345'.includes(k)) chooseSection(['intro', 'estrofa', 'coro', 'puente', 'final'][+k - 1]);
+    else if (k.length === 1 && '123456789'.includes(k) && S.song.seq[+k - 1]) choosePart(+k - 1);
   });
 
   // ---------- Microphone tempo listener (beta) ----------
@@ -1281,14 +1821,11 @@
   // ---------- Boot ----------
   setBpm(S.bpm);
   setMeter(S.meter);
-  buildShakers();
-  buildPadUi();
   $('human').value = S.human; $('humanval').textContent = S.human + ' %';
   setCountUi();
   $('autofill').value = String(S.autoFill);
   $('follow').setAttribute('aria-checked', String(S.follow));
-  if (S.section === 'final') S.section = 'estrofa';
-  buildKeys(); buildChords(); refreshSections(); setFillUi(); renderSongs(); applyLang();
+  applyLang();
   window.acompLoaded = () => Object.keys(SB).length;
   window.acompVersion = () => ({ release: RELEASE, build: BUILD, versions: CHANGELOG.length });
   // For the smoke test: stop the clock as iOS does in the background, and read the rhythm's level.
@@ -1296,7 +1833,9 @@
   window.acompTest = {
     freeze: clockStop, thaw: clockStart,
     chunks: () => chunks.map((c) => [c.t0, c.t1]),
-    pad: () => ({ kind: padVoices.length ? padVoices[padVoices.length - 1].kind : null, cached: psCache.size, ms: Math.round(psMs) }),
+    pad: () => ({ kind: padVoices.length ? padVoices[padVoices.length - 1].kind : null, cached: psCache.size, ms: Math.round(psMs), notes: (curNotes() || []).length, voices: padVoices.length }),
+    pan: () => CHANNELS.map((k) => (pans[k] && pans[k].pan ? Math.round(pans[k].pan.value * 100) / 100 : 0)),
+    song: () => ({ at: S.at, pend: ui.pend, chord: S.chord, held: [...S.held], seq: [...S.song.seq] }),
     padLevel() {
       if (!padProbe) { padProbe = ctx.createAnalyser(); padProbe.fftSize = 2048; buses.pad.connect(padProbe); }
       const d = new Float32Array(padProbe.fftSize); padProbe.getFloatTimeDomainData(d);
