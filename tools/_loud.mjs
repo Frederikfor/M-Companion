@@ -18,9 +18,10 @@ await p.click('#play'); await p.waitForTimeout(1500);
 await p.click('.tab[data-tab=sonido]');
 const ids = await p.$$eval('#padtype option', os => os.map(o => o.value));
 for (const id of ids) {
-  await p.selectOption('#padtype', id); await p.waitForTimeout(5500);
+  await p.evaluate((v) => { const s = document.getElementById('padtype'); s.value = v; s.dispatchEvent(new Event('change')); }, id); await p.waitForTimeout(5500);
   const r = await p.evaluate(async () => { let s=0,n=0,pk=0; const d=new Float32Array(2048); for(let k=0;k<20;k++){ window.__an.getFloatTimeDomainData(d); for(const x of d){s+=x*x;n++;pk=Math.max(pk,Math.abs(x));} await new Promise(r=>setTimeout(r,50)); } return [20*Math.log10(Math.sqrt(s/n)), 20*Math.log10(pk)]; });
-  console.log(id.padEnd(11), r.map(x=>x.toFixed(1)).join(' dB  '));
+  const k = await p.evaluate(() => window.acompTest.pad());
+  console.log(id.padEnd(11), r.map(x=>x.toFixed(1)).join(' dB  '), k.kind, k.ms + ' ms');
 }
 console.log('errors', errs);
 await b.close();
