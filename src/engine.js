@@ -227,9 +227,7 @@
 
   // ---------- Audio engine ----------
   let ctx, master, buses = {}, noise, padFilter, padVoices = [], hall, hallSend;
-  let playing = false, timer = null, nextTime = 0, step = 0, bar = 0, phraseBar = 0;
-  let fillQueued = false, fillActive = null, crashNext = false, ending = false;
-  let countBars = 0, counting = false;
+  let playing = false, timer = null, rhythmIn;
   const uiQueue = [];
 
   function initAudio() {
@@ -250,6 +248,8 @@
     }
     padFilter = ctx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = (SEC_PAD[S.section] || 1000) * PADS[S.pad].cutoff; padFilter.Q.value = PADS[S.pad].q;
     padFilter.connect(buses.pad);
+    rhythmIn = ctx.createChannelSplitter(3);
+    rhythmIn.connect(buses.shaker, 0); rhythmIn.connect(buses.drums, 1); rhythmIn.connect(master, 2);
     hall = ctx.createConvolver(); hall.buffer = makeRoom(5);
     hallSend = ctx.createGain(); hallSend.gain.value = PADS[S.pad].hall * 0.6;
     buses.pad.connect(hallSend); hallSend.connect(hall); hall.connect(master);
@@ -467,7 +467,7 @@
     padVoices = [];
   }
   function padPlay(at) {
-    if (!ctx || !playing || counting) return;
+    if (!ctx || !playing || ui.counting) return;
     const P = PADS[S.pad];
     padStop(padRelease);
     padRelease = Math.min(P.release, 1.2);
@@ -525,104 +525,240 @@
     hallSend.gain.setTargetAtTime(P.hall * 0.6, ctx.currentTime, 0.3);
     padBright();
   }
-  function padBright(t) { if (ctx) padFilter.frequency.setTargetAtTime(SEC_PAD[S.section] * PADS[S.pad].cutoff, Math.max(t || 0, ctx.currentTime), 0.6); }
+  function padBright(t, sec = S.section) { if (ctx) padFilter.frequency.setTargetAtTime(SEC_PAD[sec] * PADS[S.pad].cutoff, Math.max(t || 0, ctx.currentTime), 0.6); }
 
   // ---------- Scheduler ----------
+  // The rhythm is rendered ahead as audio, in chunks of up to one phrase, and played by the
+  // audio engine itself. iOS slows or freezes the page's code in the background but keeps
+  // the audio engine running (that is why the pad never stops), so each chunk also carries a
+  // seamless loop of itself that takes over if the next chunk is not ready in time.
+  // Any change cuts what is sounding at the next step and renders a new chunk from there.
   function stepDur() { return 60 / S.bpm / METERS[S.meter].div; }
+  const PRE = 0.18, TAIL = 2.5, AHEAD = 4, MAXCHUNK = 16;
+  // q: the sequencer at the end of what is already rendered. The page shows S.section,
+  // S.pending and ui, which follow the audio as it plays.
+  let q = {}, chunks = [], evq = [], R = null, gen = 0, rendering = false, dirty = false, lastCut = 0, want = {};
+  const ui = { queued: false, active: false, counting: false };
+  const snap = (t) => ({ ...q, t });
+  // Something to do when the audio reaches t: right on time (onTime) or just ahead, for audio.
+  const ev = (t, fn, onTime) => R.events.push({ t, fn, onTime });
+  const changed = () => { if (playing) dirty = true; };
 
   function scheduleStep(s, t) {
     const m = S.meter, M = METERS[m];
     if (s === 0) {
-      if (countBars > 0) { countBars--; counting = true; }
-      else if (counting) { counting = false; padPlay(t); }
+      if (q.countBars > 0) { q.countBars--; q.counting = true; ev(t, () => { ui.counting = true; }, true); }
+      else if (q.counting) { q.counting = false; ev(t, (at) => { ui.counting = false; padPlay(at); }); }
     }
-    if (counting) {
+    if (q.counting) {
       if (s % M.dotEvery === 0) INST.click(t, M.strong.includes(s) ? 1 : .6);
-      uiQueue.push({ s, t, txt: T('counting') });
+      R.ui.push({ s, t, txt: T('counting') });
       return;
     }
     if (s === 0) {
-      bar++; phraseBar++;
-      if (S.pending) {
-        const wasFinal = S.pending === 'final';
-        S.section = S.pending; S.pending = null; phraseBar = 1;
-        if (wasFinal) ending = true;
-        padBright(t);
-        refreshSections();
+      q.bar++; q.phraseBar++;
+      if (q.pend) {
+        const to = q.pend;
+        q.sec = to; q.pend = null; q.phraseBar = 1;
+        if (to === 'final') q.ending = true;
+        ev(t, (at) => padBright(at, to));
+        ev(t, () => { S.section = to; if (S.pending === to) S.pending = null; refreshSections(); }, true);
       }
-      if (crashNext) { INST.crash(t, 1); INST.kick(t, 1); crashNext = false; }
-      if (ending) {
+      if (q.crashNext) { INST.crash(t, 1); INST.kick(t, 1); q.crashNext = false; }
+      if (q.ending) {
         if (S.layers.shaker.on) INST.shaker(t, .8);
-        finishSong(t);
+        q.done = true;
+        ev(t, () => padStop(4), true);
+        ev(t + 4.2, () => stop(true), true);
         return;
       }
     }
     const st = styleNow();
-    const pat = secPat(st, S.section);
+    const pat = secPat(st, q.sec);
     const tt = t + (st.swing && m !== '6/8' && s % 4 === 2 ? st.swing * stepDur() : 0)
       + (st.swing16 && s % 2 === 1 ? st.swing16 * stepDur() : 0);
 
     // Decide a fill when its start step arrives
-    if (!fillActive) {
-      const target = S.pending || S.section;
+    if (!q.fillActive) {
+      const target = q.pend || q.sec;
       const f = buildFill(target, m);
       if (s === f.start) {
-        const auto = S.autoFill > 0 && phraseBar % S.autoFill === 0;
-        if (fillQueued || S.pending || auto) {
-          fillActive = f; fillQueued = false;
-          crashNext = target !== 'intro' && (target !== 'estrofa' || S.pending !== null);
-          setFillUi();
+        const auto = S.autoFill > 0 && q.phraseBar % S.autoFill === 0;
+        if (q.fillQueued || q.pend || auto) {
+          q.fillActive = f; q.fillQueued = false;
+          q.crashNext = target !== 'intro' && (target !== 'estrofa' || q.pend !== null);
+          ev(t, () => { ui.active = true; ui.queued = false; setFillUi(); }, true);
         }
       }
     }
     // Shaker and hand percussion
-    const shk = SEC_SHK[S.section];
-    const sh = shakerStr(st, S.section);
+    const shk = SEC_SHK[q.sec];
+    const sh = shakerStr(st, q.sec);
     if (V[sh[s]]) hit('shaker', tt, V[sh[s]] * shk);
     for (const inst of ['tamb', 'conga', 'clap']) { const p = pat[inst]; if (p && V[p[s]]) hit(inst, tt, V[p[s]] * shk); }
     // Drums
-    const dyn = SEC_DYN[S.section];
-    if (fillActive && s >= fillActive.start) {
-      const i = s - fillActive.start;
-      for (const [inst, at, v] of fillActive.hits) if (at === i) hit(inst, tt, v);
+    const dyn = SEC_DYN[q.sec];
+    if (q.fillActive && s >= q.fillActive.start) {
+      const i = s - q.fillActive.start;
+      for (const [inst, at, v] of q.fillActive.hits) if (at === i) hit(inst, tt, v);
     } else {
       for (const inst of DRUMS) { const p = pat[inst]; if (p && V[p[s]]) hit(inst, tt, V[p[s]] * dyn); }
       const h = S.human / 100;
-      const groove = S.section === 'estrofa' || S.section === 'coro';
+      const groove = q.sec === 'estrofa' || q.sec === 'coro';
       const ghostSlot = m === '6/8' ? s % 2 === 1 : s % 4 === 3;
       if (groove && (pat.snare || pat.rim) && ghostSlot && Math.random() < 0.12 * h) hit('snare', tt, .14);
-      if (groove && (pat.hat || pat.ohat) && phraseBar % 4 === 0 && s === M.steps - 2 && Math.random() < 0.7 * h) hit('ohat', tt, .6);
-      if (S.section === 'coro' && pat.kick && s === M.steps - 1 && Math.random() < 0.2 * h) hit('kick', tt, .45);
+      if (groove && (pat.hat || pat.ohat) && q.phraseBar % 4 === 0 && s === M.steps - 2 && Math.random() < 0.7 * h) hit('ohat', tt, .6);
+      if (q.sec === 'coro' && pat.kick && s === M.steps - 1 && Math.random() < 0.2 * h) hit('kick', tt, .45);
     }
-    if (s === M.steps - 1 && fillActive) { fillActive = null; setTimeout(setFillUi, Math.max(0, (t - ctx.currentTime) * 1000 + 60)); }
-    const left = S.autoFill ? S.autoFill - ((phraseBar - 1) % S.autoFill) : 0;
-    uiQueue.push({ s, t, txt: T('bar', bar, T('sec.' + S.section), left) });
+    if (s === M.steps - 1 && q.fillActive) { q.fillActive = null; ev(t + 0.06, () => { ui.active = false; setFillUi(); }, true); }
+    const left = S.autoFill ? S.autoFill - ((q.phraseBar - 1) % S.autoFill) : 0;
+    R.ui.push({ s, t, txt: T('bar', q.bar, T('sec.' + q.sec), left) });
   }
 
-  function finishSong(t) {
-    clockStop();
-    const ms = Math.max(0, (t - ctx.currentTime) * 1000);
-    setTimeout(() => { padStop(4); }, ms);
-    setTimeout(() => { stop(true); }, ms + 4200);
+  // How many steps the next chunk holds: the rest of the bar, one bar when it must sound soon
+  // (start, or right after a change), or up to the end of the phrase (so a background loop
+  // repeats whole phrases, auto fill included).
+  function chunkSteps(soon) {
+    const M = METERS[S.meter];
+    if (q.step) return M.steps - q.step;
+    if (soon || q.countBars > 0) return M.steps;
+    const P = S.autoFill || 4;
+    const bars = q.pend ? P : P - (q.phraseBar % P);
+    return Math.max(1, Math.min(bars, Math.floor(MAXCHUNK / (M.steps * stepDur())))) * M.steps;
+  }
+  const renderOff = (off) => new Promise((res, rej) => {
+    off.oncomplete = (e) => res(e.renderedBuffer);
+    const p = off.startRendering(); if (p && p.catch) p.catch(rej);
+  });
+  // Renders the next chunk with the same instruments, into three stems: percussion, drums, click.
+  async function renderNext(t0, cut) {
+    const my = gen;
+    rendering = true;
+    try {
+      const M = METERS[S.meter], n = chunkSteps(cut || t0 === undefined), loopable = !q.step && !q.countBars;
+      const sr = ctx.sampleRate, OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      const off = new OAC(3, Math.ceil((PRE + n * stepDur() + TAIL) * sr), sr);
+      const merge = off.createChannelMerger(3); merge.connect(off.destination);
+      const outs = [0, 1, 2].map((i) => { const g = off.createGain(); g.connect(merge, 0, i); return g; });
+      const live = { ctx, buses, master };
+      ctx = off; buses = { shaker: outs[0], drums: outs[1] }; master = outs[2]; openHat = null;
+      R = { events: [], ui: [], snaps: [] };
+      let t = PRE;
+      try {
+        for (let i = 0; i < n && !q.done; i++) {
+          R.snaps.push(snap(t));
+          scheduleStep(q.step, t);
+          t += stepDur(); q.step = (q.step + 1) % M.steps;
+        }
+      } finally { ({ ctx, buses, master } = live); openHat = null; }
+      const r = R; R = null;
+      r.end = snap(t); r.len = t - PRE; r.bars = n / M.steps; r.loopable = loopable && !q.done;
+      const buf = await renderOff(off);
+      if (my !== gen) return; // a change came in meanwhile: this chunk is stale
+      rendering = false;
+      commit(r, buf, t0 ?? ctx.currentTime + 0.03 + PRE, cut);
+    } catch (e) {
+      if (my === gen) rendering = false;
+      console.error(e);
+    }
+  }
+  function startAt(src, when, offset) {
+    const now = ctx.currentTime;
+    if (when < now) { offset += now - when; when = now; }
+    if (offset < src.buffer.duration) src.start(when, offset);
+  }
+  // The chunk as a seamless loop: its tail wraps to the start, its pre-roll to the end.
+  function foldLoop(buf, len) {
+    const sr = buf.sampleRate, Ls = Math.round(len * sr), P = Math.round(PRE * sr);
+    const lb = ctx.createBuffer(buf.numberOfChannels, Ls, sr);
+    for (let ch = 0; ch < buf.numberOfChannels; ch++) {
+      const d = buf.getChannelData(ch), o = lb.getChannelData(ch);
+      for (let i = 0; i < d.length; i++) o[((i - P) % Ls + Ls) % Ls] += d[i];
+    }
+    return lb;
+  }
+  function commit(r, buf, t0, cut) {
+    const now = ctx.currentTime, base = t0 - PRE;
+    const prev = chunks[chunks.length - 1];
+    if (prev && prev.loop && !cut) {
+      // The next chunk arrived in time: the previous one plays out whole and its loop never starts.
+      prev.g.gain.cancelScheduledValues(0); prev.g.gain.setValueAtTime(1, now);
+      try { prev.loop.stop(0); } catch (e) {}
+      prev.loop = null;
+    }
+    const g = ctx.createGain(); g.connect(rhythmIn);
+    const src = ctx.createBufferSource(); src.buffer = buf; src.connect(g);
+    if (cut) startAt(src, t0, PRE); else startAt(src, base, 0);
+    const c = { t0, t1: t0 + r.len, g, src, bars: r.bars, end: { ...r.end, t: base + r.end.t }, snaps: r.snaps.map((s) => ({ ...s, t: base + s.t })) };
+    const tc = c.t1 - PRE;
+    if (r.loopable && tc > now + 0.05) {
+      const lb = foldLoop(buf, r.len);
+      const lg = ctx.createGain(); lg.connect(rhythmIn);
+      const ls = ctx.createBufferSource(); ls.buffer = lb; ls.loop = true; ls.connect(lg);
+      ls.start(tc, lb.duration - PRE);
+      g.gain.setValueAtTime(1, now); g.gain.setValueAtTime(0, tc);
+      Object.assign(c, { loop: ls, lg, tc });
+    }
+    for (const e of r.events) evq.push({ ...e, t: base + e.t });
+    evq.sort((a, b) => a.t - b.t);
+    for (const u of r.ui) uiQueue.push({ ...u, t: base + u.t });
+    chunks = chunks.filter((x) => x.t1 + TAIL > now);
+    chunks.push(c);
+  }
+  // The sequencer as it will be at the first step at or after T, looping included.
+  function stateAt(T) {
+    for (const c of chunks) { const s = c.snaps.find((x) => x.t >= T - 1e-4); if (s) return { ...s }; }
+    const c = chunks[chunks.length - 1];
+    if (!c) return null;
+    if (c.loop && T >= c.t1) {
+      const L = c.t1 - c.t0;
+      for (let k = Math.max(1, Math.floor((T - c.t0) / L)); ; k++) {
+        const s = c.snaps.find((x) => x.t + k * L >= T - 1e-4);
+        if (s) return { ...s, t: s.t + k * L, bar: s.bar + k * c.bars };
+      }
+    }
+    if (c.end.done) return null;
+    const s = { ...c.end }, n = Math.max(0, Math.ceil((T - s.t) / stepDur() - 1e-6));
+    s.t += n * stepDur(); s.step = (s.step + n) % METERS[S.meter].steps;
+    return s;
+  }
+  function fadeOut(g, T) { g.gain.cancelScheduledValues(T); g.gain.setTargetAtTime(0, T, 0.006); }
+  function cutAt(T) {
+    for (const c of chunks) {
+      if (c.t0 >= T) { try { c.src.stop(); } catch (e) {} }
+      else { fadeOut(c.g, T); try { c.src.stop(T + 0.06); } catch (e) {} }
+      if (c.loop) { fadeOut(c.lg, T); try { c.loop.stop(T + 0.06); } catch (e) {} c.loop = null; }
+      c.snaps = c.snaps.filter((s) => s.t < T); c.t1 = Math.min(c.t1, T);
+    }
+    chunks = chunks.filter((c) => c.t0 < T);
+    const i = evq.findIndex((e) => e.t >= T); if (i >= 0) evq.length = i;
+    const j = uiQueue.findIndex((u) => u.t >= T); if (j >= 0) uiQueue.length = j;
+    padFilter.frequency.cancelScheduledValues(T);
+  }
+  // A change (tempo, part, fill, style…): replace what is rendered from the next step on.
+  function interrupt() {
+    const st = stateAt(ctx.currentTime + 0.12);
+    if (!st) return;
+    gen++; lastCut = ctx.currentTime;
+    cutAt(st.t);
+    const { t, ...rest } = st; q = rest;
+    if ('pend' in want) q.pend = want.pend === q.sec ? null : want.pend;
+    if ('fill' in want) q.fillQueued = want.fill;
+    if (want.reset) { q.step = 0; q.fillActive = null; }
+    want = {};
+    renderNext(t, true);
   }
 
-  // Lookahead: short while the app is visible so changes feel instant; long in the
-  // background, where iOS throttles timers to about once a second.
-  const ahead = () => document.hidden ? 2.5 : 0.12;
   function tick() {
-    const late = ctx.currentTime - nextTime;
-    if (late > 0.05) {
-      // The timer was frozen: skip the missed steps instead of firing them all at once.
-      const n = Math.ceil(late / stepDur());
-      nextTime += n * stepDur();
-      step = (step + n) % METERS[S.meter].steps;
-    }
-    while (nextTime < ctx.currentTime + ahead()) {
-      scheduleStep(step, nextTime);
-      if (!timer) return;
-      nextTime += stepDur();
-      step = (step + 1) % METERS[S.meter].steps;
-    }
+    if (!playing || !ctx) return;
+    const now = ctx.currentTime;
+    while (evq.length && evq[0].t <= now + (evq[0].onTime ? 0 : 0.1)) { const e = evq.shift(); e.fn(e.t); if (!playing) return; }
+    if (dirty && chunks.length && now - lastCut > 0.15) { dirty = false; interrupt(); return; }
+    if (rendering) return;
+    const c = chunks[chunks.length - 1];
+    if (!c) return;
+    if (c.loop && now > c.tc - 0.03) { interrupt(); return; } // the loop took over while the page was frozen: rejoin it
+    if (!c.end.done && c.t1 - now < AHEAD) renderNext();
   }
 
   // Clock in a worker: its timers keep firing in the background where the page's are throttled.
@@ -636,7 +772,7 @@
       }
       clock.postMessage(25);
     } catch (e) { clock = null; }
-    timer = setInterval(tick, 25);
+    clearInterval(timer); timer = setInterval(tick, 25);
   }
   function clockStop() {
     clock?.postMessage(0);
@@ -646,7 +782,6 @@
     if (!playing || !ctx) return;
     if (document.hidden) { tick(); return; }
     if (ctx.state !== 'running') { try { await ctx.resume(); } catch (e) {} }
-    uiQueue.splice(0, Math.max(0, uiQueue.length - 64));
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
   });
 
@@ -656,23 +791,32 @@
     if (ctx.state !== 'running') await ctx.resume();
     $('status').textContent = T('status.loading');
     await loadSamples();
-    playing = true; ending = false; step = 0; bar = 0; phraseBar = 0; fillActive = null; fillQueued = false; crashNext = false;
-    counting = false; countBars = S.countIn ? 1 : 0;
+    playing = true;
     if (S.section === 'final') S.section = 'coro';
     S.pending = null; refreshSections();
+    q = { step: 0, bar: 0, phraseBar: 0, sec: S.section, pend: null, fillQueued: false, fillActive: null, crashNext: false, ending: false, counting: false, countBars: S.countIn ? 1 : 0, done: false };
+    Object.assign(ui, { queued: false, active: false, counting: S.countIn });
+    chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false; gen++;
     padBright();
-    nextTime = ctx.currentTime + 0.08;
-    clockStart(); tick();
+    clockStart(); renderNext();
     if (!S.countIn) padPlay();
     $('play').classList.add('stop'); $('play').setAttribute('aria-label', T('stop'));
     $('status').textContent = T('status.playing');
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
   }
   function stop(soft) {
-    playing = false;
+    playing = false; gen++; rendering = false;
     clockStop();
+    if (ctx) {
+      const now = ctx.currentTime;
+      for (const c of chunks) {
+        fadeOut(c.g, now); try { c.src.stop(now + 0.06); } catch (e) {}
+        if (c.loop) { fadeOut(c.lg, now); try { c.loop.stop(now + 0.06); } catch (e) {} }
+      }
+    }
+    chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false;
     padStop(soft ? 0.1 : 0.4);
-    ending = false; fillActive = null; fillQueued = false; counting = false; countBars = 0; uiQueue.length = 0;
+    Object.assign(ui, { queued: false, active: false, counting: false });
     if (S.section === 'final') { S.section = 'estrofa'; }
     S.pending = null; refreshSections(); setFillUi();
     $('play').classList.remove('stop'); $('play').setAttribute('aria-label', T('play'));
@@ -707,7 +851,7 @@
   function setBpm(v) {
     S.bpm = Math.max(40, Math.min(220, Math.round(v * 2) / 2));
     $('bpm').textContent = Number.isInteger(S.bpm) ? S.bpm : S.bpm.toFixed(1);
-    save();
+    save(); changed();
   }
   function refreshSections() {
     document.querySelectorAll('#sections button').forEach(b => {
@@ -715,11 +859,11 @@
       b.classList.toggle('pending', b.dataset.s === S.pending);
     });
   }
-  function setFillUi() { $('fill').classList.toggle('armed', fillQueued || !!fillActive); $('filllbl').textContent = T(fillActive ? 'fill.active' : fillQueued ? 'fill.queued' : 'fill'); }
+  function setFillUi() { $('fill').classList.toggle('armed', ui.queued || ui.active); $('filllbl').textContent = T(ui.active ? 'fill.active' : ui.queued ? 'fill.queued' : 'fill'); }
   function chooseSection(s) {
     if (!playing) { S.section = s === 'final' ? 'coro' : s; refreshSections(); padBright(); save(); return; }
-    if (s === S.section && !S.pending) { fillQueued = true; setFillUi(); return; }
-    S.pending = s; refreshSections();
+    if (s === S.section && !S.pending) { ui.queued = want.fill = true; setFillUi(); changed(); return; }
+    S.pending = want.pend = s; refreshSections(); changed();
   }
   function buildKeys() {
     const k = $('key'); k.innerHTML = '';
@@ -752,7 +896,7 @@
     sel.value = S.shaker;
   }
   function setMeter(m) {
-    S.meter = m; step = 0; fillActive = null;
+    S.meter = m; if (playing) { want.reset = true; changed(); }
     $('meter').value = m;
     setUnit(); buildStyles(); drawDots(-1); save();
   }
@@ -839,16 +983,16 @@
   $('p5').addEventListener('click', () => setBpm(S.bpm + 5));
   $('tap').addEventListener('click', tap);
   $('meter').addEventListener('change', (e) => setMeter(e.target.value));
-  $('style').addEventListener('change', (e) => { S.style = e.target.value; save(); });
-  $('shaker').addEventListener('change', (e) => { S.shaker = e.target.value; save(); });
-  $('shksound').addEventListener('change', (e) => { S.shkSound = e.target.value; save(); });
+  $('style').addEventListener('change', (e) => { S.style = e.target.value; save(); changed(); });
+  $('shaker').addEventListener('change', (e) => { S.shaker = e.target.value; save(); changed(); });
+  $('shksound').addEventListener('change', (e) => { S.shkSound = e.target.value; save(); changed(); });
   $('padtype').addEventListener('change', (e) => { S.pad = e.target.value; save(); buildPadUi(); padSetup(); padPlay(); });
   $('padmode').addEventListener('click', () => { S.padMode = S.padMode === 'fifths' ? 'chord' : 'fifths'; save(); buildPadUi(); padPlay(); });
-  $('human').addEventListener('input', (e) => { S.human = +e.target.value; $('humanval').textContent = S.human + ' %'; save(); });
+  $('human').addEventListener('input', (e) => { S.human = +e.target.value; $('humanval').textContent = S.human + ' %'; save(); changed(); });
   $('next').addEventListener('click', () => { const order = ['intro', 'estrofa', 'coro', 'puente', 'final']; const cur = S.pending || S.section; chooseSection(order[Math.min(4, order.indexOf(cur) + 1)]); });
   $('countin').addEventListener('click', () => { S.countIn = !S.countIn; setCountUi(); save(); });
-  $('autofill').addEventListener('change', (e) => { S.autoFill = +e.target.value; save(); });
-  $('fill').addEventListener('click', () => { if (playing && !fillActive && !counting) { fillQueued = !fillQueued; setFillUi(); } });
+  $('autofill').addEventListener('change', (e) => { S.autoFill = +e.target.value; save(); changed(); });
+  $('fill').addEventListener('click', () => { if (playing && !ui.active && !ui.counting) { ui.queued = want.fill = !ui.queued; setFillUi(); changed(); } });
   document.querySelectorAll('#sections button').forEach(b => b.addEventListener('click', () => chooseSection(b.dataset.s)));
   $('key').addEventListener('change', (e) => { S.key = +e.target.value; save(); buildChords(); buildPadUi(); padPlay(); });
   $('names').addEventListener('change', (e) => { S.names = e.target.value; save(); buildKeys(); buildChords(); renderSongs(); });
@@ -960,5 +1104,15 @@
   if (S.section === 'final') S.section = 'estrofa';
   buildKeys(); buildChords(); refreshSections(); setFillUi(); renderSongs(); applyLang();
   window.acompLoaded = () => Object.keys(SB).length;
+  // For the smoke test: stop the clock as iOS does in the background, and read the rhythm's level.
+  let probe = null;
+  window.acompTest = {
+    freeze: clockStop, thaw: clockStart,
+    level() {
+      if (!probe) { probe = ctx.createAnalyser(); probe.fftSize = 2048; rhythmIn.connect(probe, 0); rhythmIn.connect(probe, 1); }
+      const d = new Float32Array(probe.fftSize); probe.getFloatTimeDomainData(d);
+      return d.reduce((m, x) => Math.max(m, Math.abs(x)), 0);
+    }
+  };
   requestAnimationFrame(frame);
 })();

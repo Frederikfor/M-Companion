@@ -236,10 +236,10 @@ Las pestañas son `.screen#tab-tocar|ritmo|sonido|canciones` y botones `.tab[dat
 Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron.
 
 ### 5.11 Motor de audio (resumen)
-- Programador con anticipación: un reloj cada 25 ms (en un *Web Worker*, con `setInterval` de respaldo) agenda los pasos de los próximos 0.12 s con `ctx.currentTime`.
-- Segundo plano / pantalla bloqueada: la anticipación sube a 2.5 s (iOS frena los temporizadores a ~1 por segundo); si el reloj se congeló, los pasos perdidos se saltan en vez de sonar todos juntos. Al volver se reanuda el audio y el *wake lock*. El micrófono no ajusta el tempo mientras la app está oculta.
-- Buses `shaker`, `drums`, `pad` → master → compresor. Reverb de sala (1.3 s) en todos; reverb larga (5 s) para el pad.
-- El hi-hat cerrado corta al abierto (choke).
+- Ritmo pre-generado por tramos: shaker, percusión, batería y conteo se generan por adelantado como audio (`OfflineAudioContext`, tres pistas: percusión, batería, clic) en tramos de hasta una frase (el remate automático, máx. 16 s), con las mismas muestras y la misma lógica de `scheduleStep`. El motor de audio los toca; el código solo prepara el siguiente tramo unos 4 s antes. El volumen, el silencio de cada capa y la reverb siguen en vivo.
+- Pantalla bloqueada / segundo plano: iOS frena o congela el código de la página pero no el motor de audio (por eso el pad nunca se cortaba). Cada tramo trae un loop sin costuras de sí mismo que entra solo si el siguiente tramo no llegó a tiempo, y la app se reengancha al volver.
+- Interrupciones: Stop corta al instante. Tempo, parte, remate, estilo, shaker, humanizar, compás y remate automático cortan lo que suena en el siguiente paso (~0.1 s) y lo reemplazan con un tramo nuevo; los cambios de parte siguen entrando en el siguiente compás.
+- Reloj en un *Web Worker* (con `setInterval` de respaldo). El micrófono no ajusta el tempo mientras la app está oculta.
 - iOS: `navigator.audioSession.type = 'playback'` (suena con el interruptor de silencio) y *wake lock* para que la pantalla no se apague.
 - Micrófono (beta): detección de ataques por flujo espectral e histograma de intervalos dentro de ±20 % del BPM fijado. Necesita https.
 
