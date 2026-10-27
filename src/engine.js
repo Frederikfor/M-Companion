@@ -108,7 +108,9 @@
   // Optional: air [gain, Hz] adds breathy filtered noise; formant [[Hz, Q, gain]…] shapes the layers like a choir "ah";
   // trem [Hz, depth] adds a soft volume tremolo, like an electric piano.
   // Pads are rendered with PADsynth (see below); osc: true keeps live oscillators, for keys that are not pads.
-  // bw [cents] overrides the band width that PADsynth takes from the detune spread.
+  // bw [cents] overrides the band width that PADsynth takes from the detune spread; spread (default .25) is how fast
+  // it widens with the harmonic number. tilt darkens the source by h^-tilt (a voice falls faster than a sawtooth).
+  // sections: formant scales sung at once (men 1, women ~1.15), which blurs the vowel like a mixed choir.
   const PADS = {
     atmos:     { group: 'Worship', name: 'Supersaw', en: 'Supersaw', layers: [['sawtooth', [-9, 0, 9], 0, .035], ['sine', [0], 12, .029]], cutoff: 1, q: .7, attack: 2.2, release: 2.5, vib: [.25, 4], hall: .9, voicing: 'add9' },
     fundamento:{ group: 'Worship', name: 'Pad cálido', en: 'Warm Pad', layers: [['sawtooth', [-7, 7], 0, .016], ['triangle', [0], -12, .04], ['sine', [0], 12, .01]], cutoff: .7, q: .9, attack: 3, release: 3, vib: [.2, 3], hall: 1, voicing: 'sus2', air: [.032, 3500] },
@@ -122,7 +124,7 @@
     analogico: { group: 'Alabanza', name: 'Polisinte', en: 'Poly Synth', layers: [['sawtooth', [-12, 0, 12], 0, .029], ['square', [-6, 6], -12, .019]], cutoff: 1.1, q: 1.5, attack: .5, release: 1.2, vib: [.6, 6], hall: .5, voicing: 'triad' },
     teclas:    { group: 'Alabanza', name: 'Rhodes', en: 'Rhodes', layers: [['sine', [0], 0, .039], ['triangle', [-3, 3], 12, .01]], cutoff: 1.5, q: .3, attack: .15, release: 1.2, vib: [.1, 2], hall: .5, voicing: 'add9', trem: [4.5, .3], osc: true },
     cuerdas:   { group: 'Himnos y gospel', name: 'Cuerdas', en: 'Strings', layers: [['sawtooth', [-12, -4, 4, 12], 0, .048]], cutoff: .9, q: .6, attack: 1.4, release: 2, vib: [5, 6], hall: .7, voicing: 'triad' },
-    coro:      { group: 'Himnos y gospel', name: 'Coro "Aah"', en: 'Choir Aahs', layers: [['sawtooth', [-8, 0, 8], 0, .046]], cutoff: 2.5, q: .3, attack: 1.2, release: 2, vib: [4.8, 5], hall: .9, voicing: 'triad', bw: 45, formant: [[750, 6, 1], [1200, 7, .7], [2650, 9, .35], [3400, 10, .15]], air: [.012, 3000] },
+    coro:      { group: 'Himnos y gospel', name: 'Coro "Aah"', en: 'Choir Aahs', layers: [['sawtooth', [-8, 0, 8], 0, .046]], cutoff: 2.5, q: .3, attack: 1.2, release: 2, vib: [.2, 3], hall: .9, voicing: 'triad', bw: 30, spread: .6, tilt: 1, sections: [1, 1.15], formant: [[750, 6, 1], [1200, 7, .7], [2650, 9, .35], [3400, 10, .15]], air: [.012, 3000] },
     organo:    { group: 'Himnos y gospel', name: 'Gospel B3', en: 'Gospel B3', layers: [['sine', [0], -12, .021], ['sine', [0], 0, .028], ['sine', [0], 12, .021], ['sine', [0], 19, .013], ['sine', [0], 24, .008]], cutoff: 3, q: .3, attack: .06, release: .35, vib: [6.3, 12], hall: .3, voicing: 'gospel7', osc: true }
   };
   const SHK_SETS = {
@@ -549,8 +551,9 @@
   // "ah" moves with each note as in a real choir instead of coming from fixed filters after the mix.
   function vowel(P, f) {
     if (!P.formant) return 1;
+    const sec = P.sections || [1];
     let v = 0.06;
-    for (const [F, q, g] of P.formant) { const x = Math.log2(f / F) * q / 1.5; v += g * Math.exp(-x * x); }
+    for (const s of sec) for (const [F, q, g] of P.formant) { const x = Math.log2(f / (F * s)) * q / 1.5; v += g * Math.exp(-x * x) / sec.length; }
     return v;
   }
   function psRender(notes) {
@@ -565,12 +568,12 @@
         const f0 = mtof(m + semi) * 2 ** (mean / 1200);
         const bw = (P.bw || Math.max(8, Math.max(...dets) - Math.min(...dets))) * 2 ** (1.3 * r);
         const hs = [];
-        for (let h = 1; h <= 96 && f0 * h < top; h++) { const a = WAVES[wave](h) * h ** (0.6 * r) * vowel(P, f0 * h); if (a) hs.push([h, a]); }
+        for (let h = 1; h <= 96 && f0 * h < top; h++) { const a = WAVES[wave](h) * h ** (0.6 * r - (P.tilt || 0)) * vowel(P, f0 * h); if (a) hs.push([h, a]); }
         const norm = g * WAVE_RMS[wave] / Math.sqrt(hs.reduce((e, [, a]) => e + a * a, 0) || 1);
         energy += (g * WAVE_RMS[wave]) ** 2;
         for (const [h, a] of hs) {
           // The band widens slowly with the harmonic number, as in a real section of players.
-          const cents = Math.min(100, bw * h ** 0.25), sig = Math.max(1, (2 ** (cents / 1200) - 1) * f0 * h / df / 2);
+          const cents = Math.min(100, bw * h ** (P.spread || 0.25)), sig = Math.max(1, (2 ** (cents / 1200) - 1) * f0 * h / df / 2);
           const c = f0 * h / df, amp = a * norm / Math.sqrt(sig);
           for (let k = Math.max(1, Math.floor(c - 3 * sig)), e = Math.min(N / 2 - 1, Math.ceil(c + 3 * sig)); k <= e; k++) {
             const x = (k - c) / sig; psAmp[k] += amp * Math.exp(-x * x);
