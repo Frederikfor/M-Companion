@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.5.1",
+    "date": "2026-10-27",
+    "es": [
+      "Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."
+    ],
+    "en": [
+      "Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."
+    ]
+  },
+  {
     "version": "1.5.0",
     "date": "2026-10-27",
     "es": [

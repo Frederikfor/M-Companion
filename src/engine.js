@@ -803,7 +803,7 @@
     const my = gen;
     rendering = true;
     try {
-      const M = METERS[S.meter], n = chunkSteps(cut || t0 === undefined), loopable = !q.step && !q.countBars;
+      const M = METERS[S.meter], n = chunkSteps(cut || !chunks.length), loopable = !q.step && !q.countBars;
       const sr = ctx.sampleRate, OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
       const off = new OAC(3, Math.ceil((PRE + n * stepDur() + TAIL) * sr), sr);
       const merge = off.createChannelMerger(3); merge.connect(off.destination);
@@ -926,7 +926,7 @@
     const c = chunks[chunks.length - 1];
     if (!c) return;
     if (c.loop && now > c.tc - 0.03) { interrupt(); return; } // the loop took over while the page was frozen: rejoin it
-    if (!c.end.done && c.t1 - now < AHEAD) renderNext();
+    if (!c.end.done && c.t1 - now < AHEAD) renderNext(c.t1); // the next chunk starts where this one ends
   }
 
   // Clock in a worker: its timers keep firing in the background where the page's are throttled.
@@ -1282,6 +1282,7 @@
   let probe = null;
   window.acompTest = {
     freeze: clockStop, thaw: clockStart,
+    chunks: () => chunks.map((c) => [c.t0, c.t1]),
     pad: () => ({ kind: padVoices.length ? padVoices[padVoices.length - 1].kind : null, cached: psCache.size, ms: Math.round(psMs) }),
     level() {
       if (!probe) { probe = ctx.createAnalyser(); probe.fftSize = 2048; rhythmIn.connect(probe, 0); rhythmIn.connect(probe, 1); }

@@ -31,6 +31,15 @@ async function pickEach(id) {
 
 await page.goto(pathToFileURL(path.join(root, 'index.html')).href);
 await page.click('#play');
+// The rhythm keeps tempo: each rendered chunk starts where the previous one ends, never on top of it.
+await page.waitForTimeout(6000);
+{
+  const tl = await page.evaluate(() => window.acompTest.chunks());
+  if (tl.length < 2) errors.push(`expected several rendered chunks after 6 s, got ${tl.length}`);
+  for (let i = 1; i < tl.length; i++) {
+    if (Math.abs(tl[i][0] - tl[i - 1][1]) > 0.002) errors.push(`chunk ${i} starts at ${tl[i][0].toFixed(3)} s but the previous one ends at ${tl[i - 1][1].toFixed(3)} s`);
+  }
+}
 await page.waitForTimeout(2500);
 const loaded = await page.evaluate(() => window.acompLoaded());
 await pickEach('meter');
