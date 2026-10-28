@@ -1,5 +1,25 @@
 [
   {
+    "version": "1.6.0",
+    "date": "2026-10-27",
+    "es": [
+      "Tocar nuevo: tempo arriba, la parte que suena con su mapa de la canción, el selector de pad, un dial de tonalidad que se desliza y la ventana de acordes con colores por función (reposo, se aleja, tensión).",
+      "Estructura de la canción en Sonido: Orden (qué partes y en qué orden) y Partes (los acordes de cada una, de medio compás a 4 compases). La app pasa sola a la parte siguiente y el pad cambia de acorde a tiempo. Partes nuevas: Pre-coro, Interludio, Instrumental, Tag, Vamp y Outro.",
+      "Modo Manual: el pad no sigue la canción y tú eliges el acorde. Mantén uno y toca otro para sumar hasta tres; tocar el único que suena lo silencia.",
+      "Canal Clic (metrónomo) y paneo: cada canal puede ir a la izquierda, al centro o a la derecha (Sonido › Mezcla › Paneo), para mandar cada lado a un canal de la mezcladora.",
+      "Al abrir esta versión solo queda encendido el Pad; Shaker, Batería y Clic se encienden desde Tocar. Remate se apaga cuando la batería está apagada.",
+      "Las canciones guardan su estructura y sus acordes; las que ya tenías cargan con una estructura de ejemplo."
+    ],
+    "en": [
+      "New Play screen: tempo on top, the playing part with a song map, the pad picker, a key dial you can swipe and a chord window coloured by function (rest, moves away, tension).",
+      "Song structure in Sound: Order (which parts, in what order) and Parts (each part's chords, from half a bar to 4 bars). The app moves on to the next part by itself and the pad changes chord in time. New parts: Pre-chorus, Interlude, Instrumental, Tag, Vamp and Outro.",
+      "Manual mode: the pad does not follow the song and you pick the chord. Hold one and tap another to stack up to three; tapping the only one playing silences it.",
+      "Click channel (metronome) and pan: each channel can go left, centre or right (Sound › Mix › Pan), to send each side to its own mixer channel.",
+      "When you open this version only the Pad is on; Shaker, Drums and Click turn on from Play. Fill is off while the drums are off.",
+      "Songs save their structure and chords; the ones you already had load with an example structure."
+    ]
+  },
+  {
     "version": "1.5.2",
     "date": "2026-10-27",
     "es": [

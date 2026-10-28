@@ -1,29 +1,39 @@
 <title>Acompañante de Ensayo</title>
 <style>
-/* Layout: iOS-style app shell, dark on purpose for stages; four tabs, live controls in the thumb zone */
+/* Layout: iOS-style app shell, dark on purpose for stages; four tabs, live controls in the thumb zone. Tocar follows design C5a. */
 :root {
-  --bg: #000000;
+  --bg: #0B0B0C;
   --card: #1C1C1E;
+  --surf: #161618;
+  --surf2: #131315;
   --fill: #2C2C2E;
   --seg: #48484A;
   --line: #38383A;
-  --fg: #FFFFFF;
+  --edge: #2A2A2D;
+  --fg: #F2F2F2;
   --muted: #98989F;
+  --dim: #8E8E93;
   --chev: #5A5A5F;
   --accent: #FF9F0A;
   --accent-soft: rgba(255, 159, 10, 0.16);
+  --rest: #FF9F0A;
+  --away: #64D2FF;
+  --tense: #BF5AF2;
   --go: #30D158;
   --stop: #FF453A;
   --off: #39393D;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
   --tabbar: calc(56px + env(safe-area-inset-bottom, 0px));
   color-scheme: dark;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 17px; -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
 button, select, input { font: inherit; color: inherit; }
 button { cursor: pointer; border: 0; background: none; padding: 0; touch-action: manipulation; }
+button:disabled { cursor: default; }
 button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .screen { position: fixed; inset: 0 0 var(--tabbar) 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 24px; }
 .wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; min-height: 100%; }
@@ -34,29 +44,18 @@ h1 { margin: 8px 0 12px; font-size: 34px; line-height: 41px; font-weight: 700; l
 .row { min-height: 44px; padding: 6px 16px; display: flex; align-items: center; gap: 8px; position: relative; }
 .row + .row::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--line); }
 .row > .lbl { flex: 1; min-width: 0; }
-.row select { appearance: none; -webkit-appearance: none; background: transparent; border: 0; color: var(--muted); text-align: right; text-align-last: right; max-width: 62%; padding: 6px 0; font-size: 17px; }
-.chev { flex: none; width: 8px; height: 13px; }
+.chev { flex: none; width: 8px; height: 13px; transition: transform .2s; }
 .row.col { flex-direction: column; align-items: stretch; padding-block: 11px; }
 .row.col .top { display: flex; justify-content: space-between; }
 input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); min-height: 28px; }
 .switch { flex: none; position: relative; width: 51px; height: 31px; border-radius: 16px; background: var(--off); transition: background .2s; }
 .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,.25); transition: left .2s; }
-.switch[aria-checked="true"] { background: var(--go); }
-.switch[aria-checked="true"]::after { left: 22px; }
+.switch[aria-checked="true"], [aria-checked="true"] > .switch { background: var(--go); }
+.switch[aria-checked="true"]::after, [aria-checked="true"] > .switch::after { left: 22px; }
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 2px; border-radius: 9px; background: var(--fill); }
-.seg button, .seg label { height: 32px; border-radius: 7px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
-.seg .on { background: var(--seg); font-weight: 600; }
-
-/* Tocar */
-#tab-tocar .wrap { gap: 0; }
-.now { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
-.now .song { min-width: 0; display: flex; flex-direction: column; }
-.now small { font-size: 13px; color: var(--muted); }
-#songtitle { font-size: 22px; line-height: 28px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pill { position: relative; height: 32px; padding: 0 12px; border-radius: 16px; background: var(--card); display: flex; align-items: center; font-size: 15px; font-weight: 600; }
-.pill { gap: 6px; }
-.pill .ud { width: 8px; height: 12px; color: var(--muted); }
-/* iOS pull-down menus: the native <select> stays hidden as the source of truth; .pd buttons open .pd-menu */
+.seg button { height: 32px; border-radius: 7px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.seg .on { background: var(--seg); font-weight: 600; color: var(--fg); }
+/* iOS pull-down menus: the native <select> stays hidden as the source of truth; [data-for] buttons open .pd-menu */
 select.native { display: none; }
 .pd { display: flex; align-items: center; gap: 6px; max-width: 64%; min-height: 32px; color: var(--muted); font-size: 17px; text-align: right; }
 .pd-val { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -73,39 +72,105 @@ select.native { display: none; }
 .pd-item + .pd-item::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: .5px; background: rgba(84, 84, 88, .55); }
 .pd-item:hover, .pd-item:focus-visible, .pd-item.press { background: rgba(255, 255, 255, .1); }
 .pd-item svg { position: absolute; left: 16px; top: 50%; margin-top: -7px; width: 15px; height: 14px; }
-#status { font-size: 12px; color: var(--muted); }
-.tempo { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.tempo .line { width: 100%; display: flex; align-items: center; justify-content: space-between; }
-.round { width: 56px; height: 56px; border-radius: 28px; background: var(--card); display: flex; align-items: center; justify-content: center; }
-.round.sm { width: 44px; height: 44px; border-radius: 22px; font-size: 13px; font-weight: 600; color: var(--muted); }
-.bpmbox { display: flex; flex-direction: column; align-items: center; }
-#bpm { font-size: 88px; line-height: 92px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
-#bpmunit { font-size: 15px; color: var(--muted); }
-.dots { display: flex; gap: 12px; justify-content: center; min-height: 16px; }
-.dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #3A3A3C; }
-.dot.strong { border-color: #8E8E93; }
-.dot.now { background: var(--accent); border-color: var(--accent); }
-#barinfo { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: center; min-height: 20px; }
-#tap { height: 44px; padding: 0 20px; border-radius: 22px; color: var(--accent); font-size: 17px; font-weight: 600; }
-.padcard { margin-top: 20px; padding: 12px; border-radius: 16px; background: var(--card); display: flex; flex-direction: column; gap: 10px; }
-.padcard .head { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 15px; min-height: 28px; }
-.padcard .head button { display: flex; align-items: center; gap: 6px; color: var(--muted); min-height: 32px; }
-.chords { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-.chords button { height: 48px; border-radius: 10px; background: var(--fill); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
-.chords b { font-size: 15px; font-weight: 600; }
-.chords span { font-size: 10px; opacity: .6; }
-.chords button.on { background: var(--accent); color: #000000; }
-.chords.muted { opacity: .4; }
-.live { margin-top: auto; padding-top: 24px; display: flex; flex-direction: column; gap: 20px; }
-#sections { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; padding: 2px; border-radius: 12px; background: var(--card); }
-#sections button { height: 44px; border-radius: 10px; font-size: 14px; font-weight: 500; }
-#sections button.on { background: var(--seg); font-weight: 600; }
-#sections button.pending { box-shadow: inset 0 0 0 2px var(--accent); color: var(--accent); }
+.pd-item .sub { margin-left: auto; padding-left: 12px; font-size: 13px; color: var(--muted); }
+
+/* Tocar (design C5a): song and tempo → part and map → pad and harmony → thumb zone with channels and transport */
+#tab-tocar { padding-bottom: 8px; }
+#tab-tocar .wrap { gap: 0; }
+.top1 { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.top1 .song { display: flex; flex-direction: column; min-width: 0; }
+.songbtn { min-width: 0; min-height: 28px; text-align: left; }
+#songtitle { display: block; font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top1 .sub { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.pd.meterpd { min-height: 44px; margin: -10px 0; font-size: 13px; font-weight: 600; color: #C7C7CC; gap: 4px; }
+.pd.meterpd .ud { width: 7px; height: 11px; }
+.bpmread { display: flex; align-items: baseline; gap: 4px; }
+#bpm { font-family: var(--mono); font-size: 40px; line-height: 40px; font-weight: 600; font-variant-numeric: tabular-nums; transition: color .08s; }
+#bpm.flash { color: var(--accent); }
+#bpmunit { font-size: 13px; color: var(--muted); }
+.bpmrow { margin-top: 8px; display: grid; grid-template-columns: 44px 44px minmax(0, 1fr) 44px 44px; gap: 6px; }
+.bpmrow button { height: 44px; border-radius: 10px; background: var(--surf); font-size: 20px; display: flex; align-items: center; justify-content: center; }
+.bpmrow .sm { font-size: 13px; font-weight: 600; color: var(--muted); }
+#tap { font-size: 15px; font-weight: 600; color: var(--accent); }
+.partline { margin-top: 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+#partname { font-size: 28px; line-height: 34px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#partpos { font-family: var(--mono); font-size: 17px; color: var(--muted); white-space: nowrap; }
+#partpos b { color: var(--fg); font-weight: 400; }
+#map { margin-top: 8px; display: flex; gap: 2px; }
+#map button { min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-bottom: 4px; }
+#map .seg-bar { position: relative; overflow: hidden; height: 22px; border-radius: 4px; background: var(--edge); }
+#map .seg-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--accent); }
+#map .lb { font-size: 11px; color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; }
+#map .now .seg-bar { background: var(--fg); }
+#map .now .lb { color: var(--fg); font-weight: 600; }
+#map .next .seg-bar { background: var(--seg); }
+#map .next .lb { color: var(--fg); }
+#map .pending .seg-bar { background: var(--seg); box-shadow: inset 0 0 0 2px var(--accent); }
+#map .pending .lb { color: var(--accent); font-weight: 600; }
+.padsel { margin-top: 6px; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; height: 48px; border-radius: 12px; background: var(--surf); }
+.padsel button { display: flex; align-items: center; justify-content: center; }
+#padmid { flex-direction: column; min-width: 0; }
+#padname { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+#padsub { font-size: 11px; color: var(--muted); }
+.harm { margin-top: 12px; padding: 12px 0; border-radius: 18px; background: var(--surf2); display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+#dial { position: relative; height: 44px; display: flex; flex-direction: column; justify-content: flex-end; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+#dial .needle { position: absolute; left: 50%; top: 0; margin-left: -7px; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 9px solid var(--accent); }
+#dial .names { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); align-items: end; font-family: var(--mono); text-align: center; white-space: nowrap; transition: transform .12s ease-out; }
+#dial .d0 { font-size: 22px; font-weight: 700; color: var(--accent); }
+#dial .d1 { font-size: 15px; color: #C7C7CC; }
+#dial .d2 { font-size: 13px; color: #8E8E93; }
+#dial .d3 { font-size: 12px; color: #636366; }
+#dial .d4 { font-size: 11px; color: #48484A; }
+#dial .ticks { margin-top: 6px; height: 8px; background-image: repeating-linear-gradient(to right, #3A3A3C 0 1px, transparent 1px 10px); background-position: 4px 0; }
+.win { position: relative; display: grid; grid-template-columns: .55fr 1fr 1fr 1fr .55fr; gap: 6px; transition: opacity .2s; }
+.win.off { opacity: .35; }
+.win .frame { position: absolute; left: calc(15.4% - 3px); right: calc(15.4% - 3px); top: -6px; bottom: -6px; border-radius: 16px; border: 1.5px solid rgba(255, 255, 255, .22); pointer-events: none; }
+.win .col { display: flex; flex-direction: column; gap: 6px; }
+.win .nb { opacity: .45; }
+.win .nb span { background: #1E1E21; display: flex; align-items: center; font-weight: 600; color: var(--dim); white-space: nowrap; overflow: hidden; }
+.win .nb.l span { border-radius: 0 12px 12px 0; justify-content: flex-end; padding-right: 8px; }
+.win .nb.r span { border-radius: 12px 0 0 12px; padding-left: 8px; }
+.win .big { height: 68px; font-size: 15px; }
+.win .small { height: 54px; font-size: 13px; }
+.win button { border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background .12s, box-shadow .12s; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.win button.big b { font-size: 24px; }
+.win button.small b { font-size: 18px; }
+.win button span { font-size: 12px; font-weight: 600; }
+.win .rest { background: rgba(255, 159, 10, .16); } .win .rest span { color: #FFB340; }
+.win .rest.big { background: rgba(255, 159, 10, .28); }
+.win .away { background: rgba(100, 210, 255, .16); } .win .away span { color: var(--away); }
+.win .tense { background: rgba(191, 90, 242, .2); } .win .tense span { color: #DA8FFF; }
+.win button.on { color: #000000; } .win button.on span { color: #000000; font-weight: 700; }
+.win .rest.on { background: var(--rest); box-shadow: 0 0 22px rgba(255, 159, 10, .35); }
+.win .away.on { background: var(--away); box-shadow: 0 0 22px rgba(100, 210, 255, .35); }
+.win .tense.on { background: var(--tense); box-shadow: 0 0 22px rgba(191, 90, 242, .35); }
+.harmfoot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; }
+#mode { width: 150px; flex: none; }
+#mode button { height: 30px; }
+#padmode { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+#padmode > span:first-child { font-size: 13px; font-weight: 600; color: #C7C7CC; }
+.legend { display: flex; gap: 10px; font-size: 11px; color: var(--dim); padding: 0 12px; margin-top: -4px; white-space: nowrap; }
+.legend > span { display: flex; align-items: center; gap: 4px; }
+.legend i { width: 8px; height: 8px; border-radius: 2px; }
+#hint { font-size: 11px; line-height: 13px; color: var(--dim); padding: 0 12px; margin-top: -4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live { margin-top: auto; padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tile { position: relative; height: 56px; border-radius: 14px; border: 1px solid var(--edge); font-size: 15px; font-weight: 600; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; }
+.tile.on { background: #3A3A3C; border-color: #3A3A3C; color: #FFFFFF; }
+.tile .led { width: 8px; height: 8px; border-radius: 4px; background: var(--go); display: none; flex: none; }
+.tile.on .led { display: block; }
+.tile .side { position: absolute; top: 4px; right: 8px; font-size: 9px; font-weight: 700; letter-spacing: .3px; color: var(--muted); }
 .transport { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
-.tbtn { height: 64px; border-radius: 16px; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 13px; font-weight: 600; }
-#fill { background: var(--accent-soft); color: var(--accent); }
+.tbtn { height: 64px; min-width: 0; border-radius: 16px; background: var(--surf); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; font-weight: 600; }
+#fill { color: var(--accent); background: rgba(255, 159, 10, .14); }
 #fill.armed { background: var(--accent); color: #000000; }
-#play { width: 84px; height: 84px; border-radius: 42px; background: var(--go); color: #000000; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+#fill:disabled { background: var(--surf); color: #55555A; }
+#fill:disabled svg { stroke: #48484A; }
+#fill small { font-size: 11px; font-weight: 500; color: var(--dim); }
+#next small { font-size: 12px; color: var(--muted); font-weight: 400; }
+#next b { font-size: 15px; font-weight: 700; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
+#next:disabled b { color: var(--dim); }
+#play { width: 76px; height: 76px; border-radius: 38px; background: var(--go); color: #000000; display: flex; align-items: center; justify-content: center; }
 #play .i-stop { display: none; }
 #play.stop { background: var(--stop); }
 #play.stop .i-stop { display: block; }
@@ -128,14 +193,50 @@ select.native { display: none; }
 
 /* Sonido */
 .mix .row { gap: 12px; }
-.mix .row > button { flex: none; width: 96px; min-height: 32px; border-radius: 8px; text-align: left; padding-left: 0; color: var(--muted); }
-.mix .row > button.on { color: var(--fg); }
+.mix .row > button.ch { flex: none; width: 96px; min-height: 32px; text-align: left; color: var(--muted); }
+.mix .row > button.ch.on { color: var(--fg); }
+.mix .row .tag { flex: none; width: 40px; text-align: right; font-size: 12px; font-weight: 600; color: var(--muted); }
+.fold[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.panrows { background: #151517; }
+.panrows .seg { width: 190px; flex: none; }
+.panfoot { margin: 0; padding: 6px 16px 12px; font-size: 13px; line-height: 18px; color: var(--muted); }
+.tabsrow { padding: 10px 16px 0; }
+.seqbox { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; }
+.chip { height: 36px; padding: 0 10px 0 12px; border-radius: 18px; background: var(--fill); font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.chip .n { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip .x { color: var(--muted); font-size: 18px; line-height: 1; margin-left: 2px; }
+.chip:disabled .x { visibility: hidden; }
+.chip.add { background: var(--accent-soft); color: var(--accent); font-weight: 600; padding: 0 14px; }
+#partlist { padding-top: 6px; }
+.addrow { color: var(--accent); }
+#partlist:not(:empty) + .addrow::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--line); }
+.degs { padding: 14px 16px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.degs button { height: 48px; border-radius: 10px; background: var(--fill); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.degs b { font-size: 15px; font-weight: 600; }
+.degs span { font-size: 10px; opacity: .7; }
+.degs .rest span { color: #FFB340; } .degs .away span { color: var(--away); } .degs .tense span { color: #DA8FFF; }
+.degs button.on { box-shadow: inset 0 0 0 2px var(--accent); }
+.ask { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+.askh { display: flex; align-items: center; justify-content: space-between; font-size: 15px; color: var(--muted); }
+.askh b { color: var(--fg); }
+.askh .cancel { color: var(--accent); min-height: 44px; font-size: 15px; }
+.durs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.durs button { height: 56px; border-radius: 12px; background: var(--fill); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.durs b { font-size: 20px; font-weight: 700; } .durs span { font-size: 11px; color: var(--muted); }
+.durs button.on { background: var(--accent); color: #000000; } .durs button.on span { color: #3A2500; }
+.prow { gap: 12px; } .prow .n { width: 18px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.prow .cn { font-weight: 600; } .prow .cn.rest { color: #FFB340; } .prow .cn.away { color: var(--away); } .prow .cn.tense { color: #DA8FFF; }
+.prow.sel { background: rgba(255,255,255,.05); } .prow.sel .chev { transform: rotate(90deg); }
+.edit { padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 8px; background: rgba(255,255,255,.05); }
+.edit .rm { color: var(--stop); font-size: 15px; min-height: 44px; }
+.lbl.empty { color: var(--muted); font-size: 15px; padding: 6px 0; }
+.danger { color: var(--stop); justify-content: center; }
 #micread { font-size: 17px; font-variant-numeric: tabular-nums; }
 .alert { color: var(--stop); font-weight: 600; }
 .ok { color: var(--go); font-weight: 600; }
 .credits { font-size: 12px; }
 .row.link { width: 100%; text-align: left; }
-.row .val { color: var(--muted); font-variant-numeric: tabular-nums; }
+.row .val { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row .val.new { color: var(--accent); }
 .back { align-self: flex-start; display: flex; align-items: center; gap: 6px; min-height: 44px; margin-left: -4px; color: var(--accent); }
 .back svg { width: 12px; height: 20px; }
@@ -144,60 +245,78 @@ select.native { display: none; }
 .notes li::before { content: ""; position: absolute; left: 16px; top: 16px; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
 
 /* Tab bar */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(22, 22, 24, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
-.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #8E8E93; font-size: 10px; font-weight: 600; min-height: 44px; }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(18, 18, 20, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--edge); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--dim); font-size: 10px; font-weight: 600; min-height: 44px; }
 .tab[aria-selected="true"] { color: var(--accent); }
-@media (max-height: 700px) { .tempo { margin-top: 12px; gap: 8px; } #bpm { font-size: 72px; line-height: 76px; } .padcard { margin-top: 12px; } .live { gap: 12px; padding-top: 12px; } }
+/* Shorter phones (mini, 16e) and the SE: the same layout, tighter, so Play never hides under the tab bar. */
+@media (max-height: 880px) {
+  #partname { font-size: 24px; line-height: 28px; } .partline { margin-top: 8px; }
+  .harm { margin-top: 8px; padding: 10px 0; gap: 10px; } #dial { height: 38px; }
+  .win .big { height: 56px; } .win .small { height: 46px; } .win button.big b { font-size: 21px; } .win button.small b { font-size: 16px; }
+  .tile { height: 48px; } .tbtn { height: 58px; } #play { width: 68px; height: 68px; }
+  .bpmrow button { height: 40px; } .padsel { height: 44px; } .live { padding-top: 8px; gap: 8px; } #map { margin-top: 6px; }
+}
+@media (max-height: 700px) {
+  #bpm { font-size: 32px; line-height: 32px; } .bpmrow { margin-top: 6px; }
+  #partname { font-size: 22px; line-height: 26px; } #map .seg-bar { height: 16px; } #map .lb { font-size: 10px; }
+  .harm { gap: 8px; padding: 8px 0; } #dial { height: 34px; }
+  .win .big { height: 48px; } .win .small { height: 40px; } .win button.big b { font-size: 19px; } .win button.small b { font-size: 15px; }
+  .win button span { font-size: 11px; } #padmode { min-height: 36px; }
+  .tile { height: 44px; } .tbtn { height: 54px; } #play { width: 64px; height: 64px; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .pd-menu, .pd-menu.closing { animation-duration: .01s; } }
 </style>
 
 <main>
   <section class="screen" id="tab-tocar" aria-label="Tocar" data-i18n-aria="tab.tocar">
     <div class="wrap">
-      <div class="now">
-        <button class="song" data-go="canciones" aria-label="Elegir canción" data-i18n-aria="song.choose">
-          <small><span data-i18n="song.label">Canción</span> · <span id="status">Detenido</span></small>
-          <span id="songtitle">Sin canción guardada</span>
-        </button>
-        <button type="button" class="pill pd" data-for="meter" aria-haspopup="listbox" aria-expanded="false" aria-label="Compás" data-i18n-aria="meter"><span id="meterlbl">4/4</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="meter" class="native" tabindex="-1" aria-hidden="true">
-          <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
-        </select>
-      </div>
-      <div class="tempo" aria-label="Tempo" data-i18n-aria="tempo">
-        <div class="line">
-          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
-            <button class="round" id="m1" aria-label="Bajar 1 BPM" data-i18n-aria="bpm.m1"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12"/></svg></button>
-            <button class="round sm" id="m5" aria-label="Bajar 5 BPM" data-i18n-aria="bpm.m5">−5</button>
-          </div>
-          <div class="bpmbox"><output id="bpm">72</output><span id="bpmunit">BPM (negra)</span></div>
-          <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
-            <button class="round" id="p1" aria-label="Subir 1 BPM" data-i18n-aria="bpm.p1"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12M9 3v12"/></svg></button>
-            <button class="round sm" id="p5" aria-label="Subir 5 BPM" data-i18n-aria="bpm.p5">+5</button>
-          </div>
+      <div class="top1">
+        <div class="song">
+          <button type="button" class="songbtn" data-go="canciones" aria-label="Elegir canción" data-i18n-aria="song.choose"><b id="songtitle">Sin canción guardada</b></button>
+          <div class="sub"><button type="button" class="pd meterpd" data-for="meter" aria-haspopup="listbox" aria-expanded="false" aria-label="Compás" data-i18n-aria="meter"><span id="meterlbl">4/4</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><span aria-hidden="true">·</span><span id="status">Detenido</span></div>
         </div>
-        <div class="dots" id="dots"></div>
-        <div id="barinfo">Listo para empezar</div>
-        <button id="tap" data-i18n="tap">Marcar tempo</button>
+        <div class="bpmread"><output id="bpm" aria-label="Tempo" data-i18n-aria="tempo">72</output><span id="bpmunit">BPM</span></div>
       </div>
-      <div class="padcard" aria-label="Pad">
-        <div class="head"><b>Pad</b><button data-go="sonido"><span id="padinfo">Sol · Supersaw</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button></div>
-        <div class="chords" id="chords"></div>
+      <select id="meter" class="native" tabindex="-1" aria-hidden="true">
+        <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
+      </select>
+      <div class="bpmrow" aria-label="Tempo" data-i18n-aria="tempo" role="group">
+        <button type="button" class="sm" id="m5" aria-label="Bajar 5 BPM" data-i18n-aria="bpm.m5">−5</button>
+        <button type="button" id="m1" aria-label="Bajar 1 BPM" data-i18n-aria="bpm.m1"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12"/></svg></button>
+        <button type="button" id="tap" data-i18n="tap">Marcar tempo</button>
+        <button type="button" id="p1" aria-label="Subir 1 BPM" data-i18n-aria="bpm.p1"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 9h12M9 3v12"/></svg></button>
+        <button type="button" class="sm" id="p5" aria-label="Subir 5 BPM" data-i18n-aria="bpm.p5">+5</button>
       </div>
-      <div class="live" aria-label="Control en vivo" data-i18n-aria="live">
-        <div id="sections" role="group" aria-label="Parte de la canción" data-i18n-aria="sections">
-          <button data-s="intro" data-i18n="sec.intro">Intro</button>
-          <button data-s="estrofa" data-i18n="sec.estrofa">Estrofa</button>
-          <button data-s="coro" data-i18n="sec.coro">Coro</button>
-          <button data-s="puente" data-i18n="sec.puente">Puente</button>
-          <button data-s="final" data-i18n="sec.final">Final</button>
+
+      <div class="partline"><span id="partname">Intro</span><span id="partpos"></span></div>
+      <div id="map" role="group" aria-label="Mapa de la canción" data-i18n-aria="map"></div>
+
+      <div class="padsel">
+        <button type="button" id="padprev" aria-label="Sonido de pad anterior" data-i18n-aria="pad.prev"><svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 2 8l6 6"/></svg></button>
+        <button type="button" id="padmid" data-for="padtype" aria-haspopup="listbox" aria-expanded="false" aria-label="Elegir sonido de pad" data-i18n-aria="pad.choose"><span id="padname">Supersaw</span><span id="padsub"></span></button>
+        <button type="button" id="padnext" aria-label="Sonido de pad siguiente" data-i18n-aria="pad.next"><svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 2 6 6-6 6"/></svg></button>
+      </div>
+
+      <div class="harm">
+        <button type="button" id="dial" aria-haspopup="listbox"><span class="needle" aria-hidden="true"></span><span class="names" id="dialnames" aria-hidden="true"></span><span class="ticks" aria-hidden="true"></span></button>
+        <div class="win" id="win"></div>
+        <div class="harmfoot">
+          <div class="seg" id="mode" role="radiogroup" aria-label="Cómo cambia el pad" data-i18n-aria="mode.aria"><button type="button" role="radio" data-m="auto" class="on" aria-checked="true" data-i18n="mode.auto">Auto</button><button type="button" role="radio" data-m="manual" aria-checked="false" data-i18n="mode.manual">Manual</button></div>
+          <button type="button" id="padmode" role="switch" aria-checked="false" aria-label="Solo tónica y quinta" data-i18n-aria="pad.fifths"><span data-i18n="fifths.short">Tónica + 5ª</span><span class="switch" aria-hidden="true"></span></button>
         </div>
+        <div class="legend" id="legend"><span><i style="background:var(--rest)"></i><span data-i18n="fn.rest">Reposo</span></span><span><i style="background:var(--away)"></i><span data-i18n="fn.away">Se aleja</span></span><span><i style="background:var(--tense)"></i><span data-i18n="fn.tense">Tensión</span></span></div>
+        <div id="hint" hidden></div>
+      </div>
+
+      <div class="live" role="group" aria-label="Control en vivo" data-i18n-aria="live">
+        <div class="tiles" id="tiles"></div>
         <div class="transport">
-          <button class="tbtn" id="fill"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16 9 6l4 8 2-4h3"/></svg><span id="filllbl">Remate</span></button>
-          <button id="play" aria-label="Tocar">
-            <svg class="i-play" width="30" height="30" viewBox="0 0 18 18" aria-hidden="true"><path d="M6 3.4v11.2c0 .6.7 1 1.2.6l8.4-5.6c.5-.3.5-1 0-1.3L7.2 2.8C6.7 2.4 6 2.8 6 3.4Z" fill="currentColor"/></svg>
-            <svg class="i-stop" width="28" height="28" viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="2" fill="currentColor"/></svg>
+          <button type="button" class="tbtn" id="fill"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16 9 6l4 8 2-4h3"/></svg><span id="filllbl">Remate</span><small id="fillnote" data-i18n="fill.nodrums" hidden>sin batería</small></button>
+          <button type="button" id="play" aria-label="Tocar">
+            <svg class="i-play" width="28" height="28" viewBox="0 0 18 18" aria-hidden="true"><path d="M6 3.4v11.2c0 .6.7 1 1.2.6l8.4-5.6c.5-.3.5-1 0-1.3L7.2 2.8C6.7 2.4 6 2.8 6 3.4Z" fill="currentColor"/></svg>
+            <svg class="i-stop" width="26" height="26" viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="2" fill="currentColor"/></svg>
           </button>
-          <button class="tbtn" id="next"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 5 8 6-8 6V5ZM17 5v12"/></svg><span data-i18n="next">Siguiente parte</span></button>
+          <button type="button" class="tbtn" id="next"><small data-i18n="next.small">Siguiente</small><b id="nextname">—</b></button>
         </div>
       </div>
     </div>
@@ -237,25 +356,43 @@ select.native { display: none; }
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-key" data-i18n="key">Tonalidad</span><select id="key" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="key" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-key val-key"><span class="pd-val" id="val-key"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <div class="row pick"><span class="lbl" id="lbl-padtype" data-i18n="pad.sound">Sonido del pad</span><select id="padtype" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="padtype" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-padtype val-padtype"><span class="pd-val" id="val-padtype"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
-        <div class="row"><span class="lbl" id="lbl-fifths" data-i18n="pad.fifths">Solo tónica y quinta</span><button class="switch" id="padmode" role="switch" aria-checked="false" aria-labelledby="lbl-fifths"></button></div>
         <div class="row col"><label class="top" for="padmove"><span data-i18n="pad.move">Movimiento</span><span id="padmoveval" style="color:var(--muted)">50 %</span></label><input type="range" id="padmove" min="0" max="100" value="50"></div>
         <div class="row col"><label class="top" for="padrich"><span data-i18n="pad.rich">Riqueza</span><span id="padrichval" style="color:var(--muted)">50 %</span></label><input type="range" id="padrich" min="0" max="100" value="50"></div>
         <div class="row pick"><span class="lbl" id="lbl-names" data-i18n="names">Nombres de notas</span><select id="names" class="native" tabindex="-1" aria-hidden="true"><option value="latin">Do Re Mi</option><option value="abc">C D E</option></select><button type="button" class="pd" data-for="names" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-names val-names"><span class="pd-val" id="val-names"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
-      <p class="foot" data-i18n="pad.fifths.foot">Con tónica y quinta el pad sirve para toda la canción sin cambiar de acorde. Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene.</p>
+      <p class="foot" data-i18n="pad.foot">Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Tocar.</p>
       <div class="cap" data-i18n="mix">Mezcla</div>
-      <div class="group mix">
-        <div class="row"><button id="on-shaker" class="on" aria-label="Activar o silenciar percusión" data-i18n-aria="mute.shaker" data-i18n="ch.shaker">Percusión</button><input type="range" id="v-shaker" min="0" max="100" value="60" aria-label="Volumen percusión" data-i18n-aria="vol.shaker"></div>
-        <div class="row"><button id="on-drums" class="on" aria-label="Activar o silenciar batería" data-i18n-aria="mute.drums" data-i18n="ch.drums">Batería</button><input type="range" id="v-drums" min="0" max="100" value="75" aria-label="Volumen batería" data-i18n-aria="vol.drums"></div>
-        <div class="row"><button id="on-pad" class="on" aria-label="Activar o silenciar pad" data-i18n-aria="mute.pad">Pad</button><input type="range" id="v-pad" min="0" max="100" value="50" aria-label="Volumen pad" data-i18n-aria="vol.pad"></div>
+      <div class="group mix" id="mix"></div>
+      <p class="foot" data-i18n="mix.foot">Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar.</p>
+      <div class="cap" data-i18n="struct">Estructura de la canción</div>
+      <div class="group" id="struct">
+        <div class="tabsrow"><div class="seg" role="tablist" aria-label="Estructura de la canción" data-i18n-aria="struct"><button type="button" role="tab" id="t-orden" class="on" aria-selected="true" data-i18n="struct.order">Orden</button><button type="button" role="tab" id="t-partes" aria-selected="false" data-i18n="struct.parts">Partes</button></div></div>
+        <div id="p-orden"><div class="seqbox" id="seq"><button type="button" class="chip add" id="addchip" data-for="addpart" aria-haspopup="listbox" aria-expanded="false" aria-label="Añadir una parte al orden" data-i18n-aria="struct.add.aria"><span data-i18n="struct.add">+ Añadir</span></button></div><select id="addpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
+        <div id="p-partes" hidden><div id="partlist"></div><button type="button" class="row link addrow" id="newrow" data-for="newpart" aria-haspopup="listbox" aria-expanded="false"><span class="lbl" data-i18n="struct.new">+ Nueva parte</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="newpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
       </div>
-      <p class="foot" data-i18n="mix.foot">Toca el nombre de un canal para silenciarlo. En iPhone quita el modo silencio si no suena.</p>
+      <p class="foot" id="structfoot"></p>
       <div class="cap" data-i18n="app">App</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-lang" data-i18n="lang">Idioma</span><select id="lang" class="native" tabindex="-1" aria-hidden="true"><option value="es">Español</option><option value="en">English</option></select><button type="button" class="pd" data-for="lang" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-lang val-lang"><span class="pd-val" id="val-lang"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <button type="button" class="row link" id="version" data-go="version"><span class="lbl" data-i18n="version">Versión</span><span class="val" id="versionval"></span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
       </div>
       <p class="foot credits" data-i18n="credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-parte" data-parent="sonido" aria-labelledby="ptitle" hidden>
+    <div class="wrap">
+      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <h1 id="ptitle"></h1>
+      <div class="cap" data-i18n="part.tap">Toca un acorde para añadirlo</div>
+      <div class="group">
+        <div class="degs" id="degs"></div>
+        <div class="ask" id="ask" hidden></div>
+      </div>
+      <div class="cap" id="progcap"></div>
+      <div class="group" id="prog"></div>
+      <p class="foot" data-i18n="part.foot">La parte dura lo que suman sus acordes, redondeado al compás.</p>
+      <div class="group" style="margin-top:16px"><button type="button" class="row link danger" id="pdel" data-i18n="part.delete">Borrar esta parte</button></div>
     </div>
   </section>
 
@@ -293,7 +430,7 @@ select.native { display: none; }
 
 <script>
 (() => {
-  // A screen with data-parent (Versión) opens inside its tab: the tab bar keeps that tab selected.
+  // A screen with data-parent (Versión, a part of the song) opens inside its tab: the tab bar keeps that tab selected.
   const show = (name) => {
     let tab = name;
     document.querySelectorAll('.screen').forEach(s => {
@@ -320,7 +457,7 @@ select.native { display: none; }
     const o = sel.options[sel.selectedIndex];
     const txt = o ? o.textContent : '';
     if (sel.id === 'meter') document.getElementById('meterlbl').textContent = txt;
-    else btn.querySelector('.pd-val').textContent = txt;
+    else { const v = btn.querySelector('.pd-val'); if (v) v.textContent = txt; }
   }
   function close(focusBack) {
     if (!open) return;
@@ -344,6 +481,7 @@ select.native { display: none; }
       const it = document.createElement('div'); it.className = 'pd-item'; it.setAttribute('role', 'option'); it.tabIndex = -1;
       const on = o.value === sel.value; it.setAttribute('aria-selected', String(on));
       it.innerHTML = (on ? CHECK : '') + '<span></span>'; it.lastChild.textContent = o.textContent;
+      if (o.dataset.sub) { const sub = document.createElement('span'); sub.className = 'sub'; sub.textContent = o.dataset.sub; it.appendChild(sub); }
       it.addEventListener('click', () => pick(sel, o.value));
       if (on) current = it;
       box.appendChild(it);
@@ -384,7 +522,8 @@ select.native { display: none; }
       else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); close(true); }
     });
   }
-  document.querySelectorAll('.pd[data-for]').forEach(btn => {
+  // Any button with data-for opens the menu of that select; it shows the choice if it has a .pd-val.
+  document.querySelectorAll('[data-for]').forEach(btn => {
     const sel = document.getElementById(btn.dataset.for);
     const update = () => sync(sel, btn);
     sel.addEventListener('change', update); sel.addEventListener('pd-sync', update);
@@ -393,6 +532,9 @@ select.native { display: none; }
     (row || btn).addEventListener('click', () => openMenu(sel, btn));
     update();
   });
+  // The engine opens menus itself (the key dial) and moves between screens (the part editor).
+  window.acompMenu = (id, btn) => openMenu(document.getElementById(id), btn);
+  window.acompShow = show;
   addEventListener('resize', () => close(false));
   document.querySelectorAll('.screen').forEach(sc => sc.addEventListener('scroll', () => close(false), { passive: true }));
   let start = 'tocar';
