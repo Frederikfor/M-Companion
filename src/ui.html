@@ -236,6 +236,13 @@ select.native { display: none; }
 .ok { color: var(--go); font-weight: 600; }
 .credits { font-size: 12px; }
 .row.link { width: 100%; text-align: left; }
+.beats { display: flex; gap: 6px; margin-top: 10px; }
+.beats button { flex: 1 1 0; min-width: 0; height: 64px; border-radius: 9px; background: var(--fill); position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; font: 600 13px var(--mono); color: var(--fg); }
+.beats button::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--lv) * 30%); background: var(--accent); opacity: .85; }
+.beats button span { position: relative; }
+.beats button[data-lv="0"] { color: var(--dim); }
+.beats button[data-lv="0"]::after { content: ""; position: absolute; left: 25%; right: 25%; top: 50%; height: 2px; background: var(--dim); transform: rotate(-35deg); }
+.beats.six button { height: 56px; }
 .row .val { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row .val.new { color: var(--accent); }
 .back { align-self: flex-start; display: flex; align-items: center; gap: 6px; min-height: 44px; margin-left: -4px; color: var(--accent); }
@@ -330,15 +337,25 @@ select.native { display: none; }
         <div class="row pick"><span class="lbl" id="lbl-style" data-i18n="style">Estilo</span><select id="style" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="style" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-style val-style"><span class="pd-val" id="val-style"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <div class="row pick"><span class="lbl" id="lbl-shaker" data-i18n="shaker.pattern">Patrón de shaker</span><select id="shaker" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="shaker" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-shaker val-shaker"><span class="pd-val" id="val-shaker"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <div class="row pick"><span class="lbl" id="lbl-shksound" data-i18n="shaker.sound">Sonido del shaker</span><select id="shksound" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="shksound" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-shksound val-shksound"><span class="pd-val" id="val-shksound"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
+        <div class="row pick"><span class="lbl" id="lbl-shktone" data-i18n="shaker.tone">Tono de la percusión</span><select id="shktone" class="native" tabindex="-1" aria-hidden="true">
+          <option value="soft" data-i18n="tone.soft">Suave</option><option value="normal" data-i18n="tone.normal" selected>Normal</option><option value="bright" data-i18n="tone.bright">Brillante</option>
+        </select><button type="button" class="pd" data-for="shktone" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-shktone val-shktone"><span class="pd-val" id="val-shktone"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
+      <div class="cap" data-i18n="click.cap">Clic</div>
+      <div class="group">
+        <div class="row col"><span class="top" id="lbl-beats" data-i18n="click.beats">Pulsos del clic</span><div class="beats" id="beats" role="group" aria-labelledby="lbl-beats"></div></div>
+      </div>
+      <p class="foot" data-i18n="click.foot">Toca un pulso para cambiar su fuerza: fuerte, normal, suave o en silencio. Cada compás guarda los suyos.</p>
       <div class="cap" data-i18n="feel">Interpretación</div>
       <div class="group">
         <div class="row col"><label class="top" for="human"><span data-i18n="human">Toque humano</span><span id="humanval" style="color:var(--muted)">40 %</span></label><input type="range" id="human" min="0" max="100" value="40"></div>
+        <div class="row"><span class="lbl" id="lbl-advance" data-i18n="advance">Avanzar por la canción</span><button class="switch" id="advance" role="switch" aria-checked="false" aria-labelledby="lbl-advance"></button></div>
         <div class="row"><span class="lbl" id="lbl-count" data-i18n="countin">Conteo de entrada</span><button class="switch" id="countin" role="switch" aria-checked="true" aria-labelledby="lbl-count"></button></div>
         <div class="row pick"><span class="lbl" id="lbl-autofill" data-i18n="autofill">Remate automático</span><select id="autofill" class="native" tabindex="-1" aria-hidden="true">
-          <option value="0" data-i18n="autofill.0">Apagado</option><option value="4" data-i18n="autofill.4">Cada 4 compases</option><option value="8" data-i18n="autofill.8" selected>Cada 8 compases</option>
+          <option value="0" data-i18n="autofill.0" selected>Apagado</option><option value="4" data-i18n="autofill.4">Cada 4 compases</option><option value="8" data-i18n="autofill.8">Cada 8 compases</option>
         </select><button type="button" class="pd" data-for="autofill" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-autofill val-autofill"><span class="pd-val" id="val-autofill"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
+      <p class="foot" data-i18n="advance.foot">Apagado, la parte elegida se repite hasta que toques otra o Siguiente.</p>
       <div class="cap" data-i18n="mic.cap">Micrófono · beta</div>
       <div class="group">
         <div class="row"><span class="lbl" id="lbl-mic" data-i18n="mic.listen">Escuchar mi tempo</span><button class="switch" id="mic" role="switch" aria-checked="false" aria-labelledby="lbl-mic"></button></div>
@@ -375,6 +392,7 @@ select.native { display: none; }
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-lang" data-i18n="lang">Idioma</span><select id="lang" class="native" tabindex="-1" aria-hidden="true"><option value="es">Español</option><option value="en">English</option></select><button type="button" class="pd" data-for="lang" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-lang val-lang"><span class="pd-val" id="val-lang"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <button type="button" class="row link" id="version" data-go="version"><span class="lbl" data-i18n="version">Versión</span><span class="val" id="versionval"></span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
+        <button type="button" class="row link" id="diagbtn" data-go="diag"><span class="lbl" data-i18n="diag">Diagnóstico de audio</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
       </div>
       <p class="foot credits" data-i18n="credits">Grabaciones de uso libre (CC0): batería acústica de freesound.org; shakers, cabasa, pandero, conga y palmas de la Versilian Community Sample Library.</p>
     </div>
@@ -406,6 +424,16 @@ select.native { display: none; }
       </div>
       <p class="foot" id="verupdate" data-i18n="version.foot">La app se actualiza sola cuando hay internet. La versión nueva se usa la siguiente vez que la abres.</p>
       <div id="changelog"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-diag" data-parent="sonido" aria-label="Diagnóstico de audio" data-i18n-aria="diag" hidden>
+    <div class="wrap">
+      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <h1 data-i18n="diag">Diagnóstico de audio</h1>
+      <div class="group" id="diaglist"></div>
+      <p class="foot" data-i18n="diag.foot">Cómo responde el audio en este equipo desde que abriste la app. Los datos no salen del teléfono: para compartirlos, cópialos y pégalos en un mensaje.</p>
+      <div class="group"><button type="button" class="row link" id="diagcopy"><span class="lbl" style="color:var(--accent)" data-i18n="diag.copy">Copiar datos</span></button></div>
     </div>
   </section>
 
