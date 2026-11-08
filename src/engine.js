@@ -164,7 +164,8 @@
     organo:    { group: 'Himnos y gospel', name: 'Gospel B3', en: 'Gospel B3', layers: [['sine', [0], -12, .021], ['sine', [0], 0, .028], ['sine', [0], 12, .021], ['sine', [0], 19, .013], ['sine', [0], 24, .008]], cutoff: 3, q: .3, attack: .06, release: .35, vib: [6.3, 12], hall: .3, voicing: 'gospel7', osc: true }
   };
   const SHK_SETS = {
-    small:  { name: 'Shaker pequeño', en: 'Small shaker', down: ['shkH_Down_1', 'shkH_Down_2', 'shkL_Down_1', 'shkL_Down_2'], up: ['shkH_Up_1', 'shkH_Up_2', 'shkL_Up_1', 'shkL_Up_2'] },
+    // shelf: the small shaker's recordings carry most of their energy above 8 kHz; this tames them.
+    small:  { name: 'Shaker pequeño', en: 'Small shaker', shelf: [5000, -6], down: ['shkH_Down_1', 'shkH_Down_2', 'shkL_Down_1', 'shkL_Down_2'], up: ['shkH_Up_1', 'shkH_Up_2', 'shkL_Up_1', 'shkL_Up_2'] },
     large:  { name: 'Shaker grande', en: 'Large shaker', down: ['lshkDown_1', 'lshkDown_2', 'lshkHit_1', 'lshkHit_2'], up: ['lshkUp_1', 'lshkUp_2'] },
     cabasa: { name: 'Cabasa', en: 'Cabasa', down: ['cabHit_1', 'cabHit_2'], up: ['cabRub_1', 'cabRub_2', 'cabRub_3'] }
   };
@@ -189,6 +190,14 @@
       'mode.aria': 'Cómo cambia el pad', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Tónica + 5ª',
       'hint.fifths': 'Tónica + 5ª: el pad no cambia de acorde', 'hint.held': 'Toca para cambiar · mantén uno y toca otro para sumar', 'hint.silent': 'Pad en silencio · toca un acorde',
       style: 'Estilo', 'shaker.pattern': 'Patrón de shaker', 'shaker.sound': 'Sonido del shaker', feel: 'Interpretación', human: 'Toque humano',
+      'shaker.tone': 'Tono de la percusión', 'tone.soft': 'Suave', 'tone.normal': 'Normal', 'tone.bright': 'Brillante',
+      'click.cap': 'Clic', 'click.beats': 'Pulsos del clic', 'click.foot': 'Toca un pulso para cambiar su fuerza: fuerte, normal, suave o en silencio. Cada compás guarda los suyos.',
+      'click.lv': ['en silencio', 'suave', 'normal', 'fuerte'], 'click.beat': (n, lv) => `Pulso ${n}: ${lv}. Toca para cambiar`,
+      advance: 'Avanzar por la canción', 'advance.foot': 'Apagado, la parte elegida se repite hasta que toques otra o Siguiente.',
+      diag: 'Diagnóstico de audio', 'diag.foot': 'Cómo responde el audio en este equipo desde que abriste la app. Los datos no salen del teléfono: para compartirlos, cópialos y pégalos en un mensaje.',
+      'diag.copy': 'Copiar datos', 'diag.copied': 'Copiado', 'diag.device': 'Equipo', 'diag.rate': 'Frecuencia de muestreo', 'diag.latency': 'Latencia de salida',
+      'diag.chunk': 'Preparar ritmo (prom. / máx.)', 'diag.cut': 'Responder a un cambio (prom. / máx.)', 'diag.pad': 'Preparar acorde del pad (prom. / máx.)',
+      'diag.late': 'Cambios que llegaron tarde', 'diag.loops': 'Veces que el ritmo se cubrió solo', 'diag.long': 'Pausas de la página (máx.)', 'diag.hidden': 'Veces en segundo plano', 'diag.none': 'sin datos',
       countin: 'Conteo de entrada', autofill: 'Remate automático', 'autofill.0': 'Apagado', 'autofill.4': 'Cada 4 compases', 'autofill.8': 'Cada 8 compases',
       'mic.cap': 'Micrófono · beta', 'mic.listen': 'Escuchar mi tempo', 'mic.follow': 'La base me sigue',
       'mic.hint': 'Te avisa si te aceleras o frenas respecto al tempo marcado.',
@@ -240,6 +249,14 @@
       'mode.aria': 'How the pad changes', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Root + 5th',
       'hint.fifths': 'Root + 5th: the pad does not change chords', 'hint.held': 'Tap to change · hold one and tap another to add', 'hint.silent': 'Pad silent · tap a chord',
       style: 'Style', 'shaker.pattern': 'Shaker pattern', 'shaker.sound': 'Shaker sound', feel: 'Feel', human: 'Human feel',
+      'shaker.tone': 'Percussion tone', 'tone.soft': 'Soft', 'tone.normal': 'Normal', 'tone.bright': 'Bright',
+      'click.cap': 'Click', 'click.beats': 'Click beats', 'click.foot': 'Tap a beat to change how hard it sounds: strong, normal, soft or silent. Each time signature keeps its own.',
+      'click.lv': ['silent', 'soft', 'normal', 'strong'], 'click.beat': (n, lv) => `Beat ${n}: ${lv}. Tap to change`,
+      advance: 'Move through the song', 'advance.foot': 'Off, the chosen part repeats until you tap another one or Next.',
+      diag: 'Audio diagnostics', 'diag.foot': 'How the audio is coping on this device since you opened the app. Nothing leaves the phone: to share it, copy it and paste it into a message.',
+      'diag.copy': 'Copy data', 'diag.copied': 'Copied', 'diag.device': 'Device', 'diag.rate': 'Sample rate', 'diag.latency': 'Output latency',
+      'diag.chunk': 'Rhythm render (avg / max)', 'diag.cut': 'Reacting to a change (avg / max)', 'diag.pad': 'Pad chord render (avg / max)',
+      'diag.late': 'Changes that arrived late', 'diag.loops': 'Times the rhythm covered for itself', 'diag.long': 'Page stalls (max)', 'diag.hidden': 'Times in the background', 'diag.none': 'no data',
       countin: 'Count-in', autofill: 'Auto fill', 'autofill.0': 'Off', 'autofill.4': 'Every 4 bars', 'autofill.8': 'Every 8 bars',
       'mic.cap': 'Microphone · beta', 'mic.listen': 'Listen to my tempo', 'mic.follow': 'Backing follows me',
       'mic.hint': 'Warns you if you speed up or slow down against the set tempo.',
@@ -288,7 +305,7 @@
     $('play').setAttribute('aria-label', T(playing ? 'stop' : 'play'));
     if (!micOn) $('micmsg').textContent = T('mic.hint');
     setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); buildWin(); drawTiles(); buildMix();
-    renderSeq(); renderParts(); tabTo(structTab); drawPos(); drawPart(); renderSongs(); renderVersion();
+    renderSeq(); renderParts(); tabTo(structTab); drawPos(); drawPart(); renderSongs(); renderVersion(); buildBeats();
   }
 
   // ---------- Version ----------
@@ -326,11 +343,18 @@
     });
   }
   const firstStyle = (m) => Object.keys(STYLES).find(k => STYLES[k].meter === m);
+  // Click level of each beat per time signature: 3 strong, 2 normal, 1 soft, 0 silent.
+  const CLICK0 = () => ({ '4/4': [3, 2, 2, 2], '3/4': [3, 2, 2], '6/8': [3, 2, 2, 3, 2, 2] });
+  const CLICK_V = [0, .3, .6, 1];
+  const TONES = { soft: [3500, -7], normal: null, bright: [7000, 3] };
 
   const S = {
-    bpm: 72, meter: '4/4', at: 0, autoFill: 8,
+    // Simple by default (1.7.0): the pad holds root and fifth by hand, the chosen part repeats and
+    // nothing changes on its own. Moving through the song and Auto are one switch away.
+    bpm: 72, meter: '4/4', at: 0, autoFill: 0, advance: false,
     key: 7, names: 'latin', chord: 0, style: 'balada44', shaker: 'auto', human: 40, countIn: true,
-    pad: 'atmos', padMode: 'chord', padHand: 'auto', held: [0], padMove: 50, padRich: 50, shkSound: 'small',
+    pad: 'atmos', padMode: 'fifths', padHand: 'manual', held: [0], padMove: 50, padRich: 50, shkSound: 'small', shkTone: 'normal',
+    clickLv: CLICK0(),
     // Only the pad on by default; everything in the centre except the click, on the left (the musician's ear).
     layers: { shaker: { on: false, vol: 60, side: 'C' }, drums: { on: false, vol: 75, side: 'C' }, pad: { on: true, vol: 50, side: 'C' }, click: { on: false, vol: 60, side: 'L' } },
     song: DEFAULT_SONG(), follow: false, lang: 'es'
@@ -344,6 +368,15 @@
   const pct = (v) => (Number.isFinite(+v) ? Math.max(0, Math.min(100, Math.round(+v))) : 50);
   S.padMove = pct(S.padMove); S.padRich = pct(S.padRich);
   if (!SHK_SETS[S.shkSound]) S.shkSound = 'small';
+  if (!(S.shkTone in TONES)) S.shkTone = 'normal';
+  S.advance = S.advance === true;
+  {
+    const ok = S.clickLv && typeof S.clickLv === 'object' ? S.clickLv : {}, D = CLICK0();
+    S.clickLv = {};
+    for (const m in D) S.clickLv[m] = Array.isArray(ok[m]) && ok[m].length === D[m].length && ok[m].every((x) => [0, 1, 2, 3].includes(x)) ? ok[m] : D[m];
+  }
+  // 1.7.0 made the app start simple. A state saved before it takes the new defaults once.
+  if (!S.simple17) { Object.assign(S, { padMode: 'fifths', padHand: 'manual', autoFill: 0, advance: false, simple17: true }); }
   if (!I18N[S.lang]) S.lang = 'es';
   {
     // 1.6.0 added the click channel and the sides. A state saved before it starts with the new defaults
@@ -369,6 +402,8 @@
   const secOf = (i) => i === 'end' ? 'final' : PART_SEC[seqAt(i)];
   // After the last part, the last part repeats until Siguiente (the ending) or Stop.
   const nextOf = (i) => i < S.song.seq.length - 1 ? i + 1 : i;
+  // Where the song goes on its own when a part ends: the next part, or the same one again.
+  const autoNext = (i) => S.advance ? nextOf(i) : i;
   const partKeys = () => Object.keys(PART_SEC).filter((k) => S.song.parts[k]);
   // Repeated parts get a number ("Coro 2"); the map uses short labels ("C2").
   function partLabel(i, short) {
@@ -379,6 +414,16 @@
   }
 
   // ---------- Audio engine ----------
+  // What the diagnostics screen shows: how long renders take on this device and how often the
+  // audio had to cover for a late one. Kept only in memory; Copiar hands it to the musician.
+  const diag = {
+    t0: Date.now(), late: 0, loops: 0, hidden: 0, longs: 0, longMax: 0, chunks: [], cuts: [], pads: [],
+    chunk(ms, cut) { const a = cut ? this.cuts : this.chunks; a.push(Math.round(ms)); if (a.length > 30) a.shift(); },
+    pad(ms) { this.pads.push(Math.round(ms)); if (this.pads.length > 30) this.pads.shift(); }
+  };
+  try {
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) { diag.longs++; diag.longMax = Math.max(diag.longMax, Math.round(e.duration)); } }).observe({ type: 'longtask', buffered: true });
+  } catch (e) {}
   let ctx, master, buses = {}, pans = {}, meters = {}, countBus, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
   let playing = false, timer = null, rhythmIn;
   const uiQueue = [];
@@ -386,11 +431,18 @@
   function initAudio() {
     if (ctx) return;
     try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // Everything is scheduled ahead, so a larger output buffer costs nothing musically and gives
+    // Android and laptops room to keep up: with the default small buffer they crackle under load.
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try { ctx = new AC({ latencyHint: 'playback' }); } catch (e) { ctx = new AC(); }
     const comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -14; comp.ratio.value = 3;
     master = ctx.createGain(); master.gain.value = 0.9;
-    master.connect(comp); comp.connect(ctx.destination);
+    // A last safety limiter after everything, the click included, so the sum never goes past full scale.
+    const out = ctx.createDynamicsCompressor();
+    out.threshold.value = -2; out.knee.value = 0; out.ratio.value = 20; out.attack.value = 0.002; out.release.value = 0.12;
+    out.connect(ctx.destination);
+    master.connect(comp); comp.connect(out);
     const room = ctx.createConvolver(); room.buffer = makeRoom(1.3, 0.008);
     const roomGain = ctx.createGain(); roomGain.gain.value = 0.35;
     room.connect(roomGain); roomGain.connect(master);
@@ -408,7 +460,7 @@
       const sg = ctx.createGain(); sg.gain.value = sends[k]; pans[k].connect(sg); sg.connect(room);
     }
     // The click skips the compressor, which would duck the other channels on every beat.
-    const clickOut = ctx.createGain(); clickOut.gain.value = 0.9; pans.click.connect(clickOut); clickOut.connect(ctx.destination);
+    const clickOut = ctx.createGain(); clickOut.gain.value = 0.9; pans.click.connect(clickOut); clickOut.connect(out);
     // The count-in always sounds, even with the click channel off, on the click's side.
     countBus = ctx.createGain(); countBus.connect(pans.click);
     padFilter = ctx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = (SEC_PAD[secOf(S.at)] || 1000) * PADS[S.pad].cutoff; padFilter.Q.value = PADS[S.pad].q;
@@ -524,6 +576,7 @@
     const g = ctx.createGain(); g.gain.value = gain;
     let node = s;
     if (o.hp) { const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = o.hp; s.connect(f); node = f; }
+    if (o.shelf) { const f = ctx.createBiquadFilter(); f.type = 'highshelf'; f.frequency.value = o.shelf[0]; f.gain.value = o.shelf[1]; node.connect(f); node = f; }
     node.connect(g); g.connect(bus);
     const now = ctx.currentTime, at = t - (o.off || 0);
     if (at >= now) s.start(at); else s.start(now, Math.min(b.duration - 0.01, now - at));
@@ -550,7 +603,7 @@
     crash: (t, v) => play('crash', t, vel(v) * .55, buses.drums) || SYN.crash(t, v),
     conga: (t, v) => play(v > .85 ? 'congaO_1' : pick(['conga_1', 'conga_2']), t, vel(v) * .7, buses.shaker)
       || play('tomHs', t, vel(v) * 1.2, buses.shaker, { rate: 1.7, len: 0.25 }) || SYN.conga(t, v),
-    shaker: (t, v) => play(pick(v >= .7 ? SHK_SETS[S.shkSound].down : SHK_SETS[S.shkSound].up), t, vel(v) * .55, buses.shaker)
+    shaker: (t, v) => play(pick(v >= .7 ? SHK_SETS[S.shkSound].down : SHK_SETS[S.shkSound].up), t, vel(v) * .55, buses.shaker, { shelf: SHK_SETS[S.shkSound].shelf })
       || (shakeBufs.fwd.length ? playBuf(pick(v >= .7 ? shakeBufs.fwd : shakeBufs.back), t, vel(v) * .45, buses.shaker) : SYN.shaker(t, v)),
     tamb: (t, v) => play(v >= .6 ? pick(['tambHit_1', 'tambHit_2']) : pick(['tambShk_1', 'tambShk_2']), t, vel(v) * .5, buses.shaker)
       || (tambBufs.length ? playBuf(pick(tambBufs), t, vel(v) * .4, buses.shaker) : SYN.tamb(t, v)),
@@ -650,49 +703,53 @@
   // The layers keep their meaning: wave = harmonic series, detune spread = band width, gain = level.
   // S.padRich (50 = as designed) widens the bands and tilts the harmonics; S.padMove scales the motion.
   const PS_N = 1 << 18;
-  const WAVES = { sawtooth: (h) => 1 / h, square: (h) => (h % 2 ? 1 / h : 0), triangle: (h) => (h % 2 ? 1 / (h * h) : 0), sine: (h) => (h === 1 ? 1 : 0) };
-  const WAVE_RMS = { sawtooth: .577, square: 1, triangle: .577, sine: .707 };
   const psCache = new Map();
-  let psRe, psIm, psAmp, psTodo = [], psTimer = null, psMs = 0;
+  let psTodo = [], psMs = 0;
   const richF = () => (S.padRich - 50) / 50;
   const moveF = () => (S.padMove / 50) ** 1.5;
   const sweepCents = () => Math.min(900, 400 * moveF());
   const psKey = (notes) => [S.pad, S.padRich, notes.join(',')].join('|');
-  // In-place radix-2 FFT; sign +1 is the inverse transform without the 1/N (the loop is normalised after).
-  function fft(re, im, sign) {
-    const n = re.length;
-    for (let i = 1, j = 0; i < n; i++) {
-      let bit = n >> 1;
-      for (; j & bit; bit >>= 1) j ^= bit;
-      j ^= bit;
-      if (i < j) { let x = re[i]; re[i] = re[j]; re[j] = x; x = im[i]; im[i] = im[j]; im[j] = x; }
-    }
-    for (let len = 2; len <= n; len <<= 1) {
-      const half = len >> 1, ang = sign * 2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
-      for (let i = 0; i < n; i += len) {
-        let cr = 1, ci = 0;
-        for (let k = 0; k < half; k++) {
-          const a = i + k, b = a + half, tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
-          re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
-          const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+  // The whole PADsynth render as one self-contained function: it runs in a worker, so the page (and
+  // the clock that feeds the rhythm) never stalls while a chord is computed, which on a phone takes
+  // 150 to 250 ms. Returns the left and right channels of the loop.
+  function psCore(P, notes, sr, N, r) {
+    const WAVES = { sawtooth: (h) => 1 / h, square: (h) => (h % 2 ? 1 / h : 0), triangle: (h) => (h % 2 ? 1 / (h * h) : 0), sine: (h) => (h === 1 ? 1 : 0) };
+    const WAVE_RMS = { sawtooth: .577, square: 1, triangle: .577, sine: .707 };
+    const mtof = (m) => 440 * 2 ** ((m - 69) / 12);
+    // A sung vowel: every harmonic is weighted by how close it falls to the formants (in octaves), so the
+    // "ah" moves with each note as in a real choir instead of coming from fixed filters after the mix.
+    const vowel = (f) => {
+      if (!P.formant) return 1;
+      const sec = P.sections || [1];
+      let v = 0.06;
+      for (const s of sec) for (const [F, q, g] of P.formant) { const x = Math.log2(f / (F * s)) * q / 1.5; v += g * Math.exp(-x * x) / sec.length; }
+      return v;
+    };
+    // In-place radix-2 FFT; sign +1 is the inverse transform without the 1/N (the loop is normalised after).
+    const fft = (re, im, sign) => {
+      const n = re.length;
+      for (let i = 1, j = 0; i < n; i++) {
+        let bit = n >> 1;
+        for (; j & bit; bit >>= 1) j ^= bit;
+        j ^= bit;
+        if (i < j) { let x = re[i]; re[i] = re[j]; re[j] = x; x = im[i]; im[i] = im[j]; im[j] = x; }
+      }
+      for (let len = 2; len <= n; len <<= 1) {
+        const half = len >> 1, ang = sign * 2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
+        for (let i = 0; i < n; i += len) {
+          let cr = 1, ci = 0;
+          for (let k = 0; k < half; k++) {
+            const a = i + k, b = a + half, tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+            re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+            const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+          }
         }
       }
-    }
-  }
-  // A sung vowel: every harmonic is weighted by how close it falls to the formants (in octaves), so the
-  // "ah" moves with each note as in a real choir instead of coming from fixed filters after the mix.
-  function vowel(P, f) {
-    if (!P.formant) return 1;
-    const sec = P.sections || [1];
-    let v = 0.06;
-    for (const s of sec) for (const [F, q, g] of P.formant) { const x = Math.log2(f / (F * s)) * q / 1.5; v += g * Math.exp(-x * x) / sec.length; }
-    return v;
-  }
-  function psRender(notes) {
-    const t0 = performance.now(), P = PADS[S.pad], sr = ctx.sampleRate, N = PS_N, df = sr / N, r = richF();
-    if (!psRe) { psRe = new Float64Array(N); psIm = new Float64Array(N); psAmp = new Float64Array(N / 2); }
-    psAmp.fill(0);
-    const top = Math.min(sr * 0.45, 14000);
+    };
+    const df = sr / N, amp = new Float64Array(N / 2);
+    // Nothing below 35 Hz (no speaker plays it, it only eats headroom) and nothing above 12 kHz,
+    // where small speakers turn harsh; both edges fade in over a few hertz.
+    const LO = 35, HI = Math.min(sr * 0.45, 12000);
     let energy = 0;
     notes.forEach((m, i) => {
       for (const [wave, dets, semi, gain] of P.layers) {
@@ -700,55 +757,96 @@
         const f0 = mtof(m + semi) * 2 ** (mean / 1200);
         const bw = (P.bw || Math.max(8, Math.max(...dets) - Math.min(...dets))) * 2 ** (1.3 * r);
         const hs = [];
-        for (let h = 1; h <= 96 && f0 * h < top; h++) { const a = WAVES[wave](h) * h ** (0.6 * r - (P.tilt || 0)) * vowel(P, f0 * h); if (a) hs.push([h, a]); }
+        for (let h = 1; h <= 96 && f0 * h < HI; h++) {
+          const f = f0 * h, edge = Math.min(1, Math.max(0, (f - LO) / 15)) * Math.min(1, (HI - f) / 1500);
+          const a = WAVES[wave](h) * h ** (0.6 * r - (P.tilt || 0)) * vowel(f) * edge;
+          if (a) hs.push([h, a]);
+        }
         const norm = g * WAVE_RMS[wave] / Math.sqrt(hs.reduce((e, [, a]) => e + a * a, 0) || 1);
         energy += (g * WAVE_RMS[wave]) ** 2;
         for (const [h, a] of hs) {
           // The band widens slowly with the harmonic number, as in a real section of players.
           const cents = Math.min(100, bw * h ** (P.spread || 0.25)), sig = Math.max(1, (2 ** (cents / 1200) - 1) * f0 * h / df / 2);
-          const c = f0 * h / df, amp = a * norm / Math.sqrt(sig);
+          const c = f0 * h / df, am = a * norm / Math.sqrt(sig);
           for (let k = Math.max(1, Math.floor(c - 3 * sig)), e = Math.min(N / 2 - 1, Math.ceil(c + 3 * sig)); k <= e; k++) {
-            const x = (k - c) / sig; psAmp[k] += amp * Math.exp(-x * x);
+            const x = (k - c) / sig; amp[k] += am * Math.exp(-x * x);
           }
         }
       }
     });
     // Same magnitudes left and right, phases partly shared: wide in stereo, still full when summed to mono.
     // Both channels come out of one inverse FFT: left in the real part, right in the imaginary part.
-    psRe.fill(0); psIm.fill(0);
+    const re = new Float64Array(N), im = new Float64Array(N);
     for (let k = 1; k < N / 2; k++) {
-      const A = psAmp[k]; if (!A) continue;
+      const A = amp[k]; if (!A) continue;
       const pl = Math.random() * 2 * Math.PI, pr = pl + (Math.random() - 0.5) * Math.PI;
       const aL = A * Math.cos(pl), bL = A * Math.sin(pl), aR = A * Math.cos(pr), bR = A * Math.sin(pr);
-      psRe[k] = aL - bR; psIm[k] = bL + aR; psRe[N - k] = aL + bR; psIm[N - k] = aR - bL;
+      re[k] = aL - bR; im[k] = bL + aR; re[N - k] = aL + bR; im[N - k] = aR - bL;
     }
-    fft(psRe, psIm, 1);
+    fft(re, im, 1);
     let sum = 0;
-    for (let n = 0; n < N; n++) sum += psRe[n] * psRe[n] + psIm[n] * psIm[n];
+    for (let n = 0; n < N; n++) sum += re[n] * re[n] + im[n] * im[n];
     const scale = Math.sqrt(energy) / Math.sqrt(sum / (2 * N) || 1);
-    const buf = ctx.createBuffer(2, N, sr), L = buf.getChannelData(0), R = buf.getChannelData(1);
-    for (let n = 0; n < N; n++) { L[n] = psRe[n] * scale; R[n] = psIm[n] * scale; }
-    psMs = performance.now() - t0;
-    return buf;
+    const L = new Float32Array(N), R = new Float32Array(N);
+    for (let n = 0; n < N; n++) { L[n] = re[n] * scale; R[n] = im[n] * scale; }
+    return [L, R];
   }
-  function psGet(notes) {
-    const k = psKey(notes);
-    if (!psCache.has(k)) { try { psCache.set(k, psRender(notes)); } catch (e) { return null; } }
-    return psCache.get(k);
+  // One worker renders the loops one at a time. Without workers (very old browsers) the page does it.
+  let psWorker = null;
+  const psWaiting = new Map();
+  function psSpawn() {
+    if (psWorker !== null) return psWorker;
+    try {
+      const src = `const psCore = ${psCore.toString()};
+onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance.now(), [L, R] = psCore(P, notes, sr, N, r);
+  postMessage({ id, L, R, ms: performance.now() - t0 }, [L.buffer, R.buffer]); };`;
+      psWorker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+      psWorker.onmessage = (e) => psDone(e.data);
+      psWorker.onerror = () => { psWorker = false; for (const id of [...psWaiting.keys()]) psDone({ id }); };
+    } catch (e) { psWorker = false; }
+    return psWorker;
   }
-  // Renders the other chords of the key ahead, one per idle moment, and forgets loops no longer needed.
+  let psId = 0;
+  function psDone({ id, L, R, ms }) {
+    const job = psWaiting.get(id); if (!job) return;
+    psWaiting.delete(id);
+    if (L) {
+      const buf = ctx.createBuffer(2, L.length, ctx.sampleRate);
+      buf.copyToChannel(L, 0); buf.copyToChannel(R, 1);
+      psCache.set(job.key, buf); psMs = ms; diag.pad(ms);
+    }
+    for (const cb of job.cbs) cb(psCache.get(job.key) || null);
+    if (!psWaiting.size) psNext();
+  }
+  // Calls back with the loop for these notes (null if it cannot be made): at once when it is cached,
+  // otherwise once the worker has it. Requests for the same loop share one render.
+  function psGet(notes, cb) {
+    const key = psKey(notes);
+    if (psCache.has(key)) { cb(psCache.get(key)); return; }
+    for (const job of psWaiting.values()) if (job.key === key) { job.cbs.push(cb); return; }
+    const req = { id: ++psId, P: PADS[S.pad], notes, sr: ctx.sampleRate, N: PS_N, r: richF() };
+    if (!psSpawn()) {
+      try { const t0 = performance.now(), [L, R] = psCore(req.P, notes, req.sr, req.N, req.r); psWaiting.set(req.id, { key, cbs: [cb] }); psDone({ id: req.id, L, R, ms: performance.now() - t0 }); }
+      catch (e) { cb(null); }
+      return;
+    }
+    psWaiting.set(req.id, { key, cbs: [cb] });
+    psWorker.postMessage(req);
+  }
+  // Renders the other chords of the key ahead, one at a time, and forgets loops no longer needed.
   function psPrepare() {
     if (!ctx || PADS[S.pad].osc) return;
     const wanted = S.padMode === 'fifths' ? [padNotes()] : DEGREES.map((_, c) => padNotes(c));
-    const cur = curNotes(); if (cur) wanted.push(cur);
+    const cur = curNotes(); if (cur) wanted.unshift(cur);
     const keys = new Set(wanted.map(psKey));
     for (const k of psCache.keys()) if (!keys.has(k)) psCache.delete(k);
     psTodo = wanted.filter(n => !psCache.has(psKey(n)));
-    if (!psTimer) psNext();
+    if (!psWaiting.size) psNext();
   }
   function psNext() {
+    while (psTodo.length && psCache.has(psKey(psTodo[0]))) psTodo.shift();
     const n = psTodo.shift();
-    psTimer = n ? setTimeout(() => { psTimer = null; psGet(n); psNext(); }, 30) : null;
+    if (n) psGet(n, () => {});
   }
   // Movement: vibrato depth of every sounding voice and the slow sweep of the pad filter.
   function padMotion() {
@@ -757,28 +855,42 @@
     padLfo.gain.setTargetAtTime(sweepCents(), t, 0.2);
     for (const v of padVoices) v.vib.gain.setTargetAtTime(v.vibBase * moveF(), t, 0.2);
   }
-  let padRelease = 1;
-  // from: start the fade later (the ending holds its chord a moment). Those voices stay listed, so Stop still cuts them.
+  let padRelease = 1, padGen = 0;
+  // from: start the fade later (a chord change scheduled ahead, or the ending holding its chord a moment).
+  // A voice already fading keeps its fade unless the new one ends sooner (Stop), so it never swells back.
   function padStop(fade, from) {
     if (!ctx) return;
     const now = ctx.currentTime, t = Math.max(from || 0, now);
+    // A voice's level at time x while it is not fading: its linear attack, then its level.
+    const at = (v, x) => (x <= v.t0 ? 0 : Math.min(1, (x - v.t0) / v.att) * v.lvl);
     for (const v of padVoices) {
-      v.g.gain.cancelScheduledValues(t);
-      v.g.gain.setValueAtTime(t > now ? v.lvl : v.g.gain.value, t);
-      v.g.gain.linearRampToValueAtTime(0, t + fade);
+      if (v.end !== undefined && t + fade >= v.end) continue;
+      // The whole envelope is rewritten from now on, so cutting it never drops the level in between.
+      const g = v.g.gain, from0 = v.end !== undefined ? g.value : at(v, now);
+      g.cancelScheduledValues(now);
+      g.setValueAtTime(from0, now);
+      if (t > now) g.linearRampToValueAtTime(v.end !== undefined ? from0 : at(v, t), t);
+      g.linearRampToValueAtTime(0, t + fade);
+      v.end = t + fade;
       v.oscs.forEach(o => { try { o.stop(t + fade + 0.1); } catch (e) {} });
     }
-    if (t <= now) padVoices = [];
+    padVoices = padVoices.filter((v) => v.end === undefined || v.end > now);
+    if (t <= now) padVoices = padVoices.filter((v) => v.end === undefined);
   }
   // swap: cross-fade into the same chord with a new sound (Richness changed) instead of a fresh attack.
+  // The loop may still be rendering: the old chord keeps sounding until the new one can start.
   function padPlay(at, swap) {
     if (!ctx || !playing || ui.counting) return;
-    const P = PADS[S.pad];
-    padStop(swap ? 1.5 : padRelease);
-    padRelease = Math.min(P.release, 1.2);
+    const P = PADS[S.pad], my = ++padGen;
     const notes = curNotes();
-    if (!notes) return; // Manual with no chord held: the pad goes silent
-    const t = Math.max(at || 0, ctx.currentTime), buf = !P.osc && psGet(notes);
+    if (!notes) { padStop(padRelease, at); return; } // Manual with no chord held: the pad goes silent
+    if (P.osc) { padVoice(P, notes, at, swap, null); return; }
+    psGet(notes, (buf) => { if (my === padGen && playing && !ui.counting) padVoice(P, notes, at, swap, buf); });
+  }
+  function padVoice(P, notes, at, swap, buf) {
+    const t = Math.max(at || 0, ctx.currentTime);
+    padStop(swap ? 1.5 : padRelease, t);
+    padRelease = Math.min(P.release, 1.2);
     // A merged chord has more notes: keep it as loud as a single one.
     const lvl = Math.min(1, Math.sqrt(5 / notes.length));
     // Vibrato in cents on oscillators; on a loop the same depth goes to its playback rate.
@@ -831,9 +943,10 @@
         }
       });
     }
+    const att = Math.max(0.01, swap ? Math.min(P.attack, 1.5) : P.attack);
     vg.gain.setValueAtTime(0, t);
-    vg.gain.linearRampToValueAtTime(lvl, t + (swap ? Math.min(P.attack, 1.5) : P.attack));
-    padVoices.push({ g: vg, oscs, vib: vibG, vibBase, lvl, kind: buf ? 'ps' : 'osc' });
+    vg.gain.linearRampToValueAtTime(lvl, t + att);
+    padVoices.push({ g: vg, oscs, vib: vibG, vibBase, lvl, t0: t, att, kind: buf ? 'ps' : 'osc' });
     psPrepare();
   }
   function padSetup() {
@@ -886,7 +999,7 @@
       q.bar++; q.phraseBar++;
       // The part changes on this bar line when asked (q.pend) or when the current part is over.
       let to = q.pend;
-      if (to === null && q.phraseBar > partLen(partOf(q.at))) to = nextOf(q.at);
+      if (to === null && q.phraseBar > partLen(partOf(q.at))) to = autoNext(q.at);
       if (to !== null) {
         const sec = secOf(to);
         q.pend = null; q.phraseBar = 1; q.sec = sec;
@@ -928,7 +1041,7 @@
     // Decide a fill when its start step arrives: before a part change (asked, or at the end of a part with
     // Remate automático on), every S.autoFill bars, or when Remate was tapped. Never with the drums off.
     if (!q.fillActive) {
-      const to = q.pend !== null ? q.pend : q.phraseBar >= partLen(cur) ? nextOf(q.at) : null;
+      const to = q.pend !== null ? q.pend : q.phraseBar >= partLen(cur) ? autoNext(q.at) : null;
       const target = to === null ? q.sec : secOf(to);
       const f = buildFill(target, m);
       if (s === f.start) {
@@ -942,7 +1055,7 @@
       }
     }
     // Click (metronome): always rendered into its own stem; the Clic channel decides whether it is heard.
-    if (s % M.dotEvery === 0) INST.metro(t, M.strong.includes(s) ? 1 : .6);
+    if (s % M.dotEvery === 0) { const lv = S.clickLv[m][s / M.dotEvery]; if (lv) INST.metro(t, CLICK_V[lv]); }
     // Shaker and hand percussion
     const shk = SEC_SHK[q.sec];
     const sh = shakerStr(st, q.sec);
@@ -974,7 +1087,7 @@
     if (q.step) return M.steps - q.step;
     if (soon || q.countBars > 0) return M.steps;
     const left = partLen(partOf(q.at)) - q.phraseBar;
-    const bars = q.pend !== null ? 1 : left > 0 ? left : partLen(partOf(nextOf(q.at)));
+    const bars = q.pend !== null ? 1 : left > 0 ? left : partLen(partOf(autoNext(q.at)));
     return Math.max(1, Math.min(bars, Math.floor(MAXCHUNK / (M.steps * stepDur())))) * M.steps;
   }
   const renderOff = (off) => new Promise((res, rej) => {
@@ -983,7 +1096,7 @@
   });
   // Renders the next chunk with the same instruments, into four stems: percussion, drums, click, count-in.
   async function renderNext(t0, cut) {
-    const my = gen;
+    const my = gen, w0 = performance.now();
     rendering = true;
     try {
       const M = METERS[S.meter], n = chunkSteps(cut || !chunks.length), loopable = !q.step && !q.countBars;
@@ -992,7 +1105,11 @@
       const merge = off.createChannelMerger(4); merge.connect(off.destination);
       const outs = [0, 1, 2, 3].map((i) => { const g = off.createGain(); g.connect(merge, 0, i); return g; });
       const live = { ctx, buses, master };
-      ctx = off; buses = { shaker: outs[0], drums: outs[1], click: outs[2] }; master = outs[3]; openHat = null;
+      // Percussion tone: a high shelf on the whole percussion stem, rendered in, so it costs nothing live.
+      let perc = outs[0];
+      const tone = TONES[S.shkTone];
+      if (tone) { const f = off.createBiquadFilter(); f.type = 'highshelf'; f.frequency.value = tone[0]; f.gain.value = tone[1]; f.connect(outs[0]); perc = f; }
+      ctx = off; buses = { shaker: perc, drums: outs[1], click: outs[2] }; master = outs[3]; openHat = null;
       R = { events: [], ui: [], snaps: [] };
       let t = PRE;
       try {
@@ -1007,6 +1124,9 @@
       const buf = await renderOff(off);
       if (my !== gen) return; // a change came in meanwhile: this chunk is stale
       rendering = false;
+      const took = (performance.now() - w0) / 1000;
+      if (cut) cutLag = Math.max(took, cutLag * 0.7 + took * 0.3);
+      diag.chunk(took * 1000, cut);
       commit(r, buf, t0 ?? ctx.currentTime + 0.03 + PRE, cut);
     } catch (e) {
       if (my === gen) rendering = false;
@@ -1030,6 +1150,9 @@
   }
   function commit(r, buf, t0, cut) {
     const now = ctx.currentTime, base = t0 - PRE;
+    // A change: what was playing kept sounding while this chunk was rendered; it hands over now.
+    // If the render ran late, the new chunk joins in at the point the music has reached.
+    if (cut) { if (t0 < now) diag.late++; cutAt(Math.max(t0, now + 0.01)); }
     const prev = chunks[chunks.length - 1];
     if (prev && prev.loop && !cut) {
       // The next chunk arrived in time: the previous one plays out whole and its loop never starts.
@@ -1086,12 +1209,14 @@
     const j = uiQueue.findIndex((u) => u.t >= T); if (j >= 0) uiQueue.length = j;
     padFilter.frequency.cancelScheduledValues(T);
   }
-  // A change (tempo, part, fill, style…): replace what is rendered from the next step on.
+  // A change (tempo, part, fill, style…): replace what is rendered from the next step on that the
+  // new chunk can reach in time. How far ahead follows how long the last renders took (0.12 s on a
+  // fast computer, more on a phone), and the old audio is only cut once the new one is ready.
+  let cutLag = 0.08;
   function interrupt() {
-    const st = stateAt(ctx.currentTime + 0.12);
+    const st = stateAt(ctx.currentTime + Math.min(1, Math.max(0.12, cutLag * 1.5 + 0.04)));
     if (!st) return;
     gen++; lastCut = ctx.currentTime;
-    cutAt(st.t);
     const { t, ...rest } = st; q = rest;
     if ('at' in want) { q.at = want.at; q.sec = secOf(q.at); }
     q.at = Math.min(q.at, S.song.seq.length - 1);
@@ -1106,12 +1231,12 @@
   function tick() {
     if (!playing || !ctx) return;
     const now = ctx.currentTime;
-    while (evq.length && evq[0].t <= now + (evq[0].onTime ? 0 : 0.1)) { const e = evq.shift(); e.fn(e.t); if (!playing) return; }
+    while (evq.length && evq[0].t <= now + (evq[0].onTime ? 0 : 0.3)) { const e = evq.shift(); e.fn(e.t); if (!playing) return; }
     if (dirty && chunks.length && now - lastCut > 0.15) { dirty = false; interrupt(); return; }
     if (rendering) return;
     const c = chunks[chunks.length - 1];
     if (!c) return;
-    if (c.loop && now > c.tc - 0.03) { interrupt(); return; } // the loop took over while the page was frozen: rejoin it
+    if (c.loop && now > c.tc - 0.03) { diag.loops++; interrupt(); return; } // the loop took over while the page was frozen: rejoin it
     if (!c.end.done && c.t1 - now < AHEAD) renderNext(c.t1); // the next chunk starts where this one ends
   }
 
@@ -1134,7 +1259,7 @@
   }
   document.addEventListener('visibilitychange', async () => {
     if (!playing || !ctx) return;
-    if (document.hidden) { tick(); return; }
+    if (document.hidden) { diag.hidden++; tick(); return; }
     if (ctx.state !== 'running') { try { await ctx.resume(); } catch (e) {} }
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
   });
@@ -1152,7 +1277,7 @@
     q = { step: 0, bar: 0, phraseBar: 0, at: S.at, sec: secOf(S.at), pend: null, fillQueued: false, fillActive: null, crashNext: false, ending: false, counting: false, countBars: S.countIn ? 1 : 0, done: false };
     Object.assign(ui, { queued: false, active: false, counting: S.countIn, pend: null }); pos = null;
     chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false; endMoved = false; gen++;
-    padBright();
+    padBright(); psPrepare();
     clockStart(); renderNext();
     if (!S.countIn) padPlay();
     $('play').classList.add('stop'); $('play').setAttribute('aria-label', T('stop'));
@@ -1188,7 +1313,9 @@
   function frame() {
     if (ctx && playing) {
       let cur = null;
-      while (uiQueue.length && uiQueue[0].t <= ctx.currentTime) cur = uiQueue.shift();
+      // The screen follows what is heard, so it waits for the output buffer too.
+      const heard = ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0);
+      while (uiQueue.length && uiQueue[0].t <= heard) cur = uiQueue.shift();
       if (cur) {
         const M = METERS[S.meter];
         pos = cur; drawPos();
@@ -1204,7 +1331,8 @@
   function drawPos() {
     const seq = S.song.seq, steps = METERS[S.meter].steps, live = playing && pos && !pos.counting;
     const at = Math.min(live ? pos.at : S.at, seq.length - 1), len = partLen(partOf(at)), bar = live ? pos.bar : 0;
-    const nx = ui.pend !== null ? ui.pend : at < seq.length - 1 ? at + 1 : null;
+    // Where the song goes next on its own; with Avanzar off the part repeats (↻) until asked.
+    const nx = ui.pend !== null ? ui.pend : S.advance && at < seq.length - 1 ? at + 1 : null;
     const box = $('map');
     if (box.children.length !== seq.length) {
       box.textContent = '';
@@ -1227,6 +1355,7 @@
     else {
       pp.append(`${bar}/${len}`);
       if (nx !== null) { const b = document.createElement('b'); b.textContent = partLabel(nx); pp.append(' → ', b); }
+      else if (!S.advance) pp.append(' ↻');
     }
     const base = ui.pend !== null ? ui.pend : at;
     const nb = base === 'end' ? null : base < seq.length - 1 ? base + 1 : secOf(base) === 'final' ? null : 'end';
@@ -1615,7 +1744,7 @@
   function setMeter(m) {
     S.meter = m; if (playing) { want.reset = true; changed(); }
     $('meter').value = m;
-    setUnit(); buildStyles(); drawPos(); save();
+    setUnit(); buildStyles(); buildBeats(); drawPos(); save();
   }
   function setUnit() { $('bpmunit').textContent = T(S.meter === '6/8' ? 'unit.comp' : 'unit.simple'); }
   function buildPadUi() {
@@ -1637,7 +1766,48 @@
     paintWin();
   }
   const stepPad = (n) => { const ids = Object.keys(PADS), s = $('padtype'); s.value = ids[(ids.indexOf(S.pad) + n + ids.length) % ids.length]; s.dispatchEvent(new Event('change')); };
-  function setCountUi() { $('countin').setAttribute('aria-checked', String(S.countIn)); }
+  function setCountUi() { $('countin').setAttribute('aria-checked', String(S.countIn)); $('advance').setAttribute('aria-checked', String(S.advance)); }
+  // Click beats: one button per click of the bar; a tap steps strong → normal → soft → silent.
+  function buildBeats() {
+    const box = $('beats'), lv = S.clickLv[S.meter];
+    box.textContent = ''; box.classList.toggle('six', lv.length > 4);
+    lv.forEach((l, i) => {
+      const b = document.createElement('button'); b.type = 'button';
+      b.dataset.lv = l; b.style.setProperty('--lv', l);
+      b.setAttribute('aria-label', T('click.beat', i + 1, T('click.lv')[l]));
+      const n = document.createElement('span'); n.textContent = i + 1; b.appendChild(n);
+      b.addEventListener('click', () => { S.clickLv[S.meter][i] = (l + 3) % 4; save(); changed(); buildBeats(); });
+      box.appendChild(b);
+    });
+  }
+  // Diagnostics: what the device reports and how long the audio work takes here.
+  function diagRows() {
+    const st = (a) => a.length ? `${Math.round(a.reduce((x, y) => x + y, 0) / a.length)} / ${Math.max(...a)} ms` : T('diag.none');
+    const lat = ctx ? Math.round(((ctx.outputLatency || 0) + (ctx.baseLatency || 0)) * 1000) + ' ms' : T('diag.none');
+    const ua = navigator.userAgent, dev = (ua.match(/\(([^)]+)\)/) || [, ua])[1].split(';').slice(0, 3).join(';') + ' · ' + (/(Chrome|Firefox|Version)\/(\d+)/.exec(ua) || [''])[0].replace('Version', 'Safari');
+    return [
+      ['diag.device', dev], ['diag.rate', ctx ? ctx.sampleRate + ' Hz' : T('diag.none')], ['diag.latency', lat],
+      ['diag.chunk', st(diag.chunks)], ['diag.cut', st(diag.cuts)], ['diag.pad', st(diag.pads)],
+      ['diag.late', String(diag.late)], ['diag.loops', String(diag.loops)], ['diag.long', diag.longs ? `${diag.longs} (${diag.longMax} ms)` : '0'], ['diag.hidden', String(diag.hidden)]
+    ];
+  }
+  function renderDiag() {
+    const box = $('diaglist'); box.textContent = '';
+    for (const [k, v] of diagRows()) {
+      const r = document.createElement('div'); r.className = 'row';
+      const l = document.createElement('span'); l.className = 'lbl'; l.textContent = T(k);
+      const x = document.createElement('span'); x.className = 'val'; x.textContent = v;
+      r.append(l, x); box.appendChild(r);
+    }
+  }
+  $('diagbtn').addEventListener('click', renderDiag);
+  $('diagcopy').addEventListener('click', async () => {
+    const txt = `M-Companion ${RELEASE} (${BUILD}) · ${new Date().toISOString().slice(0, 16)} · ${Math.round((Date.now() - diag.t0) / 60000)} min\n` + diagRows().map(([k, v]) => `${T(k)}: ${v}`).join('\n') + `\n${navigator.userAgent}`;
+    const lbl = $('diagcopy').querySelector('.lbl');
+    try { await navigator.clipboard.writeText(txt); lbl.textContent = T('diag.copied'); }
+    catch (e) { try { await navigator.share({ text: txt }); } catch (e2) {} }
+    renderDiag(); setTimeout(() => { lbl.textContent = T('diag.copy'); }, 1500);
+  });
 
   // ---------- Song list (kept in this browser) ----------
   let songs = [], songTitle = null;
@@ -1661,6 +1831,8 @@
         S.style = sg.style; S.key = sg.key; S.shaker = sg.shaker || 'auto';
         if (PADS[sg.pad]) S.pad = sg.pad; if (sg.padMode) S.padMode = sg.padMode; S.padMove = pct(sg.padMove); S.padRich = pct(sg.padRich); if (SHK_SETS[sg.shkSound]) S.shkSound = sg.shkSound;
         if (sg.padHand === 'auto' || sg.padHand === 'manual') S.padHand = sg.padHand;
+        if (sg.shkTone in TONES) { S.shkTone = sg.shkTone; $('shktone').value = sg.shkTone; }
+        if (typeof sg.advance === 'boolean') { S.advance = sg.advance; setCountUi(); }
         // Songs saved before 1.6.0 have no structure: they get the default one.
         S.song = validSong(sg.song);
         S.at = playing ? Math.min(S.at, S.song.seq.length - 1) : 0;
@@ -1681,7 +1853,7 @@
   $('savesong').addEventListener('click', () => {
     const name = $('songname').value.trim();
     if (!name) { $('songname').focus(); return; }
-    const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, padHand: S.padHand, padMove: S.padMove, padRich: S.padRich, shkSound: S.shkSound, song: JSON.parse(JSON.stringify(S.song)) };
+    const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, padHand: S.padHand, padMove: S.padMove, padRich: S.padRich, shkSound: S.shkSound, shkTone: S.shkTone, advance: S.advance, song: JSON.parse(JSON.stringify(S.song)) };
     const at = songs.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
     if (at >= 0) songs[at] = sg; else songs.push(sg);
     saveSongs(); renderSongs(); songTitle = name; $('songtitle').textContent = name;
@@ -1708,6 +1880,8 @@
   $('style').addEventListener('change', (e) => { S.style = e.target.value; save(); changed(); });
   $('shaker').addEventListener('change', (e) => { S.shaker = e.target.value; save(); changed(); });
   $('shksound').addEventListener('change', (e) => { S.shkSound = e.target.value; save(); changed(); });
+  $('shktone').addEventListener('change', (e) => { S.shkTone = e.target.value; save(); changed(); });
+  $('advance').addEventListener('click', () => { S.advance = !S.advance; setCountUi(); save(); changed(); drawPos(); });
   $('padtype').addEventListener('change', (e) => { S.pad = e.target.value; save(); buildPadUi(); padSetup(); padPlay(); });
   $('padprev').addEventListener('click', () => stepPad(-1));
   $('padnext').addEventListener('click', () => stepPad(1));
@@ -1824,6 +1998,7 @@
   $('human').value = S.human; $('humanval').textContent = S.human + ' %';
   setCountUi();
   $('autofill').value = String(S.autoFill);
+  $('shktone').value = S.shkTone;
   $('follow').setAttribute('aria-checked', String(S.follow));
   applyLang();
   window.acompLoaded = () => Object.keys(SB).length;
@@ -1833,6 +2008,7 @@
   window.acompTest = {
     freeze: clockStop, thaw: clockStart,
     chunks: () => chunks.map((c) => [c.t0, c.t1]),
+    diag: () => ({ late: diag.late, loops: diag.loops, cuts: [...diag.cuts], chunks: [...diag.chunks], pads: [...diag.pads], lag: cutLag }),
     pad: () => ({ kind: padVoices.length ? padVoices[padVoices.length - 1].kind : null, cached: psCache.size, ms: Math.round(psMs), notes: (curNotes() || []).length, voices: padVoices.length }),
     pan: () => CHANNELS.map((k) => (pans[k] && pans[k].pan ? Math.round(pans[k].pan.value * 100) / 100 : 0)),
     song: () => ({ at: S.at, pend: ui.pend, chord: S.chord, held: [...S.held], seq: [...S.song.seq] }),

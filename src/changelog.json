@@ -1,5 +1,27 @@
 [
   {
+    "version": "1.7.0",
+    "date": "2026-11-08",
+    "es": [
+      "Sonido más estable en Android y computadoras: la app pide un búfer de audio más amplio, el ritmo viejo sigue sonando hasta que el nuevo está listo (sin huecos al cambiar tempo o parte, ni al volver de otra app) y los acordes del pad se preparan aparte, sin frenar la página.",
+      "Un limitador final evita que la suma de canales, clic incluido, pase del máximo.",
+      "La app arranca sencilla: pad en Manual con Tónica + 5ª, la parte elegida se repite y el remate automático viene apagado. Para recorrer la canción sola, enciende Ritmo › Avanzar por la canción. Las canciones guardadas recuerdan este ajuste.",
+      "Clic con fuerza por pulso: en Ritmo › Clic toca cada pulso para pasar por fuerte, normal, suave o en silencio.",
+      "Shaker pequeño menos brillante y nuevo ajuste Ritmo › Tono de la percusión (Suave, Normal, Brillante).",
+      "Los pads ya no llevan subgraves bajo 35 Hz ni agudos sobre 12 kHz, que no suman y pueden hacer sonar feo un parlante pequeño.",
+      "Sonido › App › Diagnóstico de audio muestra cómo responde el audio en tu equipo y permite copiar esos datos para compartirlos."
+    ],
+    "en": [
+      "Steadier sound on Android and computers: the app asks for a larger audio buffer, the old rhythm keeps playing until the new one is ready (no gaps when you change tempo or part, or come back from another app), and pad chords are prepared on the side without stalling the page.",
+      "A final limiter keeps the sum of the channels, click included, from going over full scale.",
+      "The app starts simple: pad in Manual with Root + 5th, the chosen part repeats and auto fill is off. To move through the song on its own, turn on Rhythm › Move through the song. Saved songs remember this setting.",
+      "Click with a level per beat: in Rhythm › Click, tap each beat to step through strong, normal, soft or silent.",
+      "The small shaker is less bright, and there is a new Rhythm › Percussion tone setting (Soft, Normal, Bright).",
+      "Pads no longer carry sub-bass below 35 Hz or highs above 12 kHz, which add nothing and can make a small speaker sound rough.",
+      "Sound › App › Audio diagnostics shows how the audio is coping on your device and lets you copy that data to share it."
+    ]
+  },
+  {
     "version": "1.6.0",
     "date": "2026-10-27",
     "es": [

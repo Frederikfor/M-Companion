@@ -36,7 +36,18 @@ await page.goto(pathToFileURL(path.join(root, 'index.html')).href);
   const on = await page.$$eval('.tile', (ts) => ts.map((t) => t.dataset.ch + ':' + t.classList.contains('on')).join(' '));
   if (on !== 'shaker:false drums:false pad:true click:false') errors.push(`default channels should be only the pad, got ${on}`);
   if (!(await page.isDisabled('#fill'))) errors.push('Remate should be disabled with the drums off');
+  // Simple by default: Manual with root and fifth, the part repeats, no automatic fills.
+  const manual = await page.getAttribute('#mode button[data-m=manual]', 'aria-checked'), fifths = await page.getAttribute('#padmode', 'aria-checked');
+  const adv = await page.getAttribute('#advance', 'aria-checked'), fill = await page.$eval('#autofill', (s) => s.value);
+  if (manual !== 'true' || fifths !== 'true' || adv !== 'false' || fill !== '0') errors.push(`defaults should be Manual, Tónica + 5ª, no Avanzar, no auto fill; got ${manual} ${fifths} ${adv} ${fill}`);
+  if (!(await page.textContent('#partpos')).includes('↻')) errors.push('with Avanzar off the part line should show that the part repeats');
 }
+// The rest of the test plays the song with the pad following it.
+await page.click('#mode button[data-m=auto]');
+await page.click('#padmode');
+await page.click('.tab[data-tab=ritmo]');
+await page.click('#advance');
+await page.click('.tab[data-tab=tocar]');
 await page.click('.tile[data-ch=shaker]');
 await page.click('.tile[data-ch=drums]');
 if (await page.isDisabled('#fill')) errors.push('Remate should be enabled with the drums on');
@@ -114,7 +125,17 @@ for (const [when, v] of [['playing', before], ['frozen', frozen], ['after thaw',
 }
 
 await page.click('.tab[data-tab=ritmo]');
-for (const id of ['style', 'shaker', 'shksound']) await pickEach(id);
+for (const id of ['style', 'shaker', 'shksound', 'shktone']) await pickEach(id);
+// Click beats: one per click of the bar, and a tap steps the level down (strong → normal → soft → silent).
+{
+  const meter = (await page.textContent('#meterlbl')).trim(), want = { '4/4': 4, '3/4': 3, '6/8': 6 }[meter];
+  const n = await page.$$eval('#beats button', (b) => b.length);
+  if (n !== want) errors.push(`${meter} should show ${want} click beats, got ${n}`);
+  const lv0 = await page.getAttribute('#beats button:nth-child(1)', 'data-lv');
+  await page.click('#beats button:nth-child(1)');
+  const lv1 = await page.getAttribute('#beats button:nth-child(1)', 'data-lv');
+  if (lv0 !== '3' || lv1 !== '2') errors.push(`the first beat should go from strong (3) to normal (2), got ${lv0} → ${lv1}`);
+}
 await page.click('.tab[data-tab=sonido]');
 await pickEach('padtype');
 // Pads: the first one plays as a PADsynth loop, Richness re-renders it, and every chord of the key is ready ahead.
@@ -153,6 +174,13 @@ if (!/^\d+\.\d+\.\d+$/.test(ver.release) || verRow !== ver.release || verShown.c
 if (!/^[0-9a-f]{8}$/.test(verShown.build) || swCache !== `${ver.release}-${verShown.build}`) errors.push(`build "${verShown.build}" does not match the cache "${swCache}"`);
 if (verShown.entries !== ver.versions || ver.versions < 1) errors.push(`changelog shows ${verShown.entries} of ${ver.versions} versions`);
 if (sonidoSelected !== 'true' || !backHome) errors.push('version screen does not open inside Sonido or its back button fails');
+// Diagnostics: the screen lists what the device reports and how long the renders took.
+await page.click('#diagbtn');
+{
+  const rows = await page.$$eval('#diaglist .row', (r) => r.map((x) => x.textContent));
+  if (rows.length !== 10 || !rows.some((r) => /\d+ \/ \d+ ms/.test(r))) errors.push(`diagnostics should list 10 rows with render times, got ${JSON.stringify(rows)}`);
+}
+await page.click('#tab-diag .back');
 // Mix: the pan sides fold out, and a side moves that channel.
 await page.click('#panfold');
 if (!(await page.isVisible('#panrows'))) errors.push('the pan rows should fold out');
@@ -194,7 +222,21 @@ await page.click('#savesong');
 await page.click('.songload');
 await page.waitForTimeout(300);
 const title = await page.textContent('#songtitle');
-await page.click('#play');
+// A slow phone: with the CPU six times slower, tempo changes still hand over without a gap
+// (the old audio keeps playing until the new chunk is ready) and the loop never has to cover.
+{
+  const cdp = await page.context().newCDPSession(page);
+  await page.click('.tab[data-tab=tocar]');
+  if (!(await page.$eval('#play', (b) => b.classList.contains('stop')))) await page.click('#play');
+  await page.waitForTimeout(2500);
+  const d0 = await page.evaluate(() => window.acompTest.diag());
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 });
+  for (let i = 0; i < 4; i++) { await page.click(i % 2 ? '#m1' : '#p1'); await page.waitForTimeout(1000); }
+  const d = await page.evaluate(() => window.acompTest.diag());
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+  if (d.late > d0.late || d.loops > d0.loops) errors.push(`on a slow CPU the changes should arrive in time: ${JSON.stringify(d)}`);
+  await page.click('#play');
+}
 await browser.close();
 
 const samples = 42;
