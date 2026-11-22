@@ -44,7 +44,7 @@ Abre la misma dirección en Chrome, Edge o Safari. También puedes abrir `dist/a
 > 1. **En vivo primero.** Cada cambio debe funcionar con una mano, en un escenario oscuro, sin mirar mucho la pantalla. Nada puede cortar el audio, retrasar un cambio de parte ni requerir internet mientras se toca.
 > 2. **Musicalidad antes que funciones.** El tiempo es sagrado: todo sonido se programa con el reloj de Web Audio (`ctx.currentTime`), nunca con `setTimeout`. Los cambios de parte entran en el siguiente compás. Los remates terminan justo antes del tiempo 1.
 > 3. **Sonido real y libre.** Solo muestras **CC0 / dominio público**, embebidas en el archivo. Siempre debe existir un respaldo sintético si una muestra falta.
-> 4. **Un solo archivo, sin dependencias en tiempo de ejecución.** Nada de frameworks, CDNs, fuentes externas ni peticiones de red desde la app.
+> 4. **Un solo archivo, sin dependencias en tiempo de ejecución.** Nada de frameworks, CDNs, fuentes externas ni peticiones de red desde la app. Única excepción: el conteo anónimo de uso (sección 5.14), que no carga código externo y nunca bloquea el audio.
 > 5. **Aspecto iOS oscuro, en español e inglés.** Todo texto visible va en `I18N` (sección 5.12), nunca escrito directo en el código. Usa los tokens de color y las reglas de la sección 5. Botones de al menos 44 px. Los controles en vivo viven abajo, al alcance del pulgar.
 > 6. **Edita las fuentes, no lo generado.** Cambia `src/` o `samples/`, luego ejecuta `python3 tools/build.py` y `npm test`. Nunca edites `index.html`, `sw.js` ni `dist/` a mano.
 > 7. **Ve de lo general a lo específico** (design thinking + ágil): entiende qué necesita el músico, haz el cambio pequeño que lo resuelve, pruébalo, entrégalo. Si una petición choca con estas reglas, dilo y propone una alternativa que sí las respete.
@@ -244,7 +244,7 @@ Desplazamiento de tiempo ±9 ms × h, velocidad ±20 % × h, notas fantasma de c
 ### 5.9 Estado guardado (`localStorage`)
 | Clave | Contenido |
 |---|---|
-| `acomp` | objeto `S` completo (tempo, compás, parte `at`, estilo, pad, modo `padHand` y acordes `held`, mezcla `layers` con `on`/`vol`/`side` por canal, estructura `song`, `advance` (avanzar por la canción), `shkTone`, `clickLv` (fuerza de cada pulso del clic por compás: 3 fuerte, 2 normal, 1 suave, 0 silencio), idioma `lang`…) |
+| `acomp` | objeto `S` completo (tempo, compás, parte `at`, estilo, pad, modo `padHand` y acordes `held`, mezcla `layers` con `on`/`vol`/`side` por canal, estructura `song`, `advance` (avanzar por la canción), `shkTone`, `clickLv` (fuerza de cada pulso del clic por compás: 3 fuerte, 2 normal, 1 suave, 0 silencio), idioma `lang`, `stats` (estadísticas anónimas, `true` por defecto)…) |
 | `acomp-songs` | lista `[{ name, bpm, meter, style, key, shaker, pad, padMode, padHand, padMove, padRich, shkSound, shkTone, advance, song }]` (las canciones viejas sin `padMove`/`padRich` cargan en 50; sin `song`, con `DEFAULT_SONG`) |
 | `acomp-tab` | última pestaña abierta |
 
@@ -257,7 +257,7 @@ Si cambias el nombre o la forma de una propiedad de `S`, valida al cargar (como 
 ### 5.10 Contrato entre `ui.html` y `engine.js`
 El motor busca estos `id`. No los renombres sin cambiar ambos lados:
 - **Tocar:** `songtitle`, `status`, `meterlbl`, `bpm`, `bpmunit`, `m1`, `m5`, `p1`, `p5`, `tap`, `partname`, `partpos`, `map` (el motor crea un botón por parte del orden), `padprev`, `padmid`, `padname`, `padsub`, `padnext`, `dial`, `dialnames`, `win` (el motor crea los botones `[data-c=grado]`), `mode` (botones `[data-m=auto|manual]`), `padmode` (interruptor *Tónica + 5ª*), `legend`, `hint`, `tiles` (el motor crea `.tile[data-ch=…]`), `fill`, `filllbl`, `fillnote`, `play`, `next`, `nextname`.
-- **Sonido:** `key`, `padtype`, `padmove`, `padmoveval`, `padrich`, `padrichval`, `names`, `mix` (el motor crea `on-<canal>`, `v-<canal>`, `tag-<canal>`, `panfold`, `pansum`, `panrows` con botones `[data-ch][data-side]`), `t-orden`, `t-partes`, `p-orden`, `p-partes`, `seq`, `addchip`, `addpart`, `partlist`, `newrow`, `newpart`, `structfoot`, `lang`, `version`, `versionval`. Editor de parte (`#tab-parte`): `ptitle`, `degs`, `ask`, `progcap`, `prog`, `pdel`.
+- **Sonido:** `key`, `padtype`, `padmove`, `padmoveval`, `padrich`, `padrichval`, `names`, `mix` (el motor crea `on-<canal>`, `v-<canal>`, `tag-<canal>`, `panfold`, `pansum`, `panrows` con botones `[data-ch][data-side]`), `t-orden`, `t-partes`, `p-orden`, `p-partes`, `seq`, `addchip`, `addpart`, `partlist`, `newrow`, `newpart`, `structfoot`, `lang`, `version`, `versionval`, `stats` (interruptor de estadísticas). Editor de parte (`#tab-parte`): `ptitle`, `degs`, `ask`, `progcap`, `prog`, `pdel`.
 - **Ritmo, Canciones, Versión y Diagnóstico:** `style`, `shaker`, `shksound`, `shktone`, `beats` (el motor crea un botón por pulso del clic, con `data-lv`), `human`, `humanval`, `advance`, `countin`, `autofill`, `mic`, `follow`, `micread`, `micmsg`, `songs`, `songname`, `savesong`, `vercur`, `verbuild`, `verupdate`, `changelog`, `diagbtn`, `diaglist`, `diagcopy` (pantalla `#tab-diag`).
 
 Los `select` (`meter`, `style`, `shaker`, `shksound`, `shktone`, `autofill`, `key`, `padtype`, `names`, `lang`, y los de menú `addpart`, `newpart`) están ocultos. Cualquier botón con `data-for=id` abre el menú de ese select (`#padmid` abre el de pads; `#addchip` y `#newrow` los de partes); si tiene `.pd-val`, muestra la opción elegida. Una `<option data-sub>` muestra un texto gris a la derecha en el menú (armaduras, compases). Las pruebas eligen opciones haciendo clic en el menú, no con `selectOption`. El motor abre menús con `window.acompMenu(id, botón)` (el dial abre el de tonalidad) y cambia de pantalla con `window.acompShow(nombre)`.
@@ -274,7 +274,7 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 - Salida: `AudioContext({ latencyHint: 'playback' })` (búfer más amplio; todo está programado por adelantado, así que no se nota) y un limitador final a −2 dB después de todo, clic incluido. La pantalla compensa la latencia de salida para seguir lo que se oye. Los eventos del pad se adelantan 0.3 s.
 - Pad: bucles PADsynth (ver 5.5), generados en un *Web Worker* (`psCore` es autosuficiente y se pasa al worker como texto; sin workers corre en la página) para no frenar el reloj; el acorde anterior sigue sonando hasta que el nuevo está listo. O bien osciladores, por un filtro según la parte y dos reverbs sintéticas generadas al iniciar (sala de 1.3 s para todo, hall de 5 s para el pad), con pre-delay, reflexiones tempranas y agudos que se apagan antes que los graves.
 - Reloj en un *Web Worker* (con `setInterval` de respaldo).
-- Diagnóstico (Sonido › App): frecuencia de muestreo, latencia, tiempos de render del ritmo, de los cambios y del pad, cambios tardíos, veces que el loop cubrió, pausas largas de la página y veces en segundo plano. Solo en memoria; *Copiar datos* lo pasa al portapapeles (o a compartir). La app no envía nada por red. El micrófono no ajusta el tempo mientras la app está oculta.
+- Diagnóstico (Sonido › App): frecuencia de muestreo, latencia, tiempos de render del ritmo, de los cambios y del pad, cambios tardíos, veces que el loop cubrió, pausas largas de la página y veces en segundo plano. Solo en memoria; *Copiar datos* lo pasa al portapapeles (o a compartir). El diagnóstico nunca se envía por red. El micrófono no ajusta el tempo mientras la app está oculta.
 - iOS: `navigator.audioSession.type = 'playback'` (suena con el interruptor de silencio) y *wake lock* para que la pantalla no se apague.
 - Micrófono (beta): detección de ataques por flujo espectral e histograma de intervalos dentro de ±20 % del BPM fijado. Necesita https.
 
@@ -299,13 +299,20 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 - **Compilación:** `build.py` calcula un hash del contenido y lo pone en la app (`BUILD`) y en el nombre de la caché del service worker (`acompanante-<versión>-<hash>`). Así lo que muestra Sonido › App › Versión es exactamente lo que el teléfono tiene guardado offline.
 - **Aviso de actualización:** cuando el service worker descarga una versión nueva y toma la página, la fila Versión dice *Nueva lista* y la pantalla explica que basta con cerrar y abrir la app. Nunca se recarga sola: cortaría el audio.
 
+### 5.14 Estadísticas anónimas (GoatCounter)
+- Panel: https://forozco.goatcounter.com/ (sin cookies, sin datos personales). `stat(ruta)` en `src/engine.js` manda **una petición mínima** a `STATS_URL` con `navigator.sendBeacon` (o una imagen de 1 px). **No** se carga `count.js` ni otro script externo.
+- Solo cuenta en `STATS_HOST` (`frederikfor.github.io`): las pruebas (`file://`), `dist/acompanante.html` y los servidores locales nunca envían nada. Tampoco sin red (`navigator.onLine`) ni con Sonido › App › *Estadísticas anónimas* apagado (`S.stats`).
+- El service worker deja pasar directo a la red todo lo que no es del mismo origen: no lo guarda en caché ni lo bloquea.
+- Eventos (rutas en el panel): visita a la página con el título `M-Companion <versión>`; `version/<x.y.z>`; `abrir/instalada` o `abrir/navegador`; al dar Play `play`, `canales/<shaker+drums+pad+click>`, `estilo/<clave>` (si suena shaker o batería) y `pad/<clave>` (si el pad está encendido); al terminar (Stop o cerrar la app) `sesion/menos-1-min|1-5-min|5-15-min|15-30-min|mas-30-min`; micrófono `mic/on`, `mic/error`, `mic/seguir`, `mic/ajuste` (una vez por escucha).
+- Nunca se envían canciones, nombres, acordes, tempo exacto ni el diagnóstico. Un evento nuevo se programa **después** de preparar el audio, nunca en el camino de un sonido.
+
 ---
 
 ## 6. Reglas de identidad (no negociables)
 
 **Producto**
 1. Es un acompañante para **un músico en vivo**, no un DAW ni un secuenciador. Pocas decisiones, grandes y claras.
-2. Funciona **offline** después de la primera carga. Ninguna petición de red en tiempo de ejecución.
+2. Funciona **offline** después de la primera carga. Ninguna petición de red en tiempo de ejecución, salvo el conteo anónimo de uso (5.14), que falla en silencio sin internet.
 3. **Un solo HTML** generado, sin frameworks ni librerías externas.
 4. Interfaz en **español** (por defecto) e **inglés**; en español, términos musicales de la iglesia latina (Estrofa, Coro, Puente, Remate, Tonalidad, Do/Re/Mi). Los nombres de notas (Do Re Mi / C D E) son un ajuste aparte del idioma.
 5. Lo que el músico guardó (canciones, ajustes) nunca se pierde por una actualización.
