@@ -198,6 +198,7 @@
       'diag.copy': 'Copiar datos', 'diag.copied': 'Copiado', 'diag.device': 'Equipo', 'diag.rate': 'Frecuencia de muestreo', 'diag.latency': 'Latencia de salida',
       'diag.chunk': 'Preparar ritmo (prom. / máx.)', 'diag.cut': 'Responder a un cambio (prom. / máx.)', 'diag.pad': 'Preparar acorde del pad (prom. / máx.)',
       'diag.late': 'Cambios que llegaron tarde', 'diag.loops': 'Veces que el ritmo se cubrió solo', 'diag.long': 'Pausas de la página (máx.)', 'diag.hidden': 'Veces en segundo plano', 'diag.none': 'sin datos',
+      stats: 'Estadísticas anónimas', 'stats.foot': 'Cuenta cuántas veces se abre la app, qué estilos y pads suenan y cuánto se toca, sin cookies ni datos tuyos, para mejorarla. Tus canciones nunca salen del teléfono.',
       countin: 'Conteo de entrada', autofill: 'Remate automático', 'autofill.0': 'Apagado', 'autofill.4': 'Cada 4 compases', 'autofill.8': 'Cada 8 compases',
       'mic.cap': 'Micrófono · beta', 'mic.listen': 'Escuchar mi tempo', 'mic.follow': 'La base me sigue',
       'mic.hint': 'Te avisa si te aceleras o frenas respecto al tempo marcado.',
@@ -257,6 +258,7 @@
       'diag.copy': 'Copy data', 'diag.copied': 'Copied', 'diag.device': 'Device', 'diag.rate': 'Sample rate', 'diag.latency': 'Output latency',
       'diag.chunk': 'Rhythm render (avg / max)', 'diag.cut': 'Reacting to a change (avg / max)', 'diag.pad': 'Pad chord render (avg / max)',
       'diag.late': 'Changes that arrived late', 'diag.loops': 'Times the rhythm covered for itself', 'diag.long': 'Page stalls (max)', 'diag.hidden': 'Times in the background', 'diag.none': 'no data',
+      stats: 'Anonymous statistics', 'stats.foot': 'Counts how often the app is opened, which styles and pads play and for how long, with no cookies or personal data, to improve it. Your songs never leave the phone.',
       countin: 'Count-in', autofill: 'Auto fill', 'autofill.0': 'Off', 'autofill.4': 'Every 4 bars', 'autofill.8': 'Every 8 bars',
       'mic.cap': 'Microphone · beta', 'mic.listen': 'Listen to my tempo', 'mic.follow': 'Backing follows me',
       'mic.hint': 'Warns you if you speed up or slow down against the set tempo.',
@@ -378,6 +380,28 @@
   // 1.7.0 made the app start simple. A state saved before it takes the new defaults once.
   if (!S.simple17) { Object.assign(S, { padMode: 'fifths', padHand: 'manual', autoFill: 0, advance: false, simple17: true }); }
   if (!I18N[S.lang]) S.lang = 'es';
+  if (typeof S.stats !== 'boolean') S.stats = true;
+
+  // ---------- Anonymous usage counts (GoatCounter: no cookies, no personal data) ----------
+  // Only from the published address, never from the tests or the local file. No third-party script:
+  // each event is one tiny request sent after the audio is set up; offline it just fails, silently.
+  const STATS_URL = 'https://forozco.goatcounter.com/count', STATS_HOST = 'frederikfor.github.io';
+  function stat(path, event = true) {
+    if (!S.stats || location.hostname !== STATS_HOST || navigator.onLine === false) return;
+    try {
+      const q = new URLSearchParams({ p: path, t: event ? path : `M-Companion ${RELEASE}`, e: String(event), s: [screen.width, screen.height, devicePixelRatio || 1].join(','), rnd: Math.random().toString(36).slice(2, 8) });
+      if (!event) q.set('r', document.referrer);
+      const url = `${STATS_URL}?${q}`;
+      if (!(navigator.sendBeacon && navigator.sendBeacon(url))) new Image().src = url;
+    } catch (e) {}
+  }
+  // How long a Play lasted, in buckets, so the counts stay coarse.
+  let statT0 = 0;
+  function statPlayEnd() {
+    if (!statT0) return;
+    const m = (Date.now() - statT0) / 60000; statT0 = 0;
+    stat('sesion/' + (m < 1 ? 'menos-1-min' : m < 5 ? '1-5-min' : m < 15 ? '5-15-min' : m < 30 ? '15-30-min' : 'mas-30-min'));
+  }
   {
     // 1.6.0 added the click channel and the sides. A state saved before it starts with the new defaults
     // (only the pad on) and keeps its volumes.
@@ -1284,6 +1308,11 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     $('status').textContent = T('status.playing');
     paintWin(); drawPos(); setFillUi();
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
+    statT0 = Date.now();
+    const on = CHANNELS.filter((k) => S.layers[k].on);
+    stat('play'); stat('canales/' + (on.join('+') || 'ninguno'));
+    if (S.layers.shaker.on || S.layers.drums.on) stat('estilo/' + S.style);
+    if (S.layers.pad.on) stat('pad/' + S.pad);
   }
   // soft: the song reached its ending, so the next Play starts from the top.
   function stop(soft) {
@@ -1304,6 +1333,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     $('play').classList.remove('stop'); $('play').setAttribute('aria-label', T('play'));
     $('status').textContent = T('status.stopped');
     try { wakeLock?.release(); } catch (e) {}
+    statPlayEnd();
   }
 
   // ---------- UI ----------
@@ -1909,7 +1939,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   });
 
   // ---------- Microphone tempo listener (beta) ----------
-  let micOn = false, micStream = null, micTimer = null, estTimer = null, an = null, prevMag = null, fluxHist = [], onsets = [], lastOnset = 0, driftCount = 0;
+  let micOn = false, micAdjusted = false, micStream = null, micTimer = null, estTimer = null, an = null, prevMag = null, fluxHist = [], onsets = [], lastOnset = 0, driftCount = 0;
   async function micStart() {
     initAudio();
     if (ctx.state !== 'running') await ctx.resume();
@@ -1917,6 +1947,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     } catch (e) {
       $('micmsg').innerHTML = T('mic.error');
+      stat('mic/error');
       return;
     }
     const src = ctx.createMediaStreamSource(micStream);
@@ -1927,6 +1958,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     estTimer = setInterval(estimate, 1000);
     micOn = true; $('mic').setAttribute('aria-checked', 'true');
     $('micmsg').textContent = T('mic.start');
+    stat('mic/on'); micAdjusted = false;
   }
   function micStop() {
     clearInterval(micTimer); clearInterval(estTimer);
@@ -1977,6 +2009,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       driftCount++;
       if (driftCount >= 3) {
         $('micmsg').innerHTML = `<span class="alert">${T(diff > 0 ? 'mic.fast' : 'mic.slow')}</span>` + T(S.follow ? 'mic.adjusted' : 'mic.suggest');
+        if (S.follow && !micAdjusted) { micAdjusted = true; stat('mic/ajuste'); }
         if (S.follow) { setBpm(S.bpm + Math.sign(det - S.bpm) * Math.min(3, Math.abs(det - S.bpm))); driftCount = 1; }
       }
     } else {
@@ -1987,6 +2020,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   $('mic').addEventListener('click', () => micOn ? micStop() : micStart());
   $('follow').addEventListener('click', () => {
     S.follow = !S.follow; save();
+    if (S.follow) stat('mic/seguir');
     $('follow').setAttribute('aria-checked', String(S.follow));
   });
 
@@ -2000,7 +2034,14 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   $('autofill').value = String(S.autoFill);
   $('shktone').value = S.shkTone;
   $('follow').setAttribute('aria-checked', String(S.follow));
+  $('stats').setAttribute('aria-checked', String(S.stats));
+  $('stats').addEventListener('click', () => { S.stats = !S.stats; save(); $('stats').setAttribute('aria-checked', String(S.stats)); });
+  // Closing the app while it plays never reaches Stop: count that Play when the page goes away.
+  addEventListener('pagehide', statPlayEnd);
   applyLang();
+  stat(location.pathname, false);
+  stat('version/' + RELEASE);
+  stat('abrir/' + (matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'instalada' : 'navegador'));
   window.acompLoaded = () => Object.keys(SB).length;
   window.acompVersion = () => ({ release: RELEASE, build: BUILD, versions: CHANGELOG.length });
   // For the smoke test: stop the clock as iOS does in the background, and read the rhythm's level.

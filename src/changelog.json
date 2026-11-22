@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.8.0",
+    "date": "2026-11-22",
+    "es": [
+      "Estadísticas anónimas (Sonido › App): la app cuenta cuántas veces se abre, qué estilos y pads suenan y cuánto se toca, sin cookies ni datos personales, para saber qué mejorar. Se apagan con un toque y tus canciones nunca salen del teléfono."
+    ],
+    "en": [
+      "Anonymous statistics (Sound › App): the app counts how often it is opened, which styles and pads play and for how long, with no cookies or personal data, to learn what to improve. One tap turns them off, and your songs never leave the phone."
+    ]
+  },
+  {
     "version": "1.7.0",
     "date": "2026-11-08",
     "es": [
