@@ -5,6 +5,7 @@ ID: `D-AAAA-MM-DD-n`.
 
 | ID | Fecha | Decisión | Por qué | Fuente / evidencia | Decidió |
 |---|---|---|---|---|---|
+| D-2026-11-23-4 | 2026-11-23 | **Propuesta, sin decidir:** sonido HD como paquetes opcionales (AAC, ~5–10 MB) con el sonido actual embebido de respaldo; solo fuentes CC0. | Las reglas de un solo HTML y ≤ 3 MB impiden capas y variantes; 100 MB no hacen falta para batería y percusión. | [auditorias/2026-11-23-sonido.md](auditorias/2026-11-23-sonido.md), PR #11 | pendiente |
 | D-2026-11-23-3 | 2026-11-23 | Documentación del proyecto en `docs/` con `INDEX.md` como entrada; el README sigue siendo la fuente de formatos. | Que cualquier agente o persona encuentre propósito, decisiones, funciones y feedback sin repetir preguntas. | Pedido de Frederik en el chat del proyecto | Frederik |
 | D-2026-11-23-2 | 2026-11-23 | Ruta de trabajo en fases: 0 diagnóstico → 1 propósito → 2 cambios rápidos → 3 sonido → 4 pad de batería. | Ir de lo general a lo específico; cada fase entrega algo probable. | [roadmap.md](roadmap.md) | Frederik (aprobó la propuesta del coordinador) |
 | D-2026-11-23-1 | 2026-11-23 | **Descartado:** multitrack + videokaraoke con salida a pantalla y consola. | Fuera de propósito (no es reproductor de pistas ni de video); rompe el peso y el modo offline de un solo archivo. | F-2026-11-22-1; [proposito.md](proposito.md) | Frederik |
@@ -30,3 +31,4 @@ ID: `D-AAAA-MM-DD-n`.
 | Acordes por parte en Tocar | Ver opciones en la auditoría | [auditoría 2026-11-23](auditorias/2026-11-23-codigo.md#2-acordes-por-parte) |
 | Diagnóstico entre equipos | Servidor vs. solo copiar datos | D-2026-11-08-0 |
 | Piano real | Sí/no (~700 KB) | D-2026-10-27-3 |
+| Sonido HD | Cambiar la regla de un solo archivo y 3 MB; descarga con botón o automática con Wi-Fi; presupuesto ~10 MB | D-2026-11-23-4 |

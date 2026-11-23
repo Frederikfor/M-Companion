@@ -61,5 +61,5 @@ Punto de entrada para personas y agentes. Lee esto primero, abre solo el archivo
 | Fecha | Tema | Archivo |
 |---|---|---|
 | 2026-11-23 | Código: micrófono (seguir tempo), acordes por parte, mapa de pantallas | [auditorias/2026-11-23-codigo.md](auditorias/2026-11-23-codigo.md) |
-| pendiente | Calidad de sonido (batería, shakers, pads) y fuentes CC0 | [sonido.md](sonido.md) §Auditoría |
+| 2026-11-23 | Calidad de sonido (batería, shakers, pads), fuentes CC0 y plan de paquetes HD | [auditorias/2026-11-23-sonido.md](auditorias/2026-11-23-sonido.md) (resumen en [sonido.md](sonido.md) §Auditoría) |
 | pendiente | Principios de UX para apps musicales en vivo | [diseno.md](diseno.md) §Principios |
