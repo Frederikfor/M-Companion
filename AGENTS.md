@@ -8,3 +8,5 @@ Lee **[README.md](README.md)** completo antes de cambiar algo. Ahí están el pr
 4. Commit de fuentes y generados juntos.
 
 Nunca edites a mano `index.html`, `sw.js` ni `dist/`.
+
+Para propósito, metodología, estado de funciones, decisiones, feedback y auditorías, entra por **[docs/INDEX.md](docs/INDEX.md)** y actualízalo al terminar cada trabajo.
