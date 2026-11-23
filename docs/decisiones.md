@@ -5,7 +5,7 @@ ID: `D-AAAA-MM-DD-n`.
 
 | ID | Fecha | Decisión | Por qué | Fuente / evidencia | Decidió |
 |---|---|---|---|---|---|
-| D-2026-11-23-4 | 2026-11-23 | Principios de diseño P1–P10 y lista de verificación de [diseno.md](diseno.md#principios-de-ux-para-apps-musicales-en-vivo) como criterio para cualquier cambio de interfaz. Pad de batería: recomendada la opción B (panel *Acordes \| Batería*, golpes cuantizados). | Fuentes citadas (Apple HIG, Material, NN/g, WCAG 2.2, Hoober, estudios de latencia); un pad libre sonaría tarde con `latencyHint: 'playback'`. | PR #10; hilo "Base de diseño" | pendiente (propuesta, revisión de Frederik) |
+| D-2026-11-23-5 | 2026-11-23 | Principios de diseño P1–P10 y lista de verificación de [diseno.md](diseno.md#principios-de-ux-para-apps-musicales-en-vivo) como criterio para cualquier cambio de interfaz. Pad de batería: recomendada la opción B (panel *Acordes \| Batería*, golpes cuantizados). | Fuentes citadas (Apple HIG, Material, NN/g, WCAG 2.2, Hoober, estudios de latencia); un pad libre sonaría tarde con `latencyHint: 'playback'`. | PR #10; hilo "Base de diseño" | pendiente (propuesta, revisión de Frederik) |
 | D-2026-11-23-3 | 2026-11-23 | Documentación del proyecto en `docs/` con `INDEX.md` como entrada; el README sigue siendo la fuente de formatos. | Que cualquier agente o persona encuentre propósito, decisiones, funciones y feedback sin repetir preguntas. | Pedido de Frederik en el chat del proyecto | Frederik |
 | D-2026-11-23-2 | 2026-11-23 | Ruta de trabajo en fases: 0 diagnóstico → 1 propósito → 2 cambios rápidos → 3 sonido → 4 pad de batería. | Ir de lo general a lo específico; cada fase entrega algo probable. | [roadmap.md](roadmap.md) | Frederik (aprobó la propuesta del coordinador) |
 | D-2026-11-23-1 | 2026-11-23 | **Descartado:** multitrack + videokaraoke con salida a pantalla y consola. | Fuera de propósito (no es reproductor de pistas ni de video); rompe el peso y el modo offline de un solo archivo. | F-2026-11-22-1; [proposito.md](proposito.md) | Frederik |
@@ -31,5 +31,5 @@ ID: `D-AAAA-MM-DD-n`.
 | Acordes por parte en Tocar | Ver opciones en la auditoría | [auditoría 2026-11-23](auditorias/2026-11-23-codigo.md#2-acordes-por-parte) |
 | Diagnóstico entre equipos | Servidor vs. solo copiar datos | D-2026-11-08-0 |
 | Piano real | Sí/no (~700 KB) | D-2026-10-27-3 |
-| Pad de batería | A: fila de 4 golpes / **B: panel Acordes \| Batería (recomendada)** / C: pestaña Pads aparte | [diseno.md](diseno.md#pad-de-batería-opciones-y-recomendación), D-2026-11-23-4 |
+| Pad de batería | A: fila de 4 golpes / **B: panel Acordes \| Batería (recomendada)** / C: pestaña Pads aparte | [diseno.md](diseno.md#pad-de-batería-opciones-y-recomendación), D-2026-11-23-5 |
 | Pestaña Sonido sobrecargada | Mover Estructura a Canciones (renombrada "Canción") / dejar como está | [diseno.md](diseno.md#auditoría-hallazgos-h1h10) H2 |
