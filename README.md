@@ -6,6 +6,7 @@ App web (PWA) que acompaña a un músico que toca solo: pone una base de **shake
 - **Usuario principal:** cantante que toca guitarra y a veces piano, en servicios de iglesia (worship, gospel, baladas, latino).
 - **Plataforma:** iPhone (Safari, instalada en la pantalla de inicio), también cualquier navegador moderno de computadora o Android.
 - **Idioma de la interfaz:** español por defecto; inglés disponible en Sonido › App › Idioma.
+- **Documentación del proyecto** (propósito, metodología, funciones y su estado, decisiones, feedback, hoja de ruta, auditorías): [`docs/INDEX.md`](docs/INDEX.md).
 
 ---
 
@@ -57,6 +58,7 @@ Abre la misma dirección en Chrome, Edge o Safari. También puedes abrir `dist/a
 M-Companion/
 ├── README.md              ← este documento (fuente de verdad para humanos y agentes)
 ├── AGENTS.md, CLAUDE.md   ← apuntan aquí
+├── docs/                  ← por qué y estado: INDEX.md, propósito, decisiones, feedback, auditorías
 ├── src/
 │   ├── ui.html            ← interfaz: estilos, 4 pestañas, barra de pestañas (EDITABLE)
 │   ├── engine.js          ← motor de audio, datos musicales y lógica de UI (EDITABLE)
@@ -71,7 +73,8 @@ M-Companion/
 ├── tools/
 │   ├── build.py           ← genera index.html, sw.js y dist/acompanante.html
 │   ├── smoke-test.mjs     ← prueba en Chromium sin pantalla
-│   └── _loud.mjs          ← mide el volumen de cada pad (regla de volumen parejo)
+│   ├── _loud.mjs          ← mide el volumen de cada pad (regla de volumen parejo)
+│   └── mic-lab/           ← banco de pruebas del micrófono con audio simulado
 ├── index.html             ← GENERADO: lo que publica GitHub Pages
 ├── sw.js                  ← GENERADO: caché offline `acompanante-<versión>-<hash>`
 ├── dist/acompanante.html  ← GENERADO: la app como un solo archivo
@@ -353,6 +356,7 @@ Para pruebas: `window.acompLoaded()` devuelve cuántas muestras se decodificaron
 ---
 
 ## 7. Hoja de ruta (ideas abiertas)
+Fases aprobadas y estado: [`docs/roadmap.md`](docs/roadmap.md).
 - Probar en el iPhone del músico y ajustar volúmenes y latencia con la mezcladora.
 - Lista de canciones por servicio (setlist) con orden y cambio rápido.
 - Más estilos latinos de iglesia (bachata suave, cumbia lenta) si el músico los pide.
