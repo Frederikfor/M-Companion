@@ -147,6 +147,15 @@ Frederik propuso pads **configurables por el usuario**, como un Octapad: el bate
 
 El cambio de sonido queda en un botón "Sonido…" de la misma hoja. Boceto: [img/pad-pestana-boceto.png](img/pad-pestana-boceto.png). Contra P7: la app pasa a 5 pestañas; para volver a 4 se puede unir Estructura y Canciones (H2).
 
+**Navegación propuesta (2026-11-24, 05:37–05:41), de Frederik y refinada:** tres pestañas, **Ajustes · Tocar (centro) · Lanzador**.
+- Ajustes tiene un selector Ritmo · Sonido · Canción · App. Canción reúne la estructura y Mis canciones.
+- En Tocar, tocar el título abre las canciones y mantener una parte del mapa abre sus acordes.
+- Regla única para los canales (Shaker, Batería, Pad, Clic), en Tocar y en el Lanzador: **tocar enciende, mantener configura**. Mantener Batería elige estilo y toque humano; Shaker, su patrón; Clic, la fuerza de cada pulso; Pad, su sonido y tonalidad.
+- La base rítmica no es un botón del lanzador, porque es una sola por canción.
+- "Pad" queda solo para el colchón de teclado. Los botones configurables se llaman **Lanzador** (decisión pendiente) y el tipo "Sostenido" pasa a "Fondo".
+
+Boceto: [img/navegacion-3-pestanas.png](img/navegacion-3-pestanas.png).
+
 Pendiente de decidir: dónde viven los acordes cuando el panel muestra los pads, y el nombre del tipo "Sostenido", para no confundirlo con el canal Pad.
 
 #### Preguntas abiertas para Frederik
