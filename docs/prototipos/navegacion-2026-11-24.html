@@ -1,4 +1,5 @@
 <title>M-Companion prototipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 :root{--bg:#0B0B0C;--card:#1C1C1E;--surf:#161618;--surf2:#131315;--fill:#2C2C2E;--seg:#48484A;--line:#38383A;--edge:#2A2A2D;--fg:#F2F2F2;--muted:#98989F;--dim:#8E8E93;--accent:#FF9F0A;--accent-soft:rgba(255,159,10,.16);--rest:#FF9F0A;--away:#64D2FF;--tense:#BF5AF2;--go:#30D158;--stop:#FF453A;--off:#39393D;
@@ -177,18 +178,89 @@ h1.big{margin:4px 0 12px;font-size:34px;line-height:41px;font-weight:700}
 .sndtg{font-size:12px;color:var(--muted);background:var(--surf);border-radius:999px;padding:4px 9px;margin-left:6px;vertical-align:middle}
 .sndtg.on{background:var(--accent);color:#000}
 @media (max-height:700px){.scr{padding-top:10px}#bpm{font-size:32px;line-height:32px}.bpmrow{margin-top:6px}.bpmrow button{height:36px}#partname{font-size:22px;line-height:26px}.partline{margin-top:6px}#map .seg-bar{height:16px}#map .lb{font-size:10px}.padsel{height:40px}.harm{gap:8px;padding:8px 0;margin-top:6px}#dial{height:34px}.win .big{height:46px}.win .small{height:38px}.win button.big b{font-size:19px}.win button.small b{font-size:15px}.win button span{font-size:11px}#padmode{min-height:36px}.legend{display:none}.lp{height:62px;padding:6px 8px}.lp .n{font-size:14px}.grid{gap:6px;margin-top:6px}.tip{display:none}.ctx{margin-top:4px}.tile{height:42px}.tbtn{height:50px}#play{width:58px;height:58px}.live{gap:6px;padding-top:6px}.tab{min-height:40px}.tab svg{width:22px;height:22px}}
+
+/* ===== Liquid Glass pass ===== */
+:root{--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,system-ui,sans-serif;--num:-apple-system,"SF Pro Display",Inter,system-ui,sans-serif;
+ --glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.11);--gbrd:rgba(255,255,255,.14);--ghi:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(255,255,255,.03);--blur:blur(28px) saturate(170%)}
+body{font-feature-settings:"cv11","ss01";letter-spacing:-.01em}
+.phone{background:radial-gradient(120% 60% at 0% 0%,rgba(255,159,10,.20),transparent 55%),radial-gradient(90% 55% at 100% 45%,rgba(100,210,255,.14),transparent 60%),radial-gradient(100% 50% at 20% 100%,rgba(191,90,242,.16),transparent 60%),#08080A}
+.scr{padding-bottom:96px}
+/* type: one family, tabular numbers, tighter big titles, fewer weights */
+#songtitle{font-size:17px;font-weight:600;letter-spacing:-.02em}
+.top1 .sub{font-size:13px;font-weight:500;color:rgba(235,235,245,.6)}
+#bpm{font-family:var(--num);font-weight:700;font-size:44px;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+#bpmunit{font-weight:600;letter-spacing:.04em;color:rgba(235,235,245,.5)}
+#partname{font-weight:700;letter-spacing:-.03em}
+#partpos{font-family:var(--num);font-weight:500;font-variant-numeric:tabular-nums;color:rgba(235,235,245,.5)}
+#dial .names{font-family:var(--num);font-weight:500;letter-spacing:-.01em}
+#dial .d0{font-weight:700;font-size:24px}
+.win button.big b,.win button.small b{font-weight:700;letter-spacing:-.02em}
+.win button span{font-weight:600;letter-spacing:.02em}
+.cap,.lp .ty{letter-spacing:.06em}
+h1.big{letter-spacing:-.03em}
+.lp .n{letter-spacing:-.015em}
+/* glass surfaces */
+.bpmrow button,.padsel,.tile,.tbtn,.seg,.group,.chip,.tip,.lp,.sndtg{background:var(--glass);border:.5px solid var(--gbrd);box-shadow:var(--ghi);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur)}
+.bpmrow button{border-radius:14px}
+.padsel{border-radius:16px}
+.harm{background:rgba(255,255,255,.045);border:.5px solid rgba(255,255,255,.10);box-shadow:var(--ghi);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-radius:24px}
+.seg{border-radius:12px;padding:3px}
+.seg button{border-radius:9px}
+.seg .on{background:rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 8px rgba(0,0,0,.25)}
+.tile{border-radius:18px}
+.tile.on{background:rgba(255,255,255,.20);border-color:rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 18px rgba(0,0,0,.25)}
+.tbtn{border-radius:20px}
+#fill{background:rgba(255,159,10,.16);border-color:rgba(255,159,10,.30)}
+#fill.dis{background:var(--glass);border-color:var(--gbrd)}
+#fill.armed{background:var(--accent);box-shadow:0 0 24px rgba(255,159,10,.45)}
+#play{background:radial-gradient(circle at 50% 30%,#5CF07F,#2BC24F 70%);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 8px 26px rgba(48,209,88,.40);border:.5px solid rgba(255,255,255,.3)}
+#play.stop{background:radial-gradient(circle at 50% 30%,#FF7A70,#E5372D 70%);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 26px rgba(255,69,58,.40)}
+.win .nb span{background:rgba(255,255,255,.05)}
+.win .frame{border-color:rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.win button{border:.5px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+#map .seg-bar{background:rgba(255,255,255,.08)}
+#map .now .seg-bar{background:rgba(255,255,255,.9)}
+#map .next .seg-bar{background:rgba(255,255,255,.22)}
+.lp{border-radius:18px}
+.lp.hit{background:rgba(255,159,10,.15);border-color:rgba(255,159,10,.28)}
+.lp.loop{background:rgba(48,209,88,.13);border-color:rgba(48,209,88,.26)}
+.lp.bed{background:rgba(100,210,255,.13);border-color:rgba(100,210,255,.26)}
+.lp.playing.loop{background:rgba(48,209,88,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 24px rgba(48,209,88,.35)}
+.lp.playing.bed{background:rgba(100,210,255,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 24px rgba(100,210,255,.35)}
+.lp.empty{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.chip.on{background:var(--accent);border-color:transparent}
+.group .chip{background:rgba(255,255,255,.08)}.group .chip.on{background:var(--accent);color:#000;border-color:transparent}
+.row+.row::before,.sheet .opt+.opt::before{background:rgba(255,255,255,.10)}
+/* floating glass tab bar */
+.tabbar{position:absolute;left:14px;right:14px;bottom:calc(10px + env(safe-area-inset-bottom,0px));padding:6px;border-radius:30px;background:rgba(30,30,34,.55);border:.5px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 10px 30px rgba(0,0,0,.45);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);z-index:10}
+.tab{border-radius:24px;padding:4px 0;min-height:48px;justify-content:center;font-size:11px}
+.tab.on{background:rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+/* sheets, toast, onboarding */
+.scrim{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.sheet{background:rgba(28,28,32,.72);border-top:.5px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.14);-webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%);border-radius:28px 28px 0 0}
+.toast{background:rgba(40,40,44,.65);border:.5px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);border-radius:18px}
+.btn{border-radius:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 20px rgba(255,159,10,.30)}
+.btn2{background:var(--glass);border:.5px solid var(--gbrd);border-radius:16px}
+.kdial button{background:var(--glass);border:.5px solid var(--gbrd)}
+.onb{background:radial-gradient(120% 60% at 0% 0%,rgba(255,159,10,.22),transparent 55%),radial-gradient(100% 50% at 100% 100%,rgba(100,210,255,.16),transparent 60%),#08080A}
+.onb .pick{background:var(--glass);border:.5px solid var(--gbrd);box-shadow:var(--ghi);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-radius:22px}
+@media (max-height:700px){.lp{height:66px}.scr{padding-bottom:80px}.tab{min-height:40px}.tabbar{padding:4px;bottom:6px}#bpm{font-size:34px}}
+.ebtn{flex:none;height:38px;padding:0 16px;border-radius:12px;font-size:15px;font-weight:600;color:var(--accent);background:var(--glass);border:.5px solid var(--gbrd);box-shadow:var(--ghi)}.ebtn.on{background:var(--accent);color:#000}
+.lp.editing{animation:wig .28s infinite alternate ease-in-out}.lp.editing:nth-child(2n){animation-delay:-.14s}@keyframes wig{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
+.lp .pen{position:absolute;top:6px;right:8px;width:22px;height:22px;border-radius:11px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:12px}
+@media (prefers-reduced-motion:reduce){.lp.editing{animation:none}}
 </style>
 
 <div class="side">
   <h1>Prototipo con la app real</h1>
-  <p>El encabezado, el tempo, el mapa, la pestaña Pad, los canales y el transporte usan los mismos estilos de la app 1.8.0. Lo nuevo es la botonera, las hojas que salen al mantener presionado y Ajustes.</p>
+  <p>El encabezado, el tempo, el mapa, la pestaña Pad, los canales y el transporte usan los mismos estilos de la app 1.8.0. Lo nuevo es Ensamble, las hojas que salen al mantener presionado y Ajustes.</p>
   <h2>Qué probar</h2>
   <ul>
     <li><b>Primera vez:</b> eliges qué usarás más. Esa pantalla queda al centro (se cambia en Ajustes › App).</li>
     <li><b>Canales:</b> tocar enciende, mantener configura.</li>
     <li><b>Título de la canción:</b> abre la lista. <b>Mapa:</b> toca una parte para ir a ella en el próximo compás; mantenla para ver sus acordes.</li>
     <li><b>Pad:</b> arrastra el dial para cambiar la tonalidad. En Manual con Tónica + 5ª apagado, toca acordes.</li>
-    <li><b>Botonera:</b> Golpe suena en la próxima 1/16, Loop entra en el próximo compás, Fondo sostiene la armonía. Mantén un botón para cambiar su sonido o su nota.</li>
+    <li><b>Ensamble:</b> Golpe suena en la próxima 1/16, Loop entra en el próximo compás, Fondo sostiene la armonía. Mantén un botón para cambiar su sonido o su nota.</li>
     <li>Toca <b>Remate</b> con la batería apagada: te dice qué falta.</li>
     <li>Ajustes › App › <b>Modo avanzado</b>: banco B, botones vacíos asignables y más opciones.</li>
     <li>“Sonido” junto al título activa un audio de prueba (no es el sonido real).</li>
@@ -234,8 +306,8 @@ h1.big{margin:4px 0 12px;font-size:34px;line-height:41px;font-weight:700}
 
       <!-- BOTONERA view -->
       <div id="v-tocar">
-        <div class="tip" id="lpTip"><span>Mantén un botón para cambiar su sonido. En los fondos también eliges la nota.</span><button id="lpTipOk">Entendido</button></div>
-        <div class="lhead"><div class="seg" id="bankSeg"><button data-v="A">Banco A</button><button data-v="B">Banco B</button></div></div>
+        <div class="tip" id="lpTip"><span>Toca Editar para cambiar, quitar o añadir sonidos. Atajo: mantén un botón.</span><button id="lpTipOk">Entendido</button></div>
+        <div class="lhead"><div class="seg" id="bankSeg"><button data-v="A">Banco A</button><button data-v="B">Banco B</button></div><button class="ebtn" id="editBtn">Editar</button></div>
         <div class="ctx" id="ctx"></div>
         <div class="grid" id="grid"></div>
       </div>
@@ -266,7 +338,7 @@ h1.big{margin:4px 0 12px;font-size:34px;line-height:41px;font-weight:700}
     <h2>¿Qué usarás más en vivo?</h2>
     <p>Lo pondremos en el centro para tenerlo siempre a mano. Lo otro queda a un toque.</p>
     <button class="pick" data-c="pad"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="20" height="16" rx="3"/><path d="M9 5v10M14 5v10M19 5v10M9 15v6M14 15v6M19 15v6"/></svg><span><b>Pad</b>Un colchón sonando debajo mientras tocas y cantas. Eliges la tonalidad o sigue los acordes de la canción.</span></button>
-    <button class="pick" data-c="tocar"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="10" y="3" width="6" height="6" rx="1.5"/><rect x="17" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/><rect x="17" y="10" width="6" height="6" rx="1.5"/><rect x="3" y="17" width="6" height="6" rx="1.5"/><rect x="10" y="17" width="6" height="6" rx="1.5"/><rect x="17" y="17" width="6" height="6" rx="1.5"/></svg><span><b>Botonera</b>Botones para lanzar golpes, loops de percusión y fondos de piano o cuerdas. Para baterista o tecladista.</span></button>
+    <button class="pick" data-c="tocar"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="10" y="3" width="6" height="6" rx="1.5"/><rect x="17" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/><rect x="17" y="10" width="6" height="6" rx="1.5"/><rect x="3" y="17" width="6" height="6" rx="1.5"/><rect x="10" y="17" width="6" height="6" rx="1.5"/><rect x="17" y="17" width="6" height="6" rx="1.5"/></svg><span><b>Ensamble</b>Botones para lanzar golpes, loops de percusión y fondos de piano o cuerdas. Para baterista o tecladista.</span></button>
     <div class="foot2">Puedes cambiarlo cuando quieras en Ajustes › App.</div>
   </div>
 </div>
@@ -290,10 +362,10 @@ const LP={
     {n:'Órgano',t:'bed',s:'organ'},{n:'Coro “ah”',t:'bed',s:'choir'},null]};
 const TYPE={hit:'Golpe',loop:'Loop',bed:'Fondo'};
 const SOUNDS={hit:['Crash','Bombo + crash','Aplauso','Aro','Toms bajando','Corte'],loop:['Toms tribal','Pandero','Shaker 1/16','Cajón','Conga'],bed:['Cuerdas','Piano','Atmósfera','Órgano','Coro “ah”']};
-const S={center:null,tab:null,adv:false,name:'Botonera',song:0,bpm:72,key:7,part:0,qPart:null,bar:0,beat:-1,playing:false,
+const S={center:null,tab:null,adv:false,name:'Ensamble',song:0,bpm:72,key:7,part:0,qPart:null,bar:0,beat:-1,playing:false,
  ch:{shaker:false,drums:false,pad:true,click:false},drumStyle:'Balada',shakerPat:'Corcheas',pad:0,
  hand:'manual',fifths:true,held:[],bank:'A',active:{},armed:{},bedOrder:[],fillArmed:false,ajTab:'app',tipSeen:false,more:false,audio:false,bedKeys:{}};
-try{const v=JSON.parse(localStorage.getItem('mc-proto2')||'null');if(v){S.center=v.center;S.adv=v.adv;S.name=v.name||S.name;S.tipSeen=v.tipSeen}}catch(e){}
+try{const v=JSON.parse(localStorage.getItem('mc-proto2')||'null');if(v){S.center=v.center;S.adv=v.adv;S.name=(v.name&&v.name!='Botonera')?v.name:S.name;S.tipSeen=v.tipSeen}}catch(e){}
 function save(){try{localStorage.setItem('mc-proto2',JSON.stringify({center:S.center,adv:S.adv,name:S.name,tipSeen:S.tipSeen}))}catch(e){}}
 const nn=pc=>N[((pc%12)+12)%12];
 const chordName=c=>nn(S.key+DEG[c].s)+(DEG[c].m?'m':'');
@@ -407,12 +479,12 @@ function renderGrid(){const g=$('#grid');g.innerHTML='';const bank=S.adv?S.bank:
  const hn=S.fifths?nn(S.key)+' (tónica + 5ª)':S.hand=='auto'?'acordes de '+PARTS[S.part].n:(S.held.length?chordName(S.held[0]):nn(S.key));
  $('#ctx').innerHTML=`Fondos en <b>${hn}</b> · Batería ${S.ch.drums?'<b>encendida</b>':'apagada: los golpes suenan igual'}`;
  LP[bank].forEach((x,i)=>{const id=bank+':'+i;const b=document.createElement('button');
-  if(!x){b.className='lp empty';b.innerHTML=S.adv?'+<br>Asignar':'';press(b,()=>openPadCfg(bank,i,true),()=>openPadCfg(bank,i,true));g.appendChild(b);return}
+  if(!x){b.className='lp empty';b.innerHTML=(S.adv||S.edit)?'+<br>Añadir':'';press(b,()=>openPadCfg(bank,i,true),()=>openPadCfg(bank,i,true));g.appendChild(b);return}
   b.className=`lp ${x.t}`+(S.active[id]?' playing':'')+(S.armed[id]?' armed':'');
   const k=x.t=='bed'?(S.bedKeys[id]!=null?nn(S.bedKeys[id])+' fija':'como el Pad'):x.t=='loop'?'1 compás':'1/16';
   const st=S.armed[id]?'próximo compás…':S.active[id]?(x.t=='loop'?'sonando · toca para parar':'sonando'):k;
   b.innerHTML=`<span class="ty">${TYPE[x.t]}</span><span><span class="n">${x.n}</span><br><span class="k">${st}</span></span>`+(S.active[id]&&x.t=='loop'?'<span class="bar"></span>':'');
-  press(b,()=>tapPad(bank,i,b),()=>openPadCfg(bank,i));g.appendChild(b)})}
+  if(S.edit){b.classList.add('editing');b.insertAdjacentHTML('beforeend','<span class="pen">✎</span>')}press(b,()=>S.edit?openPadCfg(bank,i):tapPad(bank,i,b),()=>openPadCfg(bank,i));g.appendChild(b)});$('#editBtn').textContent=S.edit?'Listo':'Editar';$('#editBtn').classList.toggle('on',!!S.edit)}
 function tapPad(bank,i,el){const x=LP[bank][i],id=bank+':'+i;
  if(x.t=='hit'){if(x.s=='cut'){if(!S.playing||!S.ch.drums){toast('Corte calla la batería un compás. Enciende Batería y dale ▶.');return}S.cutArmed=true;toast('Corte: la batería calla el próximo compás')}
   el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),140);if(S.audio){initAudio();AC.resume();SFX[x.s]&&SFX[x.s](AC.currentTime+.01)}return}
@@ -440,7 +512,7 @@ function renderAj(){[...$('#ajSeg').children].forEach(b=>b.classList.toggle('on'
  if(S.ajTab=='app'){h=`<div class="cap">Pantalla en el centro</div><div class="group" style="padding:10px 12px"><div class="seg" id="centerSeg"><button data-v="pad" class="${S.center=='pad'?'on':''}">Pad</button><button data-v="tocar" class="${S.center=='tocar'?'on':''}">${S.name}</button></div></div>
   <p class="foot">La que más uses en vivo. Las pestañas no se mueven solas, para que tu dedo siempre sepa dónde está cada cosa.</p>
   <div class="cap">Modo</div><div class="group">${row('Modo avanzado','Banco B, botones vacíos, cambiar tipo de botón, mezcla por canal',sw(S.adv,'adv'))}${row('Idioma','','Español ›')}</div>
-  <div class="cap">Nombre de la pestaña (para decidir)</div><div class="group"><div class="chips" id="nameChips">${['Botonera','Tocar','Lanzar','Sample','Ensamble','Build'].map(n=>`<button class="chip ${n==S.name?'on':''}">${n}</button>`).join('')}</div></div>
+  <div class="cap">Nombre de la pestaña (para decidir)</div><div class="group"><div class="chips" id="nameChips">${['Ensamble','Capas','Escena','Banda','Build'].map(n=>`<button class="chip ${n==S.name?'on':''}">${n}</button>`).join('')}</div></div>
   <div class="group" style="margin-top:16px">${row('Ver de nuevo la primera vez','','<span class="val acc">Reiniciar</span>','reset')}</div>`}
  B.innerHTML=h;
  B.querySelectorAll('[data-act]').forEach(e=>e.onclick=()=>{const a=e.dataset.act;if(['drums','shaker','click'].includes(a))openChan(a);if(a=='songs')openSongs();if(a=='reset'){S.center=null;save();$('#onb').style.display='flex'}});
@@ -481,7 +553,7 @@ function openChords(i){const p=PARTS[i];openSheet(`<h3>Acordes · ${p.n}</h3><p 
  <div class="group" style="padding:12px 16px;font-size:22px;font-weight:700">${p.c.map(c=>`<span class="cn ${FN[c]}">${chordName(c)}</span>`).join(' · ')}</div>
  <div class="cap">Acordes de la tonalidad</div><div class="group"><div class="chips">${[0,3,4,5,1,2].map(c=>`<button class="chip"><span class="cn ${FN[c]}">${chordName(c)}</span></button>`).join('')}</div></div>${done}`,bindClose)}
 function openPadCfg(bank,i,empty){const x=LP[bank][i],id=bank+':'+i;
- if(empty){if(!S.adv){toast('Para asignar botones vacíos, activa Modo avanzado en Ajustes › App.');return}
+ if(empty){if(!S.adv&&!S.edit){toast('Toca Editar para añadir un sonido aquí.');return}
   openSheet(`<h3>Botón vacío</h3><p class="why">Primero elige qué hace; después, el sonido.</p>${opts([['Golpe','Un sonido, en la próxima 1/16'],['Loop','Se repite, entra en el próximo compás'],['Fondo','Sostiene una nota o los acordes']],'')}<button class="btn" id="asg">Asignar</button>`,r=>{let ty='Golpe';bindOpts(r,v=>ty=v);r.querySelector('#asg').onclick=()=>{const t={Golpe:'hit',Loop:'loop',Fondo:'bed'}[ty];LP[bank][i]={n:SOUNDS[t][0],t,s:{hit:'crash',loop:'cajon',bed:'strings'}[t],g:t=='loop'?'perc':undefined};closeSheet()}});return}
  S.tipSeen=true;save();
  let h=`<h3>${x.n}</h3><p class="why">${TYPE[x.t]} · ${{hit:'suena en la próxima 1/16',loop:'entra en el próximo compás y se repite',bed:'sostiene la armonía'}[x.t]}</p>`;
@@ -490,13 +562,14 @@ function openPadCfg(bank,i,empty){const x=LP[bank][i],id=bank+':'+i;
   else{const kk=fixed?S.bedKeys[id]:S.key;h+=`<div class="cap">Nota de este fondo · ${fixed?'fija':'como el Pad'}</div><div class="kdial" id="bdial">${N.map((n,j)=>`<button data-k="${j}" class="${j==kk?'on':''}">${n}</button>`).join('')}</div><button class="btn2" id="same">Como el Pad</button>`}}
  h+=`<div class="cap">Sonido</div><div class="group"><div class="chips">${SOUNDS[x.t].map(n=>`<button class="chip ${n==x.n?'on':''}" data-snd="${n}">${n}</button>`).join('')}${S.adv?'<button class="chip">Paquete HD…</button>':''}</div></div>`;
  h+=`<div class="cap">Volumen</div><div class="group" style="padding:10px 16px"><input type="range" style="width:100%;accent-color:var(--accent)" value="80"></div>`;
- if(S.adv)h+=`<div class="cap">Avanzado</div><div class="group"><button class="opt"><span>Tipo<small>Golpe, Loop o Fondo</small></span><span class="val">${TYPE[x.t]} ›</span></button>${x.t=='loop'?'<button class="opt"><span>Grupo<small>Los loops del mismo grupo se reemplazan</small></span><span class="val">Percusión ›</span></button>':''}<button class="opt"><span style="color:var(--stop)">Quitar de este botón</span><span></span></button></div>`;
+ if(S.adv)h+=`<div class="cap">Avanzado</div><div class="group"><button class="opt"><span>Tipo<small>Golpe, Loop o Fondo</small></span><span class="val">${TYPE[x.t]} ›</span></button>${x.t=='loop'?'<button class="opt"><span>Grupo<small>Los loops del mismo grupo se reemplazan</small></span><span class="val">Percusión ›</span></button>':''}</div>`;
+ h+=`<div class="group" style="margin-top:12px"><button class="opt" id="rm"><span style="color:var(--stop)">Quitar este sonido</span><span></span></button></div>`;
  openSheet(h+done,r=>{bindClose(r);
   r.querySelectorAll('[data-snd]').forEach(b=>b.onclick=()=>{x.n=b.dataset.snd;r.querySelectorAll('[data-snd]').forEach(o=>o.classList.toggle('on',o==b));r.querySelector('h3').textContent=x.n});
   const bd=r.querySelector('#bdial');bd&&bd.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.bedKeys[id]=+b.dataset.k;bd.querySelectorAll('button').forEach(o=>o.classList.toggle('on',o==b));if(S.active[id]&&AC)startBed(id,x.s,+b.dataset.k,null)});
   const sm=r.querySelector('#same');sm&&(sm.onclick=()=>{delete S.bedKeys[id];closeSheet()});
   const fx=r.querySelector('#fix');fx&&(fx.onclick=()=>{S.bedKeys[id]=S.key;openPadCfg(bank,i)});
-  const ec=r.querySelector('#editCh');ec&&(ec.onclick=()=>openChords(S.part))})}
+  r.querySelector('#rm').onclick=()=>{delete S.active[id];if(AC)stopBed(id);LP[bank][i]=null;closeSheet();toast('Botón vacío. Toca + para añadir otro sonido.')};const ec=r.querySelector('#editCh');ec&&(ec.onclick=()=>openChords(S.part))})}
 
 /* ---------- wiring ---------- */
 const seenH={};function hintOnce(k,m){if(seenH[k])return;seenH[k]=1;toast(m)}
@@ -505,7 +578,7 @@ $('#songBtn').onclick=openSongs;
 document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{S.bpm=Math.max(40,Math.min(200,S.bpm+ +b.dataset.b));renderTop();if(S.playing){clearInterval(timer);timer=setInterval(tick,60/S.bpm*1000/4)}});
 let taps=[];$('#tap').onclick=()=>{const t=performance.now();taps=taps.filter(x=>t-x<2500);taps.push(t);if(taps.length>1){S.bpm=Math.round(60000/((t-taps[0])/(taps.length-1)));renderTop()}$('#bpm').classList.add('flash');setTimeout(()=>$('#bpm').classList.remove('flash'),90)};
 $('#play').onclick=()=>S.playing?stop():play();
-$('#fill').onclick=()=>{if(!S.ch.drums){toast('Remate usa la batería. Enciéndela abajo, o usa un Golpe de la botonera.');return}if(!S.playing){toast('Remate entra en el próximo compás: dale ▶ primero.');return}S.fillArmed=!S.fillArmed;renderTrans()};
+$('#fill').onclick=()=>{if(!S.ch.drums){toast('Remate usa la batería. Enciéndela abajo, o usa un Golpe de Ensamble.');return}if(!S.playing){toast('Remate entra en el próximo compás: dale ▶ primero.');return}S.fillArmed=!S.fillArmed;renderTrans()};
 $('#next').onclick=()=>{const n=(S.qPart!=null?S.qPart:S.part)+1;if(n>=PARTS.length){toast('Ya es la última parte');return}if(!S.playing){S.part=n;renderLive();return}S.qPart=n;S.qJump=true;renderLive()};
 $('#mode').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.hand=b.dataset.m;renderPad();updatePadAudio()});
 $('#padmode').onclick=()=>{S.fifths=!S.fifths;renderPad();updatePadAudio()};
@@ -514,6 +587,7 @@ $('#padnext').onclick=()=>{S.pad=(S.pad+1)%PADS.length;renderPad();padNode&&(pad
 $('#padmid').onclick=()=>openChan('pad');
 $('#bankSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.v=='B'&&!S.adv){toast('El banco B está en modo avanzado (Ajustes › App).');return}S.bank=b.dataset.v;renderGrid()});
 $('#ajSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.ajTab=b.dataset.v;renderAj()});
+$('#editBtn').onclick=()=>{S.edit=!S.edit;S.tipSeen=true;save();renderGrid();if(S.edit)hintOnce('edit','Modo edición: toca un botón para cambiar su sonido, o + para añadir uno. Toca Listo al terminar.')};
 $('#lpTipOk').onclick=()=>{S.tipSeen=true;save();renderGrid()};
 $('#onb').querySelectorAll('.pick').forEach(b=>b.onclick=()=>{S.center=b.dataset.c;save();$('#onb').style.display='none';go(S.center);
  toast(S.center=='pad'?'Listo. Solo el Pad está encendido: dale ▶ para escucharlo.':'Listo. El banco A ya trae sonidos: dale ▶ y prueba los botones.')});

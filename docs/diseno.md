@@ -166,6 +166,8 @@ Pendiente de decidir: dónde viven los acordes cuando el panel muestra los pads,
 - **Sencillo vs. avanzado:** el modo sencillo trae el banco A con sonidos listos, solo Pad encendido y opciones seguras. El modo avanzado (Ajustes › App) suma el banco B, botones vacíos asignables, cambiar el tipo de botón, acorde completo, mezcla por canal y toque humano.
 - **Reglas de guía:** todo cambio de tiempo espera al próximo compás y se ve como "pendiente"; nada se deshabilita sin decir por qué y cómo arreglarlo (Remate sin batería, loops sin ▶); como máximo 2 fondos a la vez; un loop por grupo (se reemplazan, no se suman); en Auto el dial se bloquea y ofrece editar la canción; si das ▶ sin ningún canal, se enciende el Pad.
 
+**Actualización 2026-11-24 (tarde):** Frederik aprobó la estética glass (paneles translúcidos, barra de pestañas flotante, una sola familia tipográfica con números tabulares). La pestaña de botones se llama provisionalmente **Ensamble** (alternativas: Capas, Escena, Banda, Build). Añadir sonidos: el banco A viene lleno para que funcione al primer toque; un botón **Editar** entra en modo edición (cambiar, quitar o añadir en huecos vacíos), y mantener un botón es el atajo. El banco B con huecos libres sigue en modo avanzado.
+
 Prototipo interactivo: [prototipos/navegacion-2026-11-24.html](prototipos/navegacion-2026-11-24.html) (también publicado como Artifact privado).
 
 #### Preguntas abiertas para Frederik
