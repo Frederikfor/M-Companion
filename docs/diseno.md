@@ -168,6 +168,8 @@ Pendiente de decidir: dónde viven los acordes cuando el panel muestra los pads,
 
 **Actualización 2026-11-24 (tarde):** Frederik aprobó la estética glass (paneles translúcidos, barra de pestañas flotante, una sola familia tipográfica con números tabulares). La pestaña de botones se llama provisionalmente **Ensamble** (alternativas: Capas, Escena, Banda, Build). Añadir sonidos: el banco A viene lleno para que funcione al primer toque; un botón **Editar** entra en modo edición (cambiar, quitar o añadir en huecos vacíos), y mantener un botón es el atajo. El banco B con huecos libres sigue en modo avanzado.
 
+**Actualización 2026-11-24 (noche):** guía de uso no invasiva: recorrido de 6 pasos la primera vez, un consejo corto al abrir (se apaga en Ajustes › App › Ayuda) y un botón **?** con ayuda por niveles (básico, Pad, Ensamble, avanzado) y "Muéstramelo", que señala el control en pantalla. Todo texto de ayuda tiene 15 palabras o menos, con lenguaje musical sencillo. Español e inglés completos (notas C–B en inglés); el idioma se elige en la primera pantalla. Inicio: Pad recomendado ("algo sencillo, para tocar solo o en grupo: pad, shaker y clic") y Ensamble ("combinaciones más completas: remates de batería, platillos y otros sonidos"), siempre en modo sencillo.
+
 Prototipo interactivo: [prototipos/navegacion-2026-11-24.html](prototipos/navegacion-2026-11-24.html) (también publicado como Artifact privado).
 
 #### Preguntas abiertas para Frederik
