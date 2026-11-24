@@ -141,6 +141,12 @@ Frederik no quedó convencido con A, B ni C. Se ilustraron tres paradigmas nuevo
 #### Dirección actual (2026-11-24): lanzador configurable
 Frederik propuso pads **configurables por el usuario**, como un Octapad: el baterista suma efectos a su repertorio y el pianista deja un colchón de piano o cuerdas sonando. Hay tres tipos de pad: **Golpe** (cae en la siguiente semicorchea y reemplaza la misma pieza de la base en ese golpe), **Loop** (entra en el siguiente compás y se repite hasta volver a tocarlo) y **Sostenido** (piano, cuerdas o atmósfera en la tonalidad de la canción, con el motor de pad actual). Son 9 pads en 2 bancos y se editan manteniendo el pad presionado. Al principio los sonidos salen de una biblioteca CC0; importar audios propios queda para después. Boceto: [img/pad-lanzador-boceto.png](img/pad-lanzador-boceto.png).
 
+**Propuesta de Frederik (2026-11-24, 05:33):** los pads van en una **pestaña propia, Pads**, y la armonía de Tocar no cambia. Al mantener presionado un pad tonal (piano, cuerdas…):
+- en **Manual** aparece el mismo dial de tonalidad de Tocar para elegir la tónica de ese pad, con un atajo "Como la canción";
+- en **Auto** aparecen los acordes de la parte actual y un botón que lleva al editor de esa parte.
+
+El cambio de sonido queda en un botón "Sonido…" de la misma hoja. Boceto: [img/pad-pestana-boceto.png](img/pad-pestana-boceto.png). Contra P7: la app pasa a 5 pestañas; para volver a 4 se puede unir Estructura y Canciones (H2).
+
 Pendiente de decidir: dónde viven los acordes cuando el panel muestra los pads, y el nombre del tipo "Sostenido", para no confundirlo con el canal Pad.
 
 #### Preguntas abiertas para Frederik
