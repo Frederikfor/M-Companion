@@ -96,6 +96,20 @@ select.native { display: none; }
 #partname { font-size: 28px; line-height: 34px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #partpos { font-family: var(--mono); font-size: 17px; color: var(--muted); white-space: nowrap; }
 #partpos b { color: var(--fg); font-weight: 400; }
+/* The current part's chords, under its name: tap to edit them; "Usar acordes" when the pad does not follow them. */
+.pchrow { margin: 0 0 -4px; display: flex; align-items: center; gap: 6px; }
+#pchords { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 6px; text-align: left; }
+.pch-list { flex: 1; min-width: 0; display: flex; gap: 4px; overflow: hidden; scroll-behavior: smooth; -webkit-mask-image: linear-gradient(to right, #000 85%, transparent); mask-image: linear-gradient(to right, #000 85%, transparent); }
+.pch-list i { flex: none; font-style: normal; font-size: 13px; font-weight: 600; line-height: 26px; height: 26px; padding: 0 8px; border-radius: 7px; white-space: nowrap; }
+.pch-list i small { font-size: 11px; font-weight: 400; opacity: .75; margin-left: 3px; }
+.pch-list .rest { background: rgba(255, 159, 10, .16); color: #FFB340; }
+.pch-list .away { background: rgba(100, 210, 255, .16); color: var(--away); }
+.pch-list .tense { background: rgba(191, 90, 242, .2); color: #DA8FFF; }
+.pch-list .rest.now { background: var(--rest); color: #000; } .pch-list .away.now { background: var(--away); color: #000; } .pch-list .tense.now { background: var(--tense); color: #000; }
+#pchords.idle .pch-list i:not(.now) { opacity: .55; }
+.pch-empty { font-size: 13px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#pchords .pen { flex: none; width: 16px; height: 16px; color: var(--dim); }
+#pchuse { flex: none; min-height: 44px; padding: 0 2px 0 6px; font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 #map { margin-top: 8px; display: flex; gap: 2px; }
 #map button { min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-bottom: 4px; }
 #map .seg-bar { position: relative; overflow: hidden; height: 22px; border-radius: 4px; background: var(--edge); }
@@ -265,7 +279,7 @@ select.native { display: none; }
 }
 @media (max-height: 700px) {
   #bpm { font-size: 32px; line-height: 32px; } .bpmrow { margin-top: 6px; }
-  #partname { font-size: 22px; line-height: 26px; } #map .seg-bar { height: 16px; } #map .lb { font-size: 10px; }
+  #partname { font-size: 22px; line-height: 26px; } #map .seg-bar { height: 16px; } #map .lb { font-size: 10px; } .pchrow { margin: -10px 0 -12px; } .pch-list i { height: 22px; line-height: 22px; }
   .harm { gap: 8px; padding: 8px 0; } #dial { height: 34px; }
   .win .big { height: 48px; } .win .small { height: 40px; } .win button.big b { font-size: 19px; } .win button.small b { font-size: 15px; }
   .win button span { font-size: 11px; } #padmode { min-height: 36px; }
@@ -296,6 +310,10 @@ select.native { display: none; }
       </div>
 
       <div class="partline"><span id="partname">Intro</span><span id="partpos"></span></div>
+      <div class="pchrow">
+        <button type="button" id="pchords"><span class="pch-list" aria-hidden="true"></span><svg class="pen" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg></button>
+        <button type="button" id="pchuse" hidden data-i18n="pch.use" data-i18n-aria="pch.use.aria">Usar acordes</button>
+      </div>
       <div id="map" role="group" aria-label="Mapa de la canción" data-i18n-aria="map"></div>
 
       <div class="padsel">
@@ -356,6 +374,8 @@ select.native { display: none; }
         </select><button type="button" class="pd" data-for="autofill" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-autofill val-autofill"><span class="pd-val" id="val-autofill"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
       <p class="foot" data-i18n="advance.foot">Apagado, la parte elegida se repite hasta que toques otra o Siguiente.</p>
+      <!-- Micrófono: oculto mientras MIC_UI sea false en engine.js (auditoría 2026-11-23). -->
+      <div id="micbox" hidden>
       <div class="cap" data-i18n="mic.cap">Micrófono · beta</div>
       <div class="group">
         <div class="row"><span class="lbl" id="lbl-mic" data-i18n="mic.listen">Escuchar mi tempo</span><button class="switch" id="mic" role="switch" aria-checked="false" aria-labelledby="lbl-mic"></button></div>
@@ -363,6 +383,7 @@ select.native { display: none; }
         <div class="row"><span class="lbl" id="micread">—</span></div>
       </div>
       <p class="foot" id="micmsg">Te avisa si te aceleras o frenas respecto al tempo marcado.</p>
+      </div>
     </div>
   </section>
 
@@ -402,7 +423,7 @@ select.native { display: none; }
 
   <section class="screen" id="tab-parte" data-parent="sonido" aria-labelledby="ptitle" hidden>
     <div class="wrap">
-      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <button type="button" class="back" id="pback" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
       <h1 id="ptitle"></h1>
       <div class="cap" data-i18n="part.tap">Toca un acorde para añadirlo</div>
       <div class="group">

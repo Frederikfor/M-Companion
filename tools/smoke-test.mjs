@@ -42,9 +42,27 @@ await page.goto(pathToFileURL(path.join(root, 'index.html')).href);
   if (manual !== 'true' || fifths !== 'true' || adv !== 'false' || fill !== '0') errors.push(`defaults should be Manual, Tónica + 5ª, no Avanzar, no auto fill; got ${manual} ${fifths} ${adv} ${fill}`);
   if (!(await page.textContent('#partpos')).includes('↻')) errors.push('with Avanzar off the part line should show that the part repeats');
 }
-// The rest of the test plays the song with the pad following it.
-await page.click('#mode button[data-m=auto]');
-await page.click('#padmode');
+// The microphone section stays hidden (MIC_UI false) until it works on stage.
+if (await page.isVisible('#mic')) errors.push('Ritmo › Micrófono should be hidden');
+// The current part's chords show on Tocar. With the simple defaults the pad does not follow them, so
+// "Usar acordes" is offered; tapping the chords opens that part's editor, and its back button returns to Tocar.
+{
+  const chips = await page.$$eval('#pchords .pch-list i', (xs) => xs.length);
+  if (chips < 1) errors.push('the chords of the current part should show on Tocar');
+  if (!(await page.isVisible('#pchuse'))) errors.push('"Usar acordes" should show while the pad is on Manual / Tónica + 5ª');
+  await page.click('#pchords');
+  if (!(await page.isVisible('#tab-parte'))) errors.push('tapping the chords on Tocar should open the part editor');
+  if ((await page.getAttribute('.tab[data-tab=tocar]', 'aria-selected')) !== 'true') errors.push('the part editor opened from Tocar should keep Tocar selected');
+  await page.click('#pback');
+  if (!(await page.isVisible('#tab-tocar'))) errors.push('the part editor opened from Tocar should go back to Tocar');
+}
+// "Usar acordes" puts the pad on Auto with full chords, so the rest of the test plays the song with the pad following it.
+await page.click('#pchuse');
+{
+  const auto = await page.getAttribute('#mode button[data-m=auto]', 'aria-checked'), fifths = await page.getAttribute('#padmode', 'aria-checked');
+  if (auto !== 'true' || fifths !== 'false') errors.push(`"Usar acordes" should set Auto without Tónica + 5ª, got ${auto} ${fifths}`);
+  if (!(await page.isHidden('#pchuse'))) errors.push('"Usar acordes" should hide once the pad follows the song');
+}
 await page.click('.tab[data-tab=ritmo]');
 await page.click('#advance');
 await page.click('.tab[data-tab=tocar]');
@@ -94,6 +112,9 @@ if (!part) errors.push('changing to Coro never took effect');
   const iv = await page.waitForFunction(() => window.acompTest.song().chord === 3, null, { timeout: 4000 }).then(() => true, () => false);
   const i = await page.waitForFunction(() => window.acompTest.song().chord === 0, null, { timeout: 5000 }).then(() => true, () => false);
   if (!iv || !i) errors.push(`the chorus should play IV then I (IV ${iv}, I ${i})`);
+  // Tocar lights the chord the song is on.
+  const lit = await page.waitForFunction(() => !!document.querySelector('#pchords .pch-list i.now'), null, { timeout: 3000 }).then(() => true, () => false);
+  if (!lit) errors.push('Tocar should light the chord of the part that is sounding');
 }
 // Manual: a tap replaces the chord; holding one and tapping another plays both as one merged chord.
 await page.click('#mode button[data-m=manual]');
