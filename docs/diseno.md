@@ -135,6 +135,9 @@ Por qué no A: resuelve los remates pero no el pedido ("pad drum"). Por qué no 
 
 Depende de la Fase 3 (sonido): los pads exponen cada muestra sola, así que la calidad de bombo, caja y platillos se va a notar más que hoy. Conviene mejorar esas muestras antes o al mismo tiempo.
 
+#### Actualización 2026-11-24
+Frederik no quedó convencido con A, B ni C. Se ilustraron tres paradigmas nuevos (batería dibujada, pad de 9 muestras tipo Octapad/SPD, botones de arreglo tipo teclado Yamaha): `/mnt/project-files/diseno/pad-bateria-3-ideas.png` del proyecto. La investigación de usuarios está en [auditorias/2026-11-24-pad-bateria-usuarios.md](auditorias/2026-11-24-pad-bateria-usuarios.md): el músico que canta y toca no tiene manos libres, valora remates y transiciones, y los pads en pantalla se usan para jugar más que en vivo.
+
 #### Preguntas abiertas para Frederik
 
 - ¿B te parece bien, o prefieres empezar por A (más rápido) y luego crecer a B?
