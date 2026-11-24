@@ -158,6 +158,16 @@ Boceto: [img/navegacion-3-pestanas.png](img/navegacion-3-pestanas.png).
 
 Pendiente de decidir: dónde viven los acordes cuando el panel muestra los pads, y el nombre del tipo "Sostenido", para no confundirlo con el canal Pad.
 
+**Decisión de Frederik (2026-11-24, 05:45–05:51) y prototipo:**
+- **Pad** es la pestaña donde se eligen la nota, los acordes (Auto/Manual), las notas (Tónica + 5ª) y el sonido del pad: el panel de armonía actual.
+- La pantalla tipo Octapad (botones Golpe, Loop y Fondo, 9 por banco) es la otra pestaña en vivo. Nombre provisional "Tocar"; se evalúan Botonera, Lanzar, Sample, Ensamble y Build.
+- Aprobado: las dos pantallas en vivo comparten encabezado, mapa, fila de canales y transporte.
+- **Centro elegido por el usuario:** la primera vez la app pregunta qué usará más; esa pantalla va al centro y la otra a la derecha. Se cambia en Ajustes › App. Las pestañas no se reordenan solas en cada toque, para no romper la memoria espacial (P3).
+- **Sencillo vs. avanzado:** el modo sencillo trae el banco A con sonidos listos, solo Pad encendido y opciones seguras. El modo avanzado (Ajustes › App) suma el banco B, botones vacíos asignables, cambiar el tipo de botón, acorde completo, mezcla por canal y toque humano.
+- **Reglas de guía:** todo cambio de tiempo espera al próximo compás y se ve como "pendiente"; nada se deshabilita sin decir por qué y cómo arreglarlo (Remate sin batería, loops sin ▶); como máximo 2 fondos a la vez; un loop por grupo (se reemplazan, no se suman); en Auto el dial se bloquea y ofrece editar la canción; si das ▶ sin ningún canal, se enciende el Pad.
+
+Prototipo interactivo: [prototipos/navegacion-2026-11-24.html](prototipos/navegacion-2026-11-24.html) (también publicado como Artifact privado).
+
 #### Preguntas abiertas para Frederik
 
 - ¿B te parece bien, o prefieres empezar por A (más rápido) y luego crecer a B?
