@@ -63,5 +63,5 @@ Punto de entrada para personas y agentes. Lee esto primero, abre solo el archivo
 | 2026-11-23 | Código: micrófono (seguir tempo), acordes por parte, mapa de pantallas | [auditorias/2026-11-23-codigo.md](auditorias/2026-11-23-codigo.md) |
 | pendiente | Calidad de sonido (batería, shakers, pads) y fuentes CC0 | [sonido.md](sonido.md) §Auditoría |
 | 2026-11-24 | Qué dicen los músicos sobre pads de batería y acompañamiento (reseñas y foros) | [auditorias/2026-11-24-pad-bateria-usuarios.md](auditorias/2026-11-24-pad-bateria-usuarios.md) |
-| 2026-11-24 | Prototipo interactivo de navegación (Ajustes · centro · Pad/Tocar, modo sencillo y avanzado) | [prototipos/navegacion-2026-11-24.html](prototipos/navegacion-2026-11-24.html) |
+| 2026-11-24 | Prototipo interactivo de navegación (Ajustes · centro · Pad/Ensamble, modo sencillo y avanzado), **implementado en 2.0.0** | [prototipos/navegacion-2026-11-24.html](prototipos/navegacion-2026-11-24.html) |
 | 2026-11-23 | Interfaz y principios de UX para apps en vivo (P1–P10, H1–H10, opciones de pad de batería) | [diseno.md](diseno.md) §Principios de UX |

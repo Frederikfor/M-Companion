@@ -1,5 +1,23 @@
 [
   {
+    "version": "2.0.0",
+    "date": "2026-11-24",
+    "es": [
+      "Nuevo diseño con 3 pestañas: Ajustes, Pad y Ensamble. Tú eliges cuál va al centro.",
+      "Ensamble: botones de golpes, loops y fondos que entran a tiempo con la canción. Toca Editar para cambiarlos.",
+      "Mantén presionado un canal para elegir su sonido, o una parte del mapa para ver sus acordes.",
+      "Guía rápida la primera vez, un consejo al abrir (se apaga en Ajustes › App) y ayuda en el botón ?.",
+      "Español o inglés desde la primera pantalla, y un acabado más limpio."
+    ],
+    "en": [
+      "New design with 3 tabs: Settings, Pad and Ensemble. You choose which one goes in the center.",
+      "Ensemble: hit, loop and bed buttons that come in on time with the song. Tap Edit to change them.",
+      "Hold a channel to pick its sound, or a part on the map to see its chords.",
+      "A quick tour the first time, a tip at launch (turn it off in Settings › App) and help on the ? button.",
+      "Spanish or English from the first screen, and a cleaner look."
+    ]
+  },
+  {
     "version": "1.9.0",
     "date": "2026-11-24",
     "es": [

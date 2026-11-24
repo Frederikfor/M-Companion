@@ -1,6 +1,7 @@
 <title>Acompañante de Ensayo</title>
 <style>
-/* Layout: iOS-style app shell, dark on purpose for stages; four tabs, live controls in the thumb zone. Tocar follows design C5a. */
+/* Layout: iOS-style app shell, dark on purpose for stages; three tabs (Ajustes, Pad, Ensamble), live controls in the thumb zone.
+   Pad follows design C5a; 2.0 adds a glass finish (translucent panels over a soft coloured background). */
 :root {
   --bg: #0B0B0C;
   --card: #1C1C1E;
@@ -23,8 +24,12 @@
   --stop: #FF453A;
   --off: #39393D;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
-  --mono: ui-monospace, "SF Mono", Menlo, monospace;
-  --tabbar: calc(56px + env(safe-area-inset-bottom, 0px));
+  --num: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --glass: rgba(255, 255, 255, .07);
+  --gbrd: rgba(255, 255, 255, .14);
+  --ghi: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 -1px 0 rgba(255, 255, 255, .03);
+  --blur: blur(28px) saturate(170%);
+  --tabbar: calc(70px + env(safe-area-inset-bottom, 0px));
   color-scheme: dark;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -85,7 +90,7 @@ select.native { display: none; }
 .pd.meterpd { min-height: 44px; margin: -10px 0; font-size: 13px; font-weight: 600; color: #C7C7CC; gap: 4px; }
 .pd.meterpd .ud { width: 7px; height: 11px; }
 .bpmread { display: flex; align-items: baseline; gap: 4px; }
-#bpm { font-family: var(--mono); font-size: 40px; line-height: 40px; font-weight: 600; font-variant-numeric: tabular-nums; transition: color .08s; }
+#bpm { font-family: var(--num); font-size: 44px; line-height: 40px; font-weight: 700; letter-spacing: -.04em; font-variant-numeric: tabular-nums; transition: color .08s; }
 #bpm.flash { color: var(--accent); }
 #bpmunit { font-size: 13px; color: var(--muted); }
 .bpmrow { margin-top: 8px; display: grid; grid-template-columns: 44px 44px minmax(0, 1fr) 44px 44px; gap: 6px; }
@@ -94,7 +99,7 @@ select.native { display: none; }
 #tap { font-size: 15px; font-weight: 600; color: var(--accent); }
 .partline { margin-top: 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 #partname { font-size: 28px; line-height: 34px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#partpos { font-family: var(--mono); font-size: 17px; color: var(--muted); white-space: nowrap; }
+#partpos { font-family: var(--num); font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; color: rgba(235, 235, 245, .5); white-space: nowrap; }
 #partpos b { color: var(--fg); font-weight: 400; }
 /* The current part's chords, under its name: tap to edit them; "Usar acordes" when the pad does not follow them. */
 .pchrow { margin: 0 0 -4px; display: flex; align-items: center; gap: 6px; }
@@ -129,7 +134,7 @@ select.native { display: none; }
 .harm { margin-top: 12px; padding: 12px 0; border-radius: 18px; background: var(--surf2); display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
 #dial { position: relative; height: 44px; display: flex; flex-direction: column; justify-content: flex-end; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 #dial .needle { position: absolute; left: 50%; top: 0; margin-left: -7px; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 9px solid var(--accent); }
-#dial .names { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); align-items: end; font-family: var(--mono); text-align: center; white-space: nowrap; transition: transform .12s ease-out; }
+#dial .names { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); align-items: end; font-family: var(--num); font-weight: 500; text-align: center; white-space: nowrap; transition: transform .12s ease-out; }
 #dial .d0 { font-size: 22px; font-weight: 700; color: var(--accent); }
 #dial .d1 { font-size: 15px; color: #C7C7CC; }
 #dial .d2 { font-size: 13px; color: #8E8E93; }
@@ -251,7 +256,7 @@ select.native { display: none; }
 .credits { font-size: 12px; }
 .row.link { width: 100%; text-align: left; }
 .beats { display: flex; gap: 6px; margin-top: 10px; }
-.beats button { flex: 1 1 0; min-width: 0; height: 64px; border-radius: 9px; background: var(--fill); position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; font: 600 13px var(--mono); color: var(--fg); }
+.beats button { flex: 1 1 0; min-width: 0; height: 64px; border-radius: 9px; background: var(--fill); position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; font: 600 13px var(--num); font-variant-numeric: tabular-nums; color: var(--fg); }
 .beats button::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--lv) * 30%); background: var(--accent); opacity: .85; }
 .beats button span { position: relative; }
 .beats button[data-lv="0"] { color: var(--dim); }
@@ -266,9 +271,10 @@ select.native { display: none; }
 .notes li::before { content: ""; position: absolute; left: 16px; top: 16px; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
 
 /* Tab bar */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(18, 18, 20, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--edge); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
-.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--dim); font-size: 10px; font-weight: 600; min-height: 44px; }
-.tab[aria-selected="true"] { color: var(--accent); }
+.tabbar { position: fixed; left: max(14px, env(safe-area-inset-left, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-width: 532px; margin: 0 auto; height: 58px; padding: 5px; border-radius: 29px; background: rgba(30, 30, 34, .6); border: .5px solid rgba(255, 255, 255, .16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 10px 30px rgba(0, 0, 0, .45); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); z-index: 10; }
+.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border-radius: 24px; color: var(--dim); font-size: 11px; font-weight: 600; min-height: 44px; }
+.tab svg { width: 24px; height: 24px; }
+.tab[aria-selected="true"] { color: var(--accent); background: rgba(255, 255, 255, .12); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18); }
 /* Shorter phones (mini, 16e) and the SE: the same layout, tighter, so Play never hides under the tab bar. */
 @media (max-height: 880px) {
   #partname { font-size: 24px; line-height: 28px; } .partline { margin-top: 8px; }
@@ -286,6 +292,132 @@ select.native { display: none; }
   .tile { height: 44px; } .tbtn { height: 54px; } #play { width: 64px; height: 64px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .pd-menu, .pd-menu.closing { animation-duration: .01s; } }
+/* ---------- 2.0: glass finish ---------- */
+body { background: #08080A; letter-spacing: -.01em; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(120% 60% at 0% 0%, rgba(255, 159, 10, .18), transparent 55%), radial-gradient(90% 55% at 100% 45%, rgba(100, 210, 255, .12), transparent 60%), radial-gradient(100% 50% at 20% 100%, rgba(191, 90, 242, .14), transparent 60%); }
+#songtitle { letter-spacing: -.02em; }
+#partname, h1 { letter-spacing: -.03em; }
+#bpmunit { font-weight: 600; letter-spacing: .04em; color: rgba(235, 235, 245, .5); }
+.cap { letter-spacing: .06em; }
+/* Panels get the glass look from a translucent fill, a hairline edge and a top highlight. The blur behind is kept for
+   what floats over content (tab bar, sheets, toasts): on every panel it costs a phone too much while the audio renders. */
+.bpmrow button, .padsel, .tile, .tbtn, .seg, .group, .save input, .lp, .ebtn, .helpbtn { background: var(--glass); border: .5px solid var(--gbrd); box-shadow: var(--ghi); }
+.bpmrow button { border-radius: 14px; }
+.padsel { border-radius: 16px; }
+.harm { background: rgba(255, 255, 255, .045); border: .5px solid rgba(255, 255, 255, .1); box-shadow: var(--ghi); border-radius: 24px; }
+.seg { border-radius: 12px; padding: 3px; }
+.seg button { border-radius: 9px; }
+.seg .on { background: rgba(255, 255, 255, .18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 2px 8px rgba(0, 0, 0, .25); }
+.tile { border-radius: 18px; }
+.tile.on { background: rgba(255, 255, 255, .2); border-color: rgba(255, 255, 255, .28); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 4px 18px rgba(0, 0, 0, .25); }
+.tbtn { border-radius: 20px; }
+#fill { background: rgba(255, 159, 10, .16); border-color: rgba(255, 159, 10, .3); }
+#fill:disabled { background: var(--glass); border-color: var(--gbrd); }
+#fill.armed { background: var(--accent); box-shadow: 0 0 24px rgba(255, 159, 10, .45); }
+#play { background: radial-gradient(circle at 50% 30%, #5CF07F, #2BC24F 70%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 8px 26px rgba(48, 209, 88, .4); border: .5px solid rgba(255, 255, 255, .3); }
+#play.stop { background: radial-gradient(circle at 50% 30%, #FF7A70, #E5372D 70%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 8px 26px rgba(255, 69, 58, .4); }
+.win .nb span { background: rgba(255, 255, 255, .05); }
+.win .frame { border-color: rgba(255, 255, 255, .28); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12); }
+.win button { border: .5px solid rgba(255, 255, 255, .08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1); }
+#map .seg-bar { background: rgba(255, 255, 255, .08); }
+#map .now .seg-bar { background: rgba(255, 255, 255, .9); }
+#map .next .seg-bar { background: rgba(255, 255, 255, .22); }
+.row + .row::before, .songs .song + .song::before { background: rgba(255, 255, 255, .1); }
+.chip { background: rgba(255, 255, 255, .08); }
+.chip.add { background: var(--accent-soft); }
+.row .lbl small { display: block; font-size: 13px; color: var(--muted); }
+.panrows { background: rgba(0, 0, 0, .18); }
+.tile, #map button { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+
+/* ---------- 2.0: Ajustes sections ---------- */
+.aseg { margin: -4px 0 4px; }
+.aseg button { height: 34px; font-size: 14px; }
+
+/* ---------- 2.0: Ensamble (shares the song, map, channels and transport with Pad) ---------- */
+#tab-tocar[data-view="ens"] .padsel, #tab-tocar[data-view="ens"] .harm, #tab-tocar:not([data-view="ens"]) .ens { display: none; }
+.ens { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.lhead { display: flex; gap: 8px; align-items: center; min-height: 40px; }
+.lhead .seg { flex: 1; }
+.lhead .ctx { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lhead .seg:not([hidden]) + .ctx { display: none; }
+.ebtn { flex: none; height: 38px; padding: 0 16px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--accent); }
+.ebtn.on { background: var(--accent); color: #000; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.lp { position: relative; height: 84px; min-width: 0; border-radius: 18px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px 10px; text-align: left; overflow: hidden; transition: transform .05s, background .12s; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.lp:active { transform: scale(.97); }
+.lp .ty { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.lp .n { font-size: 15px; font-weight: 700; line-height: 1.15; letter-spacing: -.015em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.lp .k { font-size: 11px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp.hit { background: rgba(255, 159, 10, .15); border-color: rgba(255, 159, 10, .28); } .lp.hit .ty { color: #FFB340; }
+.lp.loop { background: rgba(48, 209, 88, .13); border-color: rgba(48, 209, 88, .26); } .lp.loop .ty { color: #5EDC7C; }
+.lp.bed { background: rgba(100, 210, 255, .13); border-color: rgba(100, 210, 255, .26); } .lp.bed .ty { color: var(--away); }
+.lp.flash { background: var(--accent) !important; color: #000; }
+.lp.armed { box-shadow: inset 0 0 0 2px var(--go); animation: blink .5s infinite alternate; }
+@keyframes blink { to { background: rgba(48, 209, 88, .28); } }
+.lp.playing.loop { background: rgba(48, 209, 88, .85); color: #000; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 6px 24px rgba(48, 209, 88, .35); }
+.lp.playing.bed { background: rgba(100, 210, 255, .85); color: #000; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 6px 24px rgba(100, 210, 255, .35); }
+.lp.playing .ty, .lp.playing .k { color: rgba(0, 0, 0, .6); }
+.lp.empty { background: transparent; border: 1.5px dashed var(--line); box-shadow: none; align-items: center; justify-content: center; color: var(--dim); font-size: 22px; }
+.lp.editing { animation: wig .28s infinite alternate ease-in-out; }
+.lp.editing:nth-child(2n) { animation-delay: -.14s; }
+@keyframes wig { from { transform: rotate(-1.2deg); } to { transform: rotate(1.2deg); } }
+
+/* ---------- 2.0: help button, coach marks, tip, sheet, toast, first launch ---------- */
+.helpbtn { align-self: center; margin-left: 8px; width: 32px; height: 32px; border-radius: 16px; font-size: 16px; font-weight: 700; background: rgba(255, 255, 255, .11); }
+.scrim { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.scrim.show { opacity: 1; pointer-events: auto; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 61; max-width: 560px; margin: 0 auto; max-height: 84%; overflow-y: auto; overscroll-behavior: contain; padding: 8px 16px calc(20px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; background: rgba(28, 28, 32, .78); border-top: .5px solid rgba(255, 255, 255, .18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(40px) saturate(180%); backdrop-filter: blur(40px) saturate(180%); transform: translateY(105%); transition: transform .22s; visibility: hidden; }
+.sheet.show { transform: none; visibility: visible; }
+.grab { width: 36px; height: 5px; border-radius: 3px; background: var(--seg); margin: 0 auto 10px; }
+.sheet h2 { margin: 0 0 2px; font-size: 20px; letter-spacing: -.02em; }
+.sheet .why { font-size: 13px; line-height: 18px; color: var(--muted); margin: 0 0 10px; }
+.sheet .cap { padding-left: 4px; }
+.opt { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 50px; padding: 8px 16px; text-align: left; position: relative; font-size: 17px; }
+.opt + .opt::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: rgba(255, 255, 255, .1); }
+.opt .ck { color: var(--accent); font-weight: 700; }
+.opt.rm { color: var(--stop); }
+.btn { width: 100%; height: 50px; margin-top: 12px; border-radius: 16px; background: var(--accent); color: #000; font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 6px 20px rgba(255, 159, 10, .3); }
+.btn2 { width: 100%; height: 44px; margin: 0 0 6px; border-radius: 16px; background: var(--glass); border: .5px solid var(--gbrd); color: var(--accent); font-weight: 600; font-size: 15px; }
+.hq { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 48px; padding: 8px 16px; text-align: left; font-size: 16px; position: relative; }
+.hq + .hq::before, .ha + .hq::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: rgba(255, 255, 255, .1); }
+.hq .chev { transition: transform .2s; }
+.hq[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.ha { padding: 0 16px 12px; font-size: 15px; line-height: 20px; color: rgba(235, 235, 245, .75); }
+.ha .show { display: block; margin-top: 6px; min-height: 36px; color: var(--accent); font-weight: 600; font-size: 15px; }
+.lvl { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; letter-spacing: .05em; vertical-align: middle; }
+.lvl.b { background: rgba(48, 209, 88, .18); color: #5EDC7C; } .lvl.m { background: rgba(100, 210, 255, .18); color: var(--away); } .lvl.a { background: rgba(191, 90, 242, .2); color: #DA8FFF; }
+.toast { position: fixed; left: 16px; right: 16px; max-width: 528px; margin: 0 auto; top: calc(60px + env(safe-area-inset-top, 0px)); z-index: 70; padding: 11px 14px; border-radius: 18px; font-size: 15px; line-height: 20px; background: rgba(40, 40, 44, .75); border: .5px solid rgba(255, 255, 255, .16); box-shadow: 0 12px 40px rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); opacity: 0; transform: translateY(-6px); transition: .2s; pointer-events: none; }
+.toast.show { opacity: 1; transform: none; }
+.coach { position: fixed; inset: 0; z-index: 65; }
+.coach .ring { position: absolute; border-radius: 20px; box-shadow: 0 0 0 2px var(--accent), 0 0 0 9999px rgba(0, 0, 0, .55), 0 0 24px rgba(255, 159, 10, .5); transition: all .3s cubic-bezier(.2, .9, .3, 1); pointer-events: none; }
+.ccard { position: absolute; left: 16px; right: 16px; max-width: 528px; margin: 0 auto; padding: 14px 16px; border-radius: 22px; background: rgba(36, 36, 40, .8); border: .5px solid rgba(255, 255, 255, .18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 12px 40px rgba(0, 0, 0, .5); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
+.cstep { font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: .04em; }
+.ccard h2 { margin: 4px 0; font-size: 18px; letter-spacing: -.02em; }
+.ccard p { margin: 0; font-size: 15px; line-height: 20px; color: rgba(235, 235, 245, .75); }
+.cbtns { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.cbtns button { min-height: 40px; padding: 0 4px; font-size: 15px; color: var(--muted); }
+.cbtns .cnext { padding: 0 18px; border-radius: 12px; background: var(--accent); color: #000; font-weight: 600; }
+.tipday { position: fixed; left: 16px; right: 16px; max-width: 528px; margin: 0 auto; top: calc(56px + env(safe-area-inset-top, 0px)); z-index: 15; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; border-radius: 18px; font-size: 14px; line-height: 18px; background: rgba(40, 40, 44, .78); border: .5px solid rgba(255, 255, 255, .16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 10px 30px rgba(0, 0, 0, .4); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); animation: tipin .3s ease-out; }
+@keyframes tipin { from { opacity: 0; transform: translateY(-8px); } }
+#tiptext { flex: 1; }
+#tipmore { min-height: 36px; padding: 0 6px; color: var(--accent); font-weight: 600; font-size: 14px; }
+#tipx { flex: none; width: 32px; height: 32px; border-radius: 16px; color: var(--muted); background: rgba(255, 255, 255, .08); }
+.onb { position: fixed; inset: 0; z-index: 80; overflow-y: auto; background: radial-gradient(120% 60% at 0% 0%, rgba(255, 159, 10, .22), transparent 55%), radial-gradient(100% 50% at 100% 100%, rgba(100, 210, 255, .16), transparent 60%), #08080A; }
+.onbin { max-width: 480px; min-height: 100%; margin: 0 auto; padding: calc(40px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; }
+.onb h2 { margin: 0 0 8px; font-size: 28px; line-height: 34px; letter-spacing: -.03em; }
+.onb p { margin: 0 0 20px; color: var(--muted); font-size: 15px; line-height: 20px; }
+.langseg { width: 220px; align-self: center; margin-bottom: 28px; }
+.onb .pick { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px; padding: 16px; border-radius: 22px; text-align: left; background: var(--glass); border: .5px solid var(--gbrd); box-shadow: var(--ghi); }
+.onb .pick.rec { box-shadow: var(--ghi), 0 0 0 1.5px rgba(255, 159, 10, .55); }
+.onb .pick svg { flex: none; width: 30px; height: 30px; color: var(--accent); }
+.onb .pick b { display: block; margin-bottom: 4px; font-size: 18px; }
+.onb .pick > span > span { color: var(--muted); font-size: 14px; line-height: 19px; }
+.onb .pick:active { box-shadow: inset 0 0 0 2px var(--accent); }
+.badge { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 8px; font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: #000; background: var(--accent); vertical-align: middle; }
+.foot2 { margin-top: auto; padding-top: 16px; color: var(--muted); font-size: 13px; text-align: center; }
+@media (max-height: 880px) { .lp { height: 80px; } }
+@media (max-height: 700px) { .lp { height: 58px; padding: 6px 8px; } .lp .n { font-size: 14px; -webkit-line-clamp: 1; } .grid { gap: 6px; } .ens { gap: 6px; margin-top: 6px; } .lhead { min-height: 34px; } .ebtn { height: 34px; } .tabbar { height: 52px; bottom: calc(6px + env(safe-area-inset-bottom, 0px)); } :root { --tabbar: calc(62px + env(safe-area-inset-bottom, 0px)); } .tab { font-size: 10px; } .tab svg { width: 22px; height: 22px; } #bpm { font-size: 34px; } }
+@media (prefers-reduced-motion: reduce) { .lp.editing, .lp.armed, .tipday { animation: none; } }
 </style>
 
 <main>
@@ -296,7 +428,7 @@ select.native { display: none; }
           <button type="button" class="songbtn" data-go="canciones" aria-label="Elegir canción" data-i18n-aria="song.choose"><b id="songtitle">Sin canción guardada</b></button>
           <div class="sub"><button type="button" class="pd meterpd" data-for="meter" aria-haspopup="listbox" aria-expanded="false" aria-label="Compás" data-i18n-aria="meter"><span id="meterlbl">4/4</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><span aria-hidden="true">·</span><span id="status">Detenido</span></div>
         </div>
-        <div class="bpmread"><output id="bpm" aria-label="Tempo" data-i18n-aria="tempo">72</output><span id="bpmunit">BPM</span></div>
+        <div class="bpmread"><output id="bpm" aria-label="Tempo" data-i18n-aria="tempo">72</output><span id="bpmunit">BPM</span><button type="button" class="helpbtn" id="helpbtn" aria-label="Ayuda" data-i18n-aria="help.title">?</button></div>
       </div>
       <select id="meter" class="native" tabindex="-1" aria-hidden="true">
         <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
@@ -333,6 +465,11 @@ select.native { display: none; }
         <div id="hint" hidden></div>
       </div>
 
+      <div class="ens" id="ens">
+        <div class="lhead"><div class="seg" id="bank" role="radiogroup" aria-label="Banco" data-i18n-aria="ens.bank"><button type="button" role="radio" data-b="A" data-i18n="ens.bankA">Banco A</button><button type="button" role="radio" data-b="B" data-i18n="ens.bankB">Banco B</button></div><span class="ctx" id="ensctx"></span><button type="button" class="ebtn" id="ensedit" data-i18n="ens.edit">Editar</button></div>
+        <div class="grid" id="ensgrid" role="group" aria-label="Ensamble" data-i18n-aria="tab.ens"></div>
+      </div>
+
       <div class="live" role="group" aria-label="Control en vivo" data-i18n-aria="live">
         <div class="tiles" id="tiles"></div>
         <div class="transport">
@@ -349,7 +486,8 @@ select.native { display: none; }
 
   <section class="screen" id="tab-ritmo" aria-label="Ritmo" data-i18n-aria="tab.ritmo" hidden>
     <div class="wrap">
-      <h1 data-i18n="tab.ritmo">Ritmo</h1>
+      <h1 data-i18n="tab.ajustes">Ajustes</h1>
+      <div class="seg aseg" role="tablist" aria-label="Ajustes" data-i18n-aria="tab.ajustes"><button type="button" role="tab" data-s="ritmo" aria-selected="true" class="on" data-i18n="tab.ritmo">Ritmo</button><button type="button" role="tab" data-s="sonido" aria-selected="false" data-i18n="tab.sonido">Sonido</button><button type="button" role="tab" data-s="canciones" aria-selected="false" data-i18n="tab.canciones">Canciones</button><button type="button" role="tab" data-s="app" aria-selected="false" data-i18n="tab.app">App</button></div>
       <div class="cap" data-i18n="style">Estilo</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-style" data-i18n="style">Estilo</span><select id="style" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="style" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-style val-style"><span class="pd-val" id="val-style"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
@@ -389,7 +527,8 @@ select.native { display: none; }
 
   <section class="screen" id="tab-sonido" aria-label="Sonido" data-i18n-aria="tab.sonido" hidden>
     <div class="wrap">
-      <h1 data-i18n="tab.sonido">Sonido</h1>
+      <h1 data-i18n="tab.ajustes">Ajustes</h1>
+      <div class="seg aseg" role="tablist" aria-label="Ajustes" data-i18n-aria="tab.ajustes"><button type="button" role="tab" data-s="ritmo" aria-selected="false" data-i18n="tab.ritmo">Ritmo</button><button type="button" role="tab" data-s="sonido" aria-selected="true" class="on" data-i18n="tab.sonido">Sonido</button><button type="button" role="tab" data-s="canciones" aria-selected="false" data-i18n="tab.canciones">Canciones</button><button type="button" role="tab" data-s="app" aria-selected="false" data-i18n="tab.app">App</button></div>
       <div class="cap">Pad</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-key" data-i18n="key">Tonalidad</span><select id="key" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="key" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-key val-key"><span class="pd-val" id="val-key"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
@@ -402,14 +541,28 @@ select.native { display: none; }
       <div class="cap" data-i18n="mix">Mezcla</div>
       <div class="group mix" id="mix"></div>
       <p class="foot" data-i18n="mix.foot">Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar.</p>
-      <div class="cap" data-i18n="struct">Estructura de la canción</div>
-      <div class="group" id="struct">
-        <div class="tabsrow"><div class="seg" role="tablist" aria-label="Estructura de la canción" data-i18n-aria="struct"><button type="button" role="tab" id="t-orden" class="on" aria-selected="true" data-i18n="struct.order">Orden</button><button type="button" role="tab" id="t-partes" aria-selected="false" data-i18n="struct.parts">Partes</button></div></div>
-        <div id="p-orden"><div class="seqbox" id="seq"><button type="button" class="chip add" id="addchip" data-for="addpart" aria-haspopup="listbox" aria-expanded="false" aria-label="Añadir una parte al orden" data-i18n-aria="struct.add.aria"><span data-i18n="struct.add">+ Añadir</span></button></div><select id="addpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
-        <div id="p-partes" hidden><div id="partlist"></div><button type="button" class="row link addrow" id="newrow" data-for="newpart" aria-haspopup="listbox" aria-expanded="false"><span class="lbl" data-i18n="struct.new">+ Nueva parte</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="newpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-app" aria-label="App" data-i18n-aria="tab.app" hidden>
+    <div class="wrap">
+      <h1 data-i18n="tab.ajustes">Ajustes</h1>
+      <div class="seg aseg" role="tablist" aria-label="Ajustes" data-i18n-aria="tab.ajustes"><button type="button" role="tab" data-s="ritmo" aria-selected="false" data-i18n="tab.ritmo">Ritmo</button><button type="button" role="tab" data-s="sonido" aria-selected="false" data-i18n="tab.sonido">Sonido</button><button type="button" role="tab" data-s="canciones" aria-selected="false" data-i18n="tab.canciones">Canciones</button><button type="button" role="tab" data-s="app" aria-selected="true" class="on" data-i18n="tab.app">App</button></div>
+      <div class="cap" data-i18n="center">Pantalla en el centro</div>
+      <div class="group">
+        <div class="row"><div class="seg" id="centerseg" role="radiogroup" aria-label="Pantalla en el centro" data-i18n-aria="center" style="flex:1"><button type="button" role="radio" data-c="pad" data-i18n="tab.pad">Pad</button><button type="button" role="radio" data-c="ens" data-i18n="tab.ens">Ensamble</button></div></div>
       </div>
-      <p class="foot" id="structfoot"></p>
-      <div class="cap" data-i18n="app">App</div>
+      <p class="foot" data-i18n="center.foot">La que más usas. Las pestañas no cambian de lugar.</p>
+      <div class="group" style="margin-top:8px">
+        <div class="row"><span class="lbl" id="lbl-adv"><span data-i18n="adv">Modo avanzado</span><small data-i18n="adv.sub">Banco B y más sonidos en Ensamble</small></span><button class="switch" id="adv" role="switch" aria-checked="false" aria-labelledby="lbl-adv"></button></div>
+      </div>
+      <div class="cap" data-i18n="guide.cap">Ayuda</div>
+      <div class="group">
+        <div class="row"><span class="lbl" id="lbl-tips"><span data-i18n="tips">Consejo al abrir</span><small data-i18n="tips.sub">Un consejo corto cada vez que abres la app</small></span><button class="switch" id="tips" role="switch" aria-checked="true" aria-labelledby="lbl-tips"></button></div>
+        <button type="button" class="row link" id="tourrow"><span class="lbl" data-i18n="tour.again">Repetir la guía rápida</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
+        <button type="button" class="row link" id="helprow"><span class="lbl" data-i18n="help.center">Centro de ayuda</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
+      </div>
+      <div class="cap" data-i18n="app.general">General</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-lang" data-i18n="lang">Idioma</span><select id="lang" class="native" tabindex="-1" aria-hidden="true"><option value="es">Español</option><option value="en">English</option></select><button type="button" class="pd" data-for="lang" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-lang val-lang"><span class="pd-val" id="val-lang"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <button type="button" class="row link" id="version" data-go="version"><span class="lbl" data-i18n="version">Versión</span><span class="val" id="versionval"></span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
@@ -421,9 +574,9 @@ select.native { display: none; }
     </div>
   </section>
 
-  <section class="screen" id="tab-parte" data-parent="sonido" aria-labelledby="ptitle" hidden>
+  <section class="screen" id="tab-parte" data-parent="canciones" aria-labelledby="ptitle" hidden>
     <div class="wrap">
-      <button type="button" class="back" id="pback" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <button type="button" class="back" id="pback" data-go="canciones"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.canciones">Canciones</span></button>
       <h1 id="ptitle"></h1>
       <div class="cap" data-i18n="part.tap">Toca un acorde para añadirlo</div>
       <div class="group">
@@ -437,9 +590,9 @@ select.native { display: none; }
     </div>
   </section>
 
-  <section class="screen" id="tab-version" data-parent="sonido" aria-label="Versión" data-i18n-aria="version" hidden>
+  <section class="screen" id="tab-version" data-parent="app" aria-label="Versión" data-i18n-aria="version" hidden>
     <div class="wrap">
-      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <button type="button" class="back" data-go="app"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.app">App</span></button>
       <h1 data-i18n="version.title">Novedades</h1>
       <div class="group">
         <div class="row"><span class="lbl" data-i18n="version.installed">Versión instalada</span><span class="val" id="vercur"></span></div>
@@ -450,9 +603,9 @@ select.native { display: none; }
     </div>
   </section>
 
-  <section class="screen" id="tab-diag" data-parent="sonido" aria-label="Diagnóstico de audio" data-i18n-aria="diag" hidden>
+  <section class="screen" id="tab-diag" data-parent="app" aria-label="Diagnóstico de audio" data-i18n-aria="diag" hidden>
     <div class="wrap">
-      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <button type="button" class="back" data-go="app"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.app">App</span></button>
       <h1 data-i18n="diag">Diagnóstico de audio</h1>
       <div class="group" id="diaglist"></div>
       <p class="foot" data-i18n="diag.foot">Cómo responde el audio en este equipo desde que abriste la app. Los datos no salen del teléfono: para compartirlos, cópialos y pégalos en un mensaje.</p>
@@ -462,37 +615,81 @@ select.native { display: none; }
 
   <section class="screen" id="tab-canciones" aria-label="Canciones" data-i18n-aria="tab.canciones" hidden>
     <div class="wrap">
-      <h1 data-i18n="tab.canciones">Canciones</h1>
+      <h1 data-i18n="tab.ajustes">Ajustes</h1>
+      <div class="seg aseg" role="tablist" aria-label="Ajustes" data-i18n-aria="tab.ajustes"><button type="button" role="tab" data-s="ritmo" aria-selected="false" data-i18n="tab.ritmo">Ritmo</button><button type="button" role="tab" data-s="sonido" aria-selected="false" data-i18n="tab.sonido">Sonido</button><button type="button" role="tab" data-s="canciones" aria-selected="true" class="on" data-i18n="tab.canciones">Canciones</button><button type="button" role="tab" data-s="app" aria-selected="false" data-i18n="tab.app">App</button></div>
       <div class="save"><input type="text" id="songname" placeholder="Nombre de la canción" aria-label="Nombre de la canción" data-i18n-ph="song.name" data-i18n-aria="song.name"><button id="savesong" data-i18n="save">Guardar</button></div>
       <p class="foot" data-i18n="save.foot">Guarda el tempo, compás, estilo, tono, pad y shaker actuales.</p>
       <div class="cap" data-i18n="mysongs">Mis canciones</div>
       <div class="group songs" id="songs"></div>
       <p class="foot" data-i18n="songs.foot">Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.</p>
+      <div class="cap" data-i18n="struct">Estructura de la canción</div>
+      <div class="group" id="struct">
+        <div class="tabsrow"><div class="seg" role="tablist" aria-label="Estructura de la canción" data-i18n-aria="struct"><button type="button" role="tab" id="t-orden" class="on" aria-selected="true" data-i18n="struct.order">Orden</button><button type="button" role="tab" id="t-partes" aria-selected="false" data-i18n="struct.parts">Partes</button></div></div>
+        <div id="p-orden"><div class="seqbox" id="seq"><button type="button" class="chip add" id="addchip" data-for="addpart" aria-haspopup="listbox" aria-expanded="false" aria-label="Añadir una parte al orden" data-i18n-aria="struct.add.aria"><span data-i18n="struct.add">+ Añadir</span></button></div><select id="addpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
+        <div id="p-partes" hidden><div id="partlist"></div><button type="button" class="row link addrow" id="newrow" data-for="newpart" aria-haspopup="listbox" aria-expanded="false"><span class="lbl" data-i18n="struct.new">+ Nueva parte</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="newpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
+      </div>
+      <p class="foot" id="structfoot"></p>
     </div>
   </section>
 </main>
 
-<nav class="tabbar" role="tablist" aria-label="Secciones" data-i18n-aria="tabbar">
-  <button class="tab" role="tab" data-tab="tocar" aria-selected="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="13" r="10"/><path d="M11 9v8l6-4-6-4Z" fill="currentColor"/></svg><span data-i18n="tab.tocar">Tocar</span></button>
-  <button class="tab" role="tab" data-tab="ritmo" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 13h2M8 8v10M12 5v16M16 9v8M20 11v4M22 13h1"/></svg><span data-i18n="tab.ritmo">Ritmo</span></button>
-  <button class="tab" role="tab" data-tab="sonido" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4v18M13 4v18M20 4v18"/><circle cx="6" cy="16" r="2.4" fill="#161618"/><circle cx="13" cy="9" r="2.4" fill="#161618"/><circle cx="20" cy="14" r="2.4" fill="#161618"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
-  <button class="tab" role="tab" data-tab="canciones" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 7h13M9 13h13M9 19h13"/><circle cx="4.5" cy="7" r="1" fill="currentColor"/><circle cx="4.5" cy="13" r="1" fill="currentColor"/><circle cx="4.5" cy="19" r="1" fill="currentColor"/></svg><span data-i18n="tab.canciones">Canciones</span></button>
+<nav class="tabbar" id="tabbar" role="tablist" aria-label="Secciones" data-i18n-aria="tabbar">
+  <button class="tab" role="tab" data-tab="ajustes" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4v18M13 4v18M20 4v18"/><circle cx="6" cy="16" r="2.6" fill="#1E1E22"/><circle cx="13" cy="9" r="2.6" fill="#1E1E22"/><circle cx="20" cy="14" r="2.6" fill="#1E1E22"/></svg><span data-i18n="tab.ajustes">Ajustes</span></button>
+  <button class="tab" role="tab" data-tab="pad" aria-selected="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3" y="5" width="20" height="16" rx="3"/><path d="M9 5v10M14 5v10M19 5v10M9 15v6M14 15v6M19 15v6"/></svg><span data-i18n="tab.pad">Pad</span></button>
+  <button class="tab" role="tab" data-tab="ens" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="10" y="3" width="6" height="6" rx="1.5"/><rect x="17" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/><rect x="17" y="10" width="6" height="6" rx="1.5"/><rect x="3" y="17" width="6" height="6" rx="1.5"/><rect x="10" y="17" width="6" height="6" rx="1.5"/><rect x="17" y="17" width="6" height="6" rx="1.5"/></svg><span data-i18n="tab.ens">Ensamble</span></button>
 </nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheettitle"><div class="grab" aria-hidden="true"></div><div id="sheetbody"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="coach" id="coach" hidden><div class="ring" id="ring"></div><div class="ccard" id="ccard" role="dialog" aria-labelledby="ctitle"><div class="cstep" id="cstep"></div><h2 id="ctitle"></h2><p id="ctext"></p><div class="cbtns"><button type="button" id="cskip" data-i18n="tour.skip">Omitir</button><button type="button" class="cnext" id="cnext"></button></div></div></div>
+<div class="tipday" id="tipday" role="status" hidden><span aria-hidden="true">💡</span><span id="tiptext"></span><button type="button" id="tipmore" data-i18n="tip.more">Más</button><button type="button" id="tipx" aria-label="Cerrar" data-i18n-aria="close">✕</button></div>
+<div class="onb" id="onb" hidden>
+  <div class="onbin">
+    <div class="seg langseg" id="onblang" role="radiogroup" aria-label="Idioma" data-i18n-aria="lang"><button type="button" role="radio" data-l="es">Español</button><button type="button" role="radio" data-l="en">English</button></div>
+    <h2 data-i18n="onb.title">¿Cómo quieres empezar?</h2>
+    <p data-i18n="onb.sub">Elige lo que más vas a usar. Lo demás queda a un toque.</p>
+    <button type="button" class="pick rec" data-c="pad"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="20" height="16" rx="3"/><path d="M9 5v10M14 5v10M19 5v10M9 15v6M14 15v6M19 15v6"/></svg><span><b><span data-i18n="tab.pad">Pad</span> <em class="badge" data-i18n="onb.rec">Recomendado</em></b><span data-i18n="onb.pad">Si quieres algo sencillo, para tocar solo o en grupo: pad, shaker y clic.</span></span></button>
+    <button type="button" class="pick" data-c="ens"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="10" y="3" width="6" height="6" rx="1.5"/><rect x="17" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/><rect x="17" y="10" width="6" height="6" rx="1.5"/><rect x="3" y="17" width="6" height="6" rx="1.5"/><rect x="10" y="17" width="6" height="6" rx="1.5"/><rect x="17" y="17" width="6" height="6" rx="1.5"/></svg><span><b data-i18n="tab.ens">Ensamble</b><span data-i18n="onb.ens">Para combinaciones más completas: remates de batería, platillos y otros sonidos.</span></span></button>
+    <div class="foot2" data-i18n="onb.foot">Empiezas en modo sencillo. Todo se cambia luego en Ajustes › App.</div>
+  </div>
+</div>
 
 <script>
 (() => {
-  // A screen with data-parent (Versión, a part of the song) opens inside its tab: the tab bar keeps that tab selected.
+  // Two live views share one screen (#tab-tocar): Pad and Ensamble. Ajustes is four sections (Ritmo, Sonido,
+  // Canciones, App) under one tab, which reopens on the last one. A screen with data-parent (Versión, a part
+  // of the song) opens inside its section. 'tocar' means the live view last seen.
+  const SETS = ['ritmo', 'sonido', 'canciones', 'app'];
+  let live = 'pad', lastSet = 'ritmo';
   const show = (name) => {
-    let tab = name;
+    if (name === 'tocar') name = live;
+    if (name === 'ajustes') name = lastSet;
+    let screen = name;
+    if (name === 'pad' || name === 'ens') { screen = 'tocar'; live = name; document.getElementById('tab-tocar').dataset.view = name; }
+    let tab = screen === 'tocar' ? live : screen;
     document.querySelectorAll('.screen').forEach(s => {
-      s.hidden = s.id !== 'tab-' + name;
-      if (!s.hidden && s.dataset.parent) { s.scrollTop = 0; tab = s.dataset.parent; }
+      s.hidden = s.id !== 'tab-' + screen;
+      if (!s.hidden && s.dataset.parent) { s.scrollTop = 0; tab = s.dataset.parent === 'tocar' ? live : s.dataset.parent; }
     });
+    if (SETS.includes(tab)) {
+      lastSet = tab;
+      document.querySelectorAll('.aseg button').forEach(b => { const on = b.dataset.s === tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
+      tab = 'ajustes';
+    }
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
-    try { localStorage.setItem('acomp-tab', tab); } catch (e) {}
+    try { localStorage.setItem('acomp-tab', tab === 'ajustes' ? lastSet : live); } catch (e) {}
+    document.dispatchEvent(new CustomEvent('acomp-view', { detail: screen === 'tocar' ? live : 'ajustes' }));
   };
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
+  document.querySelectorAll('.aseg button').forEach(b => b.addEventListener('click', () => show(b.dataset.s)));
+  // Tab order: Ajustes, the centre screen the musician chose, the other one. It never moves on its own.
+  window.acompOrder = (center) => {
+    const bar = document.getElementById('tabbar'), other = center === 'ens' ? 'pad' : 'ens';
+    for (const k of ['ajustes', center, other]) bar.appendChild(bar.querySelector(`[data-tab="${k}"]`));
+  };
+  window.acompLive = () => live;
   document.getElementById('songs').addEventListener('click', (e) => { if (e.target.closest('.songload')) show('tocar'); });
 
   // iOS-style pull-down menus over hidden native selects. The engine keeps using the selects:
@@ -550,7 +747,7 @@ select.native { display: none; }
     layer.appendChild(menu); document.body.appendChild(layer);
     // Place under the button, right-aligned; flip above when there is no room; never under the tab bar.
     const r = btn.getBoundingClientRect(), vw = innerWidth;
-    const bottomLimit = innerHeight - (document.querySelector('.tabbar')?.offsetHeight || 0) - 8, topLimit = 12;
+    const bar = document.querySelector('.tabbar'), bottomLimit = (bar ? bar.getBoundingClientRect().top : innerHeight) - 8, topLimit = 12;
     const h = Math.min(menu.scrollHeight, bottomLimit - topLimit);
     menu.style.maxHeight = h + 'px';
     menu.style.right = Math.min(Math.max(16, vw - r.right), vw - menu.offsetWidth - 16) + 'px';
@@ -590,7 +787,7 @@ select.native { display: none; }
   document.querySelectorAll('.screen').forEach(sc => sc.addEventListener('scroll', () => close(false), { passive: true }));
   let start = 'tocar';
   try { start = localStorage.getItem('acomp-tab') || 'tocar'; } catch (e) {}
-  if (!document.getElementById('tab-' + start)) start = 'tocar';
+  if (start !== 'pad' && start !== 'ens' && !SETS.includes(start)) start = 'tocar';
   show(start);
 })();
 </script>
@@ -810,15 +1007,15 @@ select.native { display: none; }
       'mic.read': (det, set) => `Detecto <b>${det}</b> BPM · marcado ${set}`, 'mic.fast': 'Te estás acelerando', 'mic.slow': 'Te estás frenando',
       'mic.adjusted': ' · ajusté el tempo', 'mic.suggest': ' · activa "La base me sigue" para que la base te siga', 'mic.ok': 'Vas a tempo.',
       key: 'Tonalidad', 'key.opt': 'Tono', 'pad.sound': 'Sonido del pad', 'pad.fifths': 'Solo tónica y quinta', 'pad.move': 'Movimiento', 'pad.rich': 'Riqueza', names: 'Nombres de notas',
-      'pad.foot': 'Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Tocar.',
+      'pad.foot': 'Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Pad.',
       mix: 'Mezcla', 'ch.shaker': 'Shaker', 'ch.drums': 'Batería', 'ch.pad': 'Pad', 'ch.click': 'Clic',
       'ch.mute': (c) => `Encender o apagar ${c}`, 'ch.vol': (c) => `Volumen ${c}`,
       pan: 'Paneo', 'pan.center': 'Todo al centro', 'pan.aria': (c) => `Lado de ${c}`, 'side.L': 'Izq', 'side.C': 'Centro', 'side.R': 'Der', 'tag.L': 'IZQ', 'tag.R': 'DER',
       'pan.foot': 'Centro suena por los dos lados. Con el adaptador USB-C y un cable de 3.5 mm a dos plugs, cada lado entra a su propio canal de la mezcladora.',
-      'mix.foot': 'Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar. Clic es el metrónomo. En iPhone quita el modo silencio si no suena.',
+      'mix.foot': 'Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Pad o Ensamble. Clic es el metrónomo. En iPhone quita el modo silencio si no suena.',
       struct: 'Estructura de la canción', 'struct.order': 'Orden', 'struct.parts': 'Partes', 'struct.add': '+ Añadir', 'struct.add.aria': 'Añadir una parte al orden', 'struct.new': '+ Nueva parte',
       'struct.foot.order': 'El orden en que suenan las partes. Toca × para quitar una; Añadir pone una parte al final.',
-      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. En Tocar se ven bajo el nombre de la parte; con el pad en Auto cambia de acorde cuando termina cada uno. Para pasar sola de parte en parte, activa Ritmo › Avanzar por la canción.',
+      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. En Pad y Ensamble se ven bajo el nombre de la parte; con el pad en Auto cambia de acorde cuando termina cada uno. Para pasar sola de parte en parte, activa Ritmo › Avanzar por la canción.',
       'seq.remove': (p) => 'Quitar ' + p, 'bars.short': 'c.', 'bars.n': (n) => n === 1 ? '1 compás' : n === .5 ? 'medio compás' : `${fmtBars(n)} compases`,
       'dur.half': 'medio', 'dur.one': 'compás', 'dur.many': 'compases',
       'part.tap': 'Toca un acorde para añadirlo', 'part.ask': '¿cuántos compases?', cancel: 'Cancelar', 'part.sounds': 'Así suena', 'part.nochords': 'sin acordes',
@@ -833,6 +1030,71 @@ select.native { display: none; }
       'songs.foot': 'Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.',
       'songs.empty': 'Todavía no hay canciones. Ajusta tempo, compás, estilo y tono, escribe el nombre y pulsa Guardar.',
       del: 'Borrar', 'del.aria': (name) => 'Borrar ' + name,
+      // 2.0: three tabs, Ensamble, first launch, guide and help. Help texts: 15 words at most, plain musical words.
+      'tab.ajustes': 'Ajustes', 'tab.pad': 'Pad', 'tab.ens': 'Ensamble', 'tab.app': 'App', 'app.general': 'General',
+      center: 'Pantalla en el centro', 'center.foot': 'La que más usas. Las pestañas no cambian de lugar.',
+      adv: 'Modo avanzado', 'adv.sub': 'Banco B y más sonidos en Ensamble', 'adv.on': 'Modo avanzado: banco B en Ensamble.', 'adv.off': 'Modo sencillo: lo esencial.',
+      'guide.cap': 'Ayuda', tips: 'Consejo al abrir', 'tips.sub': 'Un consejo corto cada vez que abres la app',
+      'tips.on': 'Verás un consejo corto al abrir la app.', 'tips.off': 'Listo, sin consejos al abrir. La ayuda sigue en el botón ?.',
+      'tour.again': 'Repetir la guía rápida', 'help.center': 'Centro de ayuda', 'help.title': 'Ayuda', close: 'Cerrar', done: 'Listo',
+      'onb.title': '¿Cómo quieres empezar?', 'onb.sub': 'Elige lo que más vas a usar. Lo demás queda a un toque.', 'onb.rec': 'Recomendado',
+      'onb.pad': 'Si quieres algo sencillo, para tocar solo o en grupo: pad, shaker y clic.',
+      'onb.ens': 'Para combinaciones más completas: remates de batería, platillos y otros sonidos.',
+      'onb.foot': 'Empiezas en modo sencillo. Todo se cambia luego en Ajustes › App.',
+      'tour.skip': 'Omitir', 'tour.next': 'Siguiente', 'tour.start': 'Empezar', 'tour.ok': 'Entendido', 'tour.step': (n, m) => `PASO ${n} DE ${m}`, 'tour.one': 'AYUDA',
+      'tour.end.pad': 'Dale ▶ para escuchar el Pad.', 'tour.end.ens': 'Dale ▶ y prueba los botones de Ensamble.',
+      'tip.more': 'Más', 'tip.closed': 'Puedes apagar los consejos en Ajustes › App.',
+      'help.why': 'De lo básico a lo avanzado. "Muéstramelo" te lo señala en pantalla.', 'help.tour': '▶ Repetir la guía rápida', 'help.show': 'Muéstramelo',
+      'help.foot': 'Los consejos al abrir se apagan en Ajustes › App.', 'lvl.b': 'BÁSICO', 'lvl.m': 'INTERMEDIO', 'lvl.a': 'AVANZADO',
+      'play.padon': 'Encendí el Pad para que suene algo. Puedes cambiarlo abajo.',
+      'ens.bank': 'Banco', 'ens.bankA': 'Banco A', 'ens.bankB': 'Banco B', 'ens.edit': 'Editar', 'ens.done': 'Listo',
+      'type.hit': 'Golpe', 'type.loop': 'Loop', 'type.bed': 'Fondo',
+      'ens.k.hit': 'suena una vez', 'ens.k.cut': 'calla la batería', 'ens.k.loop': 'se repite', 'ens.k.armed': 'próximo compás…', 'ens.k.playing': 'sonando',
+      'ens.k.stopping': 'se detiene…', 'ens.k.bed': (k) => 'fondo en ' + k, 'ens.ctx': (k) => 'Fondos en ' + k + ' · golpes y loops a tiempo',
+      'ens.empty': 'Toca Editar para añadir un sonido aquí.', 'ens.slot': 'Botón vacío',
+      'ens.loop.play': 'Los loops entran a tiempo con la canción: dale ▶ y luego tócalo.', 'ens.bed.play': 'Listo. Dale ▶ para escuchar el fondo.',
+      'ens.cut.need': 'Corte calla la batería un compás. Enciende Batería y dale ▶.',
+      'ens.edit.hint': 'Toca un botón para cambiarlo, o + para sumar uno. Toca Listo al final.',
+      'ens.change': 'Cambiar sonido', 'ens.add': 'Añadir sonido', 'ens.pick.why': 'Golpe suena una vez. Loop se repite. Fondo se queda sonando.', 'ens.remove': 'Quitar este sonido',
+      guide: {
+        tour: {
+          play: ['Empieza aquí', '▶ empieza y para. Los cambios entran en el siguiente compás, sin cortar.'],
+          tiles: ['Tocar enciende, mantener configura', 'Toca para encender o apagar. Mantén presionado para elegir el sonido.'],
+          map: ['Las partes de la canción', 'Toca una parte para ir ahí. Mantenla para ver sus acordes.'],
+          pad: ['Tu pad', 'Desliza para cambiar la tonalidad. Auto sigue la canción; Manual sigue tus dedos.'],
+          ens: ['Ensamble', 'Golpe suena una vez. Loop se repite. Fondo se queda sonando.'],
+          tabs: ['Tus pantallas', (c, o) => `Ajustes a la izquierda, ${c} en el centro y ${o} a la derecha.`],
+          help: ['Si te pierdes', '¿Dudas? Toca ? y te mostramos cada cosa paso a paso.']
+        },
+        tips: [
+          ['Mantén una parte del mapa para ver y editar sus acordes.', 'Acordes por parte', 'Mantén presionada cualquier parte del mapa para ver sus acordes y cambiarlos.'],
+          ['Mantén un canal para configurarlo sin ir a Ajustes.', 'Configurar un canal', 'Mantén presionado Shaker, Batería, Pad o Clic para cambiar su sonido.'],
+          ['Siguiente cambia de parte justo al terminar el compás.', 'Cambiar de parte', 'Siguiente pasa a la próxima parte al terminar el compás.'],
+          ['Remate necesita la batería encendida.', 'Remate', 'Remate toca un redoble de batería. Primero enciende Batería.'],
+          ['Arrastra el dial de tonalidad hacia los lados.', 'Cambiar tonalidad', 'En Pad, desliza el dial. Al soltarlo, el pad cambia de nota.'],
+          ['En Ensamble, toca Editar para elegir tus propios sonidos.', 'Armar tu ensamble', 'Toca Editar: los botones tiemblan, tocas uno para cambiarlo y + para añadir.']
+        ],
+        help: [
+          { h: 'Lo básico', it: [
+            ['¿Cómo empiezo a tocar?', 'Toca ▶. Primero suena el Pad. Toca Shaker, Batería o Clic para sumarlos.', 'Empezar', 'Toca ▶ para arrancar y ■ para detener.'],
+            ['Encender y configurar canales', 'Toca para encender o apagar. Mantén presionado para cambiar estilo o sonido.', 'Canales', 'Toca para encender, mantén para configurar.'],
+            ['Cambiar de canción y tempo', 'Toca el título para cambiar de canción. Usa −/+ para el tempo.', 'Canción y tempo', 'El título abre tus canciones; el número grande es el tempo.'],
+            ['Moverme por la canción', 'Siguiente pasa a la próxima parte. También puedes tocar el mapa.', 'Mapa', 'Toca una parte para ir a ella en el próximo compás.']] },
+          { h: 'Pad', it: [
+            ['Elegir la tonalidad', 'Arrastra el dial hacia los lados o tócalo para ver la lista.', 'Dial', 'Arrastra hacia los lados para cambiar de tonalidad.'],
+            ['Auto o Manual', 'Auto: el pad sigue los acordes. Manual: tú eliges el acorde.', 'Auto y Manual', 'Elige si el pad sigue la canción o tus dedos.'],
+            ['Tónica + 5ª', 'Encendido, suena una sola nota base. Funciona con cualquier canción.', 'Tónica + 5ª', 'La forma más segura de acompañar sin saber los acordes.']] },
+          { h: 'Ensamble', it: [
+            ['Golpe, Loop y Fondo', 'Golpe suena una vez. Loop se repite hasta que lo tocas. Fondo se queda sonando.', 'Tipos de botón', 'Naranja: golpe. Verde: loop. Azul: fondo.'],
+            ['Cambiar o añadir sonidos', 'Toca Editar y luego un botón para cambiar su sonido, o + para sumar.', 'Editar', 'Entra al modo edición desde aquí.'],
+            ['¿Por qué se calló un loop?', 'Suena un loop a la vez. El nuevo entra y el anterior se calla.'],
+            ['¿Por qué cambió el Pad?', 'Un Fondo usa el canal Pad: elegir otro fondo cambia su sonido.']] },
+          { h: 'Avanzado', it: [
+            ['Modo avanzado', 'En Ajustes › App: banco B con más golpes, loops y fondos.'],
+            ['Clic solo para mí', 'El clic sale solo por la izquierda. Así solo tú lo oyes con audífonos.', 'Clic IZQ', 'Mantén Clic para elegir la fuerza de cada tiempo.'],
+            ['Remate y Corte', 'Remate toca un redoble de batería. Corte calla la batería un compás.', 'Remate', 'Necesita la batería encendida.']] }
+        ]
+      },
       groups: { 'Worship': 'Worship', 'Oración y ministración': 'Oración y ministración', 'Alabanza': 'Alabanza', 'Himnos y gospel': 'Himnos y gospel' }
     },
     en: {
@@ -871,15 +1133,15 @@ select.native { display: none; }
       'mic.read': (det, set) => `Hearing <b>${det}</b> BPM · set ${set}`, 'mic.fast': 'You are speeding up', 'mic.slow': 'You are slowing down',
       'mic.adjusted': ' · tempo adjusted', 'mic.suggest': ' · turn on "Backing follows me" so the backing follows you', 'mic.ok': 'You are on tempo.',
       key: 'Key', 'key.opt': 'Key', 'pad.sound': 'Pad sound', 'pad.fifths': 'Root and fifth only', 'pad.move': 'Movement', 'pad.rich': 'Richness', names: 'Note names',
-      'pad.foot': 'Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed. Root + 5th and Manual mode are on Play.',
+      'pad.foot': 'Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed. Root + 5th and Manual mode are on Pad.',
       mix: 'Mix', 'ch.shaker': 'Shaker', 'ch.drums': 'Drums', 'ch.pad': 'Pad', 'ch.click': 'Click',
       'ch.mute': (c) => `Turn ${c} on or off`, 'ch.vol': (c) => `${c} volume`,
       pan: 'Pan', 'pan.center': 'All centred', 'pan.aria': (c) => `${c} side`, 'side.L': 'Left', 'side.C': 'Centre', 'side.R': 'Right', 'tag.L': 'L', 'tag.R': 'R',
       'pan.foot': 'Centre plays on both sides. With the USB-C adapter and a 3.5 mm to two-plug cable, each side goes into its own mixer channel.',
-      'mix.foot': 'Tap a channel name to turn it on or off; you can also do it from Play. Click is the metronome. On iPhone, turn off silent mode if there is no sound.',
+      'mix.foot': 'Tap a channel name to turn it on or off; you can also do it from Pad or Ensemble. Click is the metronome. On iPhone, turn off silent mode if there is no sound.',
       struct: 'Song structure', 'struct.order': 'Order', 'struct.parts': 'Parts', 'struct.add': '+ Add', 'struct.add.aria': 'Add a part to the order', 'struct.new': '+ New part',
       'struct.foot.order': 'The order the parts play in. Tap × to remove one; Add puts a part at the end.',
-      'struct.foot.parts': 'Each part has its chords and how long each one lasts. Play shows them under the part name; with the pad on Auto it changes chord as each one ends. To move from part to part on its own, turn on Rhythm › Move through the song.',
+      'struct.foot.parts': 'Each part has its chords and how long each one lasts. Pad and Ensemble show them under the part name; with the pad on Auto it changes chord as each one ends. To move from part to part on its own, turn on Rhythm › Move through the song.',
       'seq.remove': (p) => 'Remove ' + p, 'bars.short': 'bars', 'bars.n': (n) => n === 1 ? '1 bar' : n === .5 ? 'half a bar' : `${fmtBars(n)} bars`,
       'dur.half': 'half', 'dur.one': 'bar', 'dur.many': 'bars',
       'part.tap': 'Tap a chord to add it', 'part.ask': 'how many bars?', cancel: 'Cancel', 'part.sounds': 'How it goes', 'part.nochords': 'no chords',
@@ -894,6 +1156,70 @@ select.native { display: none; }
       'songs.foot': 'Tap a song to load it. Tap ✕ twice to delete it.',
       'songs.empty': 'No songs yet. Set the tempo, time signature, style and key, type a name and tap Save.',
       del: 'Delete', 'del.aria': (name) => 'Delete ' + name,
+      'tab.ajustes': 'Settings', 'tab.pad': 'Pad', 'tab.ens': 'Ensemble', 'tab.app': 'App', 'app.general': 'General',
+      center: 'Center screen', 'center.foot': 'The one you use most. Tabs never change place.',
+      adv: 'Advanced mode', 'adv.sub': 'Bank B and more sounds in Ensemble', 'adv.on': 'Advanced mode: bank B in Ensemble.', 'adv.off': 'Simple mode: the essentials.',
+      'guide.cap': 'Help', tips: 'Tip at launch', 'tips.sub': 'A short tip each time you open the app',
+      'tips.on': 'You will see a short tip when you open the app.', 'tips.off': 'Done, no tips at launch. Help is still on the ? button.',
+      'tour.again': 'Replay the quick tour', 'help.center': 'Help center', 'help.title': 'Help', close: 'Close', done: 'Done',
+      'onb.title': 'Your first step', 'onb.sub': 'Pick what you will use most. Everything else is one tap away.', 'onb.rec': 'Recommended',
+      'onb.pad': 'If you want something simple, solo or with a band: pad, shaker and click.',
+      'onb.ens': 'For richer combinations: drum fills, cymbals and other sounds.',
+      'onb.foot': 'You start in simple mode. Change anything later in Settings › App.',
+      'tour.skip': 'Skip', 'tour.next': 'Next', 'tour.start': 'Start', 'tour.ok': 'Got it', 'tour.step': (n, m) => `STEP ${n} OF ${m}`, 'tour.one': 'HELP',
+      'tour.end.pad': 'Press ▶ to hear the Pad.', 'tour.end.ens': 'Press ▶ and try the Ensemble buttons.',
+      'tip.more': 'More', 'tip.closed': 'You can turn tips off in Settings › App.',
+      'help.why': 'From basic to advanced. "Show me" points to it on screen.', 'help.tour': '▶ Replay the quick tour', 'help.show': 'Show me',
+      'help.foot': 'Turn off tips at launch in Settings › App.', 'lvl.b': 'BASIC', 'lvl.m': 'INTERMEDIATE', 'lvl.a': 'ADVANCED',
+      'play.padon': 'I turned on the Pad so something plays. You can change it below.',
+      'ens.bank': 'Bank', 'ens.bankA': 'Bank A', 'ens.bankB': 'Bank B', 'ens.edit': 'Edit', 'ens.done': 'Done',
+      'type.hit': 'Hit', 'type.loop': 'Loop', 'type.bed': 'Bed',
+      'ens.k.hit': 'plays once', 'ens.k.cut': 'silences the drums', 'ens.k.loop': 'repeats', 'ens.k.armed': 'next bar…', 'ens.k.playing': 'playing',
+      'ens.k.stopping': 'stopping…', 'ens.k.bed': (k) => 'bed in ' + k, 'ens.ctx': (k) => 'Beds in ' + k + ' · hits and loops in time',
+      'ens.empty': 'Tap Edit to add a sound here.', 'ens.slot': 'Empty button',
+      'ens.loop.play': 'Loops come in on time with the song: press ▶, then tap it.', 'ens.bed.play': 'Done. Press ▶ to hear the bed.',
+      'ens.cut.need': 'Cut silences the drums for a bar. Turn on Drums and press ▶.',
+      'ens.edit.hint': 'Tap a button to change it, or + to add one. Tap Done when finished.',
+      'ens.change': 'Change sound', 'ens.add': 'Add a sound', 'ens.pick.why': 'Hit plays once. Loop repeats. Bed keeps ringing.', 'ens.remove': 'Remove this sound',
+      guide: {
+        tour: {
+          play: ['Start here', '▶ starts and stops. Changes come in on the next bar, smoothly.'],
+          tiles: ['Tap turns on, hold sets up', 'Tap to turn on or off. Hold to choose the sound.'],
+          map: ['The song parts', 'Tap a part to go there. Hold it to see its chords.'],
+          pad: ['Your pad', 'Slide to change the key. Auto follows the song; Manual follows your fingers.'],
+          ens: ['Ensemble', 'Hit plays once. Loop repeats. Bed keeps ringing.'],
+          tabs: ['Your screens', (c, o) => `Settings on the left, ${c} in the center and ${o} on the right.`],
+          help: ['If you get lost', 'Questions? Tap ? and we will show you each thing, step by step.']
+        },
+        tips: [
+          ['Hold a part on the map to see and edit its chords.', 'Chords per part', 'Hold any part on the map to see its chords and change them.'],
+          ['Hold a channel to set it up without going to Settings.', 'Setting up a channel', 'Hold Shaker, Drums, Pad or Click to change its sound.'],
+          ['Next changes part right when the bar ends.', 'Changing part', 'Next moves to the next part when the bar ends.'],
+          ['Fill needs the drums on.', 'Fill', 'Fill plays a drum roll. Turn on Drums first.'],
+          ['Drag the key dial sideways.', 'Changing key', 'In Pad, slide the dial. When you let go, the pad changes note.'],
+          ['In Ensemble, tap Edit to pick your own sounds.', 'Build your ensemble', 'Tap Edit: buttons jiggle, tap one to change it and + to add.']
+        ],
+        help: [
+          { h: 'The basics', it: [
+            ['How do I start?', 'Tap ▶. The Pad plays first. Tap Shaker, Drums or Click to add them.', 'Start', 'Tap ▶ to start and ■ to stop.'],
+            ['Turning channels on and setting them up', 'Tap to turn on or off. Hold to change style or sound.', 'Channels', 'Tap to turn on, hold to set up.'],
+            ['Changing song and tempo', 'Tap the title to change song. Use −/+ for the tempo.', 'Song and tempo', 'The title opens your songs; the big number is the tempo.'],
+            ['Moving through the song', 'Next moves to the next part. You can also tap the map.', 'Map', 'Tap a part to jump to it on the next bar.']] },
+          { h: 'Pad', it: [
+            ['Choosing the key', 'Drag the dial sideways or tap it to see the list.', 'Dial', 'Drag sideways to change key.'],
+            ['Auto or Manual', 'Auto: the pad follows the chords. Manual: you pick the chord.', 'Auto and Manual', 'Choose whether the pad follows the song or your fingers.'],
+            ['Root + 5th', 'When on, one base note plays. It works with any song.', 'Root + 5th', 'The safest way to accompany without knowing the chords.']] },
+          { h: 'Ensemble', it: [
+            ['Hit, Loop and Bed', 'Hit plays once. Loop repeats until you tap it. Bed keeps ringing.', 'Button types', 'Orange: hit. Green: loop. Blue: bed.'],
+            ['Changing or adding sounds', 'Tap Edit, then a button to change its sound, or + to add one.', 'Edit', 'Enter edit mode from here.'],
+            ['Why did a loop stop?', 'One loop plays at a time. The new one comes in, the old one stops.'],
+            ['Why did the Pad change?', 'A Bed uses the Pad channel: picking another bed changes its sound.']] },
+          { h: 'Advanced', it: [
+            ['Advanced mode', 'In Settings › App: bank B with more hits, loops and beds.'],
+            ['Click only for me', 'The click plays only on the left. So only you hear it in headphones.', 'Click L', 'Hold Click to set the accent of each beat.'],
+            ['Fill and Cut', 'Fill plays a drum roll. Cut silences the drums for one bar.', 'Fill', 'Needs the drums on.']] }
+        ]
+      },
       groups: { 'Worship': 'Worship', 'Oración y ministración': 'Prayer & ministry', 'Alabanza': 'Praise', 'Himnos y gospel': 'Hymns & gospel' }
     }
   };
@@ -911,14 +1237,14 @@ select.native { display: none; }
     $('play').setAttribute('aria-label', T(playing ? 'stop' : 'play'));
     if (!micOn) $('micmsg').textContent = T('mic.hint');
     setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); buildWin(); drawTiles(); buildMix();
-    renderSeq(); renderParts(); tabTo(structTab); drawPos(); drawPart(); renderSongs(); renderVersion(); buildBeats();
+    renderSeq(); renderParts(); tabTo(structTab); drawPos(); drawPart(); renderSongs(); renderVersion(); buildBeats(); applyLang2();
   }
 
   // ---------- Version ----------
   // tools/build.py fills CHANGELOG from src/changelog.json (newest first) and BUILD with the content hash
   // that also names the service worker's cache, so what the screen shows is what is cached offline.
-  const CHANGELOG = [{"version": "1.9.0", "date": "2026-11-24", "es": ["Los acordes de cada parte se ven en Tocar, bajo el nombre de la parte. Mientras suena, el acorde en que va la canción se ilumina, también en Manual, para que sepas cuál tocar.", "Toca esos acordes para cambiarlos: se abre el editor de esa parte y ‹ Tocar te devuelve.", "Si el pad no sigue los acordes (Manual o Tónica + 5ª), aparece Usar acordes: un toque pone el pad en Auto con acordes completos.", "La sección Micrófono de Ritmo se oculta por ahora: si el micrófono oye la base, decía que ibas a tempo aunque no fuera así. Volverá cuando funcione en vivo."], "en": ["Each part's chords show on Play, under the part name. While it plays, the chord the song is on lights up, also in Manual, so you know which one to play.", "Tap those chords to change them: that part's editor opens and ‹ Play takes you back.", "If the pad does not follow the chords (Manual or Root + 5th), Use chords appears: one tap puts the pad on Auto with full chords.", "The Microphone section in Rhythm is hidden for now: when the microphone heard the backing, it said you were on tempo even when you were not. It will come back once it works live."]}, {"version": "1.8.0", "date": "2026-11-22", "es": ["Estadísticas anónimas (Sonido › App): la app cuenta cuántas veces se abre, qué estilos y pads suenan y cuánto se toca, sin cookies ni datos personales, para saber qué mejorar. Se apagan con un toque y tus canciones nunca salen del teléfono."], "en": ["Anonymous statistics (Sound › App): the app counts how often it is opened, which styles and pads play and for how long, with no cookies or personal data, to learn what to improve. One tap turns them off, and your songs never leave the phone."]}, {"version": "1.7.0", "date": "2026-11-08", "es": ["Sonido más estable en Android y computadoras: la app pide un búfer de audio más amplio, el ritmo viejo sigue sonando hasta que el nuevo está listo (sin huecos al cambiar tempo o parte, ni al volver de otra app) y los acordes del pad se preparan aparte, sin frenar la página.", "Un limitador final evita que la suma de canales, clic incluido, pase del máximo.", "La app arranca sencilla: pad en Manual con Tónica + 5ª, la parte elegida se repite y el remate automático viene apagado. Para recorrer la canción sola, enciende Ritmo › Avanzar por la canción. Las canciones guardadas recuerdan este ajuste.", "Clic con fuerza por pulso: en Ritmo › Clic toca cada pulso para pasar por fuerte, normal, suave o en silencio.", "Shaker pequeño menos brillante y nuevo ajuste Ritmo › Tono de la percusión (Suave, Normal, Brillante).", "Los pads ya no llevan subgraves bajo 35 Hz ni agudos sobre 12 kHz, que no suman y pueden hacer sonar feo un parlante pequeño.", "Sonido › App › Diagnóstico de audio muestra cómo responde el audio en tu equipo y permite copiar esos datos para compartirlos."], "en": ["Steadier sound on Android and computers: the app asks for a larger audio buffer, the old rhythm keeps playing until the new one is ready (no gaps when you change tempo or part, or come back from another app), and pad chords are prepared on the side without stalling the page.", "A final limiter keeps the sum of the channels, click included, from going over full scale.", "The app starts simple: pad in Manual with Root + 5th, the chosen part repeats and auto fill is off. To move through the song on its own, turn on Rhythm › Move through the song. Saved songs remember this setting.", "Click with a level per beat: in Rhythm › Click, tap each beat to step through strong, normal, soft or silent.", "The small shaker is less bright, and there is a new Rhythm › Percussion tone setting (Soft, Normal, Bright).", "Pads no longer carry sub-bass below 35 Hz or highs above 12 kHz, which add nothing and can make a small speaker sound rough.", "Sound › App › Audio diagnostics shows how the audio is coping on your device and lets you copy that data to share it."]}, {"version": "1.6.0", "date": "2026-10-27", "es": ["Tocar nuevo: tempo arriba, la parte que suena con su mapa de la canción, el selector de pad, un dial de tonalidad que se desliza y la ventana de acordes con colores por función (reposo, se aleja, tensión).", "Estructura de la canción en Sonido: Orden (qué partes y en qué orden) y Partes (los acordes de cada una, de medio compás a 4 compases). La app pasa sola a la parte siguiente y el pad cambia de acorde a tiempo. Partes nuevas: Pre-coro, Interludio, Instrumental, Tag, Vamp y Outro.", "Modo Manual: el pad no sigue la canción y tú eliges el acorde. Mantén uno y toca otro para sumar hasta tres; tocar el único que suena lo silencia.", "Canal Clic (metrónomo) y paneo: cada canal puede ir a la izquierda, al centro o a la derecha (Sonido › Mezcla › Paneo), para mandar cada lado a un canal de la mezcladora.", "Al abrir esta versión solo queda encendido el Pad; Shaker, Batería y Clic se encienden desde Tocar. Remate se apaga cuando la batería está apagada.", "Las canciones guardan su estructura y sus acordes; las que ya tenías cargan con una estructura de ejemplo."], "en": ["New Play screen: tempo on top, the playing part with a song map, the pad picker, a key dial you can swipe and a chord window coloured by function (rest, moves away, tension).", "Song structure in Sound: Order (which parts, in what order) and Parts (each part's chords, from half a bar to 4 bars). The app moves on to the next part by itself and the pad changes chord in time. New parts: Pre-chorus, Interlude, Instrumental, Tag, Vamp and Outro.", "Manual mode: the pad does not follow the song and you pick the chord. Hold one and tap another to stack up to three; tapping the only one playing silences it.", "Click channel (metronome) and pan: each channel can go left, centre or right (Sound › Mix › Pan), to send each side to its own mixer channel.", "When you open this version only the Pad is on; Shaker, Drums and Click turn on from Play. Fill is off while the drums are off.", "Songs save their structure and chords; the ones you already had load with an example structure."]}, {"version": "1.5.2", "date": "2026-10-27", "es": ["Con Movimiento alto, los pads oscuros (Senoidal, Quintas, Pad cálido, Cuerdas) ya no se apagan por ratos: el barrido del filtro se mueve en proporción a cada pad.", "Coro \"Aah\" más natural: la vocal se forma en cada nota, voces de hombres y mujeres a la vez, sin el vibrato que lo hacía sonar a una sola voz robótica."], "en": ["With high Movement, dark pads (Sine, Power 5th, Warm Pad, Strings) no longer drop out: the filter sweep now moves in proportion to each pad.", "More natural Choir Aahs: the vowel is shaped on each note, men's and women's voices together, without the vibrato that made it sound like one robotic voice."]}, {"version": "1.5.1", "date": "2026-10-27", "es": ["Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."], "en": ["Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."]}, {"version": "1.5.0", "date": "2026-10-27", "es": ["Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.", "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.", "Reverb nueva para el pad y la batería, con más sala y menos siseo."], "en": ["New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.", "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.", "New reverb for the pad and the drums, with more room and less hiss."]}, {"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
-  const BUILD = 'c18fd119';
+  const CHANGELOG = [{"version": "2.0.0", "date": "2026-11-24", "es": ["Nuevo diseño con 3 pestañas: Ajustes, Pad y Ensamble. Tú eliges cuál va al centro.", "Ensamble: botones de golpes, loops y fondos que entran a tiempo con la canción. Toca Editar para cambiarlos.", "Mantén presionado un canal para elegir su sonido, o una parte del mapa para ver sus acordes.", "Guía rápida la primera vez, un consejo al abrir (se apaga en Ajustes › App) y ayuda en el botón ?.", "Español o inglés desde la primera pantalla, y un acabado más limpio."], "en": ["New design with 3 tabs: Settings, Pad and Ensemble. You choose which one goes in the center.", "Ensemble: hit, loop and bed buttons that come in on time with the song. Tap Edit to change them.", "Hold a channel to pick its sound, or a part on the map to see its chords.", "A quick tour the first time, a tip at launch (turn it off in Settings › App) and help on the ? button.", "Spanish or English from the first screen, and a cleaner look."]}, {"version": "1.9.0", "date": "2026-11-24", "es": ["Los acordes de cada parte se ven en Tocar, bajo el nombre de la parte. Mientras suena, el acorde en que va la canción se ilumina, también en Manual, para que sepas cuál tocar.", "Toca esos acordes para cambiarlos: se abre el editor de esa parte y ‹ Tocar te devuelve.", "Si el pad no sigue los acordes (Manual o Tónica + 5ª), aparece Usar acordes: un toque pone el pad en Auto con acordes completos.", "La sección Micrófono de Ritmo se oculta por ahora: si el micrófono oye la base, decía que ibas a tempo aunque no fuera así. Volverá cuando funcione en vivo."], "en": ["Each part's chords show on Play, under the part name. While it plays, the chord the song is on lights up, also in Manual, so you know which one to play.", "Tap those chords to change them: that part's editor opens and ‹ Play takes you back.", "If the pad does not follow the chords (Manual or Root + 5th), Use chords appears: one tap puts the pad on Auto with full chords.", "The Microphone section in Rhythm is hidden for now: when the microphone heard the backing, it said you were on tempo even when you were not. It will come back once it works live."]}, {"version": "1.8.0", "date": "2026-11-22", "es": ["Estadísticas anónimas (Sonido › App): la app cuenta cuántas veces se abre, qué estilos y pads suenan y cuánto se toca, sin cookies ni datos personales, para saber qué mejorar. Se apagan con un toque y tus canciones nunca salen del teléfono."], "en": ["Anonymous statistics (Sound › App): the app counts how often it is opened, which styles and pads play and for how long, with no cookies or personal data, to learn what to improve. One tap turns them off, and your songs never leave the phone."]}, {"version": "1.7.0", "date": "2026-11-08", "es": ["Sonido más estable en Android y computadoras: la app pide un búfer de audio más amplio, el ritmo viejo sigue sonando hasta que el nuevo está listo (sin huecos al cambiar tempo o parte, ni al volver de otra app) y los acordes del pad se preparan aparte, sin frenar la página.", "Un limitador final evita que la suma de canales, clic incluido, pase del máximo.", "La app arranca sencilla: pad en Manual con Tónica + 5ª, la parte elegida se repite y el remate automático viene apagado. Para recorrer la canción sola, enciende Ritmo › Avanzar por la canción. Las canciones guardadas recuerdan este ajuste.", "Clic con fuerza por pulso: en Ritmo › Clic toca cada pulso para pasar por fuerte, normal, suave o en silencio.", "Shaker pequeño menos brillante y nuevo ajuste Ritmo › Tono de la percusión (Suave, Normal, Brillante).", "Los pads ya no llevan subgraves bajo 35 Hz ni agudos sobre 12 kHz, que no suman y pueden hacer sonar feo un parlante pequeño.", "Sonido › App › Diagnóstico de audio muestra cómo responde el audio en tu equipo y permite copiar esos datos para compartirlos."], "en": ["Steadier sound on Android and computers: the app asks for a larger audio buffer, the old rhythm keeps playing until the new one is ready (no gaps when you change tempo or part, or come back from another app), and pad chords are prepared on the side without stalling the page.", "A final limiter keeps the sum of the channels, click included, from going over full scale.", "The app starts simple: pad in Manual with Root + 5th, the chosen part repeats and auto fill is off. To move through the song on its own, turn on Rhythm › Move through the song. Saved songs remember this setting.", "Click with a level per beat: in Rhythm › Click, tap each beat to step through strong, normal, soft or silent.", "The small shaker is less bright, and there is a new Rhythm › Percussion tone setting (Soft, Normal, Bright).", "Pads no longer carry sub-bass below 35 Hz or highs above 12 kHz, which add nothing and can make a small speaker sound rough.", "Sound › App › Audio diagnostics shows how the audio is coping on your device and lets you copy that data to share it."]}, {"version": "1.6.0", "date": "2026-10-27", "es": ["Tocar nuevo: tempo arriba, la parte que suena con su mapa de la canción, el selector de pad, un dial de tonalidad que se desliza y la ventana de acordes con colores por función (reposo, se aleja, tensión).", "Estructura de la canción en Sonido: Orden (qué partes y en qué orden) y Partes (los acordes de cada una, de medio compás a 4 compases). La app pasa sola a la parte siguiente y el pad cambia de acorde a tiempo. Partes nuevas: Pre-coro, Interludio, Instrumental, Tag, Vamp y Outro.", "Modo Manual: el pad no sigue la canción y tú eliges el acorde. Mantén uno y toca otro para sumar hasta tres; tocar el único que suena lo silencia.", "Canal Clic (metrónomo) y paneo: cada canal puede ir a la izquierda, al centro o a la derecha (Sonido › Mezcla › Paneo), para mandar cada lado a un canal de la mezcladora.", "Al abrir esta versión solo queda encendido el Pad; Shaker, Batería y Clic se encienden desde Tocar. Remate se apaga cuando la batería está apagada.", "Las canciones guardan su estructura y sus acordes; las que ya tenías cargan con una estructura de ejemplo."], "en": ["New Play screen: tempo on top, the playing part with a song map, the pad picker, a key dial you can swipe and a chord window coloured by function (rest, moves away, tension).", "Song structure in Sound: Order (which parts, in what order) and Parts (each part's chords, from half a bar to 4 bars). The app moves on to the next part by itself and the pad changes chord in time. New parts: Pre-chorus, Interlude, Instrumental, Tag, Vamp and Outro.", "Manual mode: the pad does not follow the song and you pick the chord. Hold one and tap another to stack up to three; tapping the only one playing silences it.", "Click channel (metronome) and pan: each channel can go left, centre or right (Sound › Mix › Pan), to send each side to its own mixer channel.", "When you open this version only the Pad is on; Shaker, Drums and Click turn on from Play. Fill is off while the drums are off.", "Songs save their structure and chords; the ones you already had load with an example structure."]}, {"version": "1.5.2", "date": "2026-10-27", "es": ["Con Movimiento alto, los pads oscuros (Senoidal, Quintas, Pad cálido, Cuerdas) ya no se apagan por ratos: el barrido del filtro se mueve en proporción a cada pad.", "Coro \"Aah\" más natural: la vocal se forma en cada nota, voces de hombres y mujeres a la vez, sin el vibrato que lo hacía sonar a una sola voz robótica."], "en": ["With high Movement, dark pads (Sine, Power 5th, Warm Pad, Strings) no longer drop out: the filter sweep now moves in proportion to each pad.", "More natural Choir Aahs: the vowel is shaped on each note, men's and women's voices together, without the vibrato that made it sound like one robotic voice."]}, {"version": "1.5.1", "date": "2026-10-27", "es": ["Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."], "en": ["Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."]}, {"version": "1.5.0", "date": "2026-10-27", "es": ["Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.", "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.", "Reverb nueva para el pad y la batería, con más sala y menos siseo."], "en": ["New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.", "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.", "New reverb for the pad and the drums, with more room and less hiss."]}, {"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
+  const BUILD = 'f1ac6aa2';
   const RELEASE = CHANGELOG.length ? CHANGELOG[0].version : '';
   let updateReady = false;
   function renderVersion() {
@@ -966,6 +1292,9 @@ select.native { display: none; }
     song: DEFAULT_SONG(), follow: false, lang: 'es'
   };
   const LAYERS0 = JSON.parse(JSON.stringify(S.layers));
+  let firstRun = false;
+  try { firstRun = localStorage.getItem('acomp') === null; } catch (e) {}
+  if (firstRun) S.lang = /^es\b/i.test(navigator.language || 'es') ? 'es' : 'en';
   try { Object.assign(S, JSON.parse(localStorage.getItem('acomp') || '{}')); } catch (e) {}
   delete S.section; delete S.pending;
   if (!STYLES[S.style] || STYLES[S.style].meter !== S.meter) S.style = firstStyle(S.meter);
@@ -1052,7 +1381,7 @@ select.native { display: none; }
   try {
     new PerformanceObserver((l) => { for (const e of l.getEntries()) { diag.longs++; diag.longMax = Math.max(diag.longMax, Math.round(e.duration)); } }).observe({ type: 'longtask', buffered: true });
   } catch (e) {}
-  let ctx, master, buses = {}, pans = {}, meters = {}, countBus, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
+  let ctx, master, buses = {}, pans = {}, meters = {}, countBus, ensBus, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
   let playing = false, timer = null, rhythmIn;
   const uiQueue = [];
 
@@ -1088,6 +1417,9 @@ select.native { display: none; }
       const sg = ctx.createGain(); sg.gain.value = sends[k]; pans[k].connect(sg); sg.connect(room);
     }
     // The click skips the compressor, which would duck the other channels on every beat.
+    // Ensamble plays on its own bus, in the centre, with a little room: Batería or Shaker off does not mute it.
+    ensBus = ctx.createGain(); ensBus.gain.value = 0.85; ensBus.connect(master);
+    const ensSend = ctx.createGain(); ensSend.gain.value = 0.25; ensBus.connect(ensSend); ensSend.connect(room);
     const clickOut = ctx.createGain(); clickOut.gain.value = 0.9; pans.click.connect(clickOut); clickOut.connect(out);
     // The count-in always sounds, even with the click channel off, on the click's side.
     countBus = ctx.createGain(); countBus.connect(pans.click);
@@ -1860,6 +2192,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     if (!playing || !ctx) return;
     const now = ctx.currentTime;
     while (evq.length && evq[0].t <= now + (evq[0].onTime ? 0 : 0.3)) { const e = evq.shift(); e.fn(e.t); if (!playing) return; }
+    ensTick(now);
     if (dirty && chunks.length && now - lastCut > 0.15) { dirty = false; interrupt(); return; }
     if (rendering) return;
     const c = chunks[chunks.length - 1];
@@ -1894,6 +2227,8 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
 
   let wakeLock = null;
   async function start() {
+    // Play with every channel off in Pad would sound like nothing works: turn the pad on and say so.
+    if (view() === 'pad' && !CHANNELS.some((k) => S.layers[k].on)) { setLayer('pad', true); toast(T('play.padon')); }
     initAudio();
     if (ctx.state !== 'running') await ctx.resume();
     $('status').textContent = T('status.loading');
@@ -1914,7 +2249,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
     statT0 = Date.now();
     const on = CHANNELS.filter((k) => S.layers[k].on);
-    stat('play'); stat('canales/' + (on.join('+') || 'ninguno'));
+    stat('play'); stat('modo/' + viewStat(view())); stat('canales/' + (on.join('+') || 'ninguno'));
     if (S.layers.shaker.on || S.layers.drums.on) stat('estilo/' + S.style);
     if (S.layers.pad.on) stat('pad/' + S.pad);
   }
@@ -1930,6 +2265,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       }
     }
     chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false;
+    ensStop();
     padStop(soft ? 0.1 : 0.4);
     Object.assign(ui, { queued: false, active: false, counting: false, pend: null }); pos = null;
     if (soft) S.at = 0;
@@ -1958,7 +2294,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
         }
       }
     }
-    drawLeds();
+    drawLeds(); drawEns();
     requestAnimationFrame(frame);
   }
   // Part line, song map and Siguiente: where the song is, what comes next, what is waiting for the next bar.
@@ -1974,6 +2310,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
         const b = document.createElement('button'); b.type = 'button';
         b.innerHTML = '<span class="seg-bar"><i></i></span><span class="lb"></span>';
         b.addEventListener('click', () => choosePart(i));
+        onHold(b, () => editPart(seqAt(i), 'tocar'));
         box.appendChild(b);
       });
     }
@@ -2210,6 +2547,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       const b = document.createElement('button'); b.type = 'button'; b.className = 'tile'; b.dataset.ch = k;
       b.innerHTML = '<span class="led"></span><span class="tl"></span><span class="side"></span>';
       b.addEventListener('click', () => setLayer(k, !S.layers[k].on));
+      onHold(b, () => holdChannel(k, b));
       leds[k] = b.firstChild; box.appendChild(b);
     }
     for (const b of box.children) {
@@ -2333,10 +2671,12 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     save(); renderSeq(); renderParts(); drawPos();
     if (playing) { if (moved) { ui.pend = null; want.pend = null; want.at = S.at; } changed(); }
   }
-  // The editor opens from Sonido › Partes or from the chords on Tocar; its back button returns there.
-  function editPart(k, from = 'sonido') {
+  // The editor opens from Canciones › Partes, from the chords under the part name or by holding a part on the
+  // map; its back button returns there ('tocar' is the live view, Pad or Ensamble).
+  function editPart(k, from = 'canciones') {
     editing = k; adding = null; selChord = null; drawPart();
-    const back = $('pback'); back.dataset.go = from; back.lastChild.dataset.i18n = 'tab.' + from; back.lastChild.textContent = T('tab.' + from);
+    const lbl = 'tab.' + (from === 'tocar' ? view() : from);
+    const back = $('pback'); back.dataset.go = from; back.lastChild.dataset.i18n = lbl; back.lastChild.textContent = T(lbl);
     $('tab-parte').dataset.parent = from;
     window.acompShow?.('parte');
   }
@@ -2678,6 +3018,352 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
 
   $('lang').addEventListener('change', (e) => { S.lang = e.target.value; save(); applyLang(); });
 
+  // ---------- 2.0: Ensamble, holding a control, first launch, guide and help ----------
+  const view = () => ($('tab-tocar').dataset.view === 'ens' ? 'ens' : 'pad');
+  const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const seen = new Set();
+  const statOnce = (p) => { if (!seen.has(p)) { seen.add(p); stat(p); } };
+  let toastT = null;
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  // Holding a control half a second does its second job (open its options) and swallows the click that follows.
+  function onHold(el, fn) {
+    let tm = null, x = 0, y = 0;
+    const cancel = () => { clearTimeout(tm); tm = null; };
+    el.addEventListener('pointerdown', (e) => {
+      delete el.dataset.held; x = e.clientX; y = e.clientY; cancel();
+      tm = setTimeout(() => { tm = null; el.dataset.held = '1'; try { navigator.vibrate?.(15); } catch (er) {} fn(); }, 480);
+    });
+    el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - x, e.clientY - y) > 10) cancel(); });
+    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, cancel);
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+    el.addEventListener('click', (e) => { if (el.dataset.held) { delete el.dataset.held; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  }
+  function holdChannel(k, btn) {
+    if (k === 'click') { window.acompShow?.('ritmo'); return; }
+    window.acompMenu?.({ drums: 'style', shaker: 'shaker', pad: 'padtype' }[k], btn);
+  }
+
+  // A bottom sheet for the help center and for choosing a sound.
+  let sheetFrom = null;
+  function openSheet(build) {
+    const b = $('sheetbody'); b.textContent = ''; build(b);
+    sheetFrom = document.activeElement;
+    $('scrim').classList.add('show'); $('sheet').classList.add('show'); $('sheet').scrollTop = 0;
+    $('sheet').querySelector('button')?.focus({ preventScroll: true });
+  }
+  function closeSheet() {
+    if (!$('sheet').classList.contains('show')) return;
+    $('scrim').classList.remove('show'); $('sheet').classList.remove('show');
+    try { sheetFrom?.focus({ preventScroll: true }); } catch (e) {}
+    sheetFrom = null;
+  }
+  $('scrim').addEventListener('click', closeSheet);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeSheet(); if (!$('coach').hidden) endTour(true); } });
+  const sheetHead = (box, title, why) => { const h = mk('h2', null, title); h.id = 'sheettitle'; box.append(h); if (why) box.append(mk('p', 'why', why)); };
+  const doneBtn = (box) => { const d = mk('button', 'btn', T('done')); d.type = 'button'; d.addEventListener('click', closeSheet); box.append(d); };
+
+  // ---------- Ensamble: buttons over the same song, tempo and key ----------
+  // Golpe (hit) plays once, on the next 1/16 while playing, at once when stopped. Loop plays a one-bar
+  // pattern from the next bar until tapped again; one loop at a time. Fondo (bed) is a pad sound: it
+  // picks that sound on the Pad channel, so it follows the key and the chords like the Pad does.
+  // Patterns per beat: [instrument, 4 steps for 4/4 and 3/4, 6 steps for 6/8]; X x o g are the levels in V.
+  const ENS = {
+    crash: { t: 'hit', name: 'Crash', en: 'Crash', hit: (t) => hit('crash', t, 1) },
+    kickcrash: { t: 'hit', name: 'Bombo + crash', en: 'Kick + crash', hit: (t) => { hit('kick', t, 1); hit('crash', t, .9); } },
+    clap: { t: 'hit', name: 'Aplauso', en: 'Clap', hit: (t) => { hit('clap', t, 1); hit('clap', t + .018, .75); } },
+    rim: { t: 'hit', name: 'Aro', en: 'Rim', hit: (t) => hit('rim', t, 1) },
+    tomroll: { t: 'hit', name: 'Toms bajando', en: 'Tom roll', hit: (t) => { const d = stepDur(); ['tomH', 'tomH', 'tomM', 'tomM', 'tomL', 'tomL'].forEach((k, i) => hit(k, t + i * d, .95 - i * .05)); } },
+    cut: { t: 'hit', name: 'Corte', en: 'Cut', cut: true },
+    toms: { t: 'loop', name: 'Toms tribal', en: 'Tribal toms', pat: [['tomL', 'X--x', 'X--x--'], ['tomM', '--o-', '---o-o']] },
+    tamb: { t: 'loop', name: 'Pandero', en: 'Tambourine', pat: [['tamb', 'x-o-', 'x-oo-o']] },
+    shk16: { t: 'loop', name: 'Shaker 1/16', en: 'Shaker 1/16', pat: [['shaker', 'xgog', 'xgogog']] },
+    conga: { t: 'loop', name: 'Conga', en: 'Conga', pat: [['conga', 'x-ox', 'x-o-ox']] },
+    kick4: { t: 'loop', name: 'Bombo a negras', en: 'Four on the floor', pat: [['kick', 'x---', 'x-----']] }
+  };
+  for (const k of ['cuerdas', 'teclas', 'shimmer', 'organo', 'coro', 'oracion', 'atmos']) ENS['bed_' + k] = { t: 'bed', pad: k };
+  const ensName = (id) => (ENS[id].t === 'bed' ? NM(PADS[ENS[id].pad]) : NM(ENS[id]));
+  const ENS0 = () => ({
+    A: ['crash', 'kickcrash', 'clap', 'toms', 'tamb', 'shk16', 'bed_cuerdas', 'bed_teclas', 'bed_shimmer'],
+    B: ['rim', 'tomroll', 'cut', 'conga', 'kick4', null, 'bed_organo', 'bed_coro', null]
+  });
+  {
+    const D = ENS0(), ok = S.ens && typeof S.ens === 'object' ? S.ens : {};
+    S.ens = {};
+    for (const b of ['A', 'B']) S.ens[b] = Array.isArray(ok[b]) && ok[b].length === 9 && ok[b].every((x) => x === null || ENS[x]) ? ok[b] : D[b];
+  }
+  if (S.bank !== 'B') S.bank = 'A';
+  if (S.center !== 'pad' && S.center !== 'ens') S.center = null;
+  S.adv = S.adv === true; S.tips = S.tips !== false; S.tourDone = S.tourDone === true;
+  const bank = () => (S.adv ? S.bank : 'A');
+  // The sounds go to their own bus (in initAudio), so Ensamble plays even with Batería or Shaker off.
+  function ensPlay(fn) { const live = buses; buses = { ...live, drums: ensBus, shaker: ensBus }; try { fn(); } finally { buses = live; } }
+  async function ensAudio() { initAudio(); if (ctx.state !== 'running') await ctx.resume(); await loadSamples(); }
+  const nextStepAt = (now) => { const st = playing && stateAt(now + 0.02); return st ? st.t : now + 0.01; };
+  function nextBarAt(now) {
+    const st = stateAt(now + 0.05); if (!st) return null;
+    return st.t + ((METERS[S.meter].steps - st.step) % METERS[S.meter].steps) * stepDur();
+  }
+  let loops = [], ensEditing = false;
+  // Called from tick(): schedules the loop's steps a little ahead on the sequencer's own steps, so it follows
+  // tempo, time signature and part changes. Not during the count-in.
+  function ensTick(now) {
+    if (!loops.length) return;
+    loops = loops.filter((L) => L.until === null || L.until > now);
+    for (const L of loops) {
+      L.next = Math.max(L.next, now);
+      for (let g = 0; g < 64; g++) {
+        const st = stateAt(L.next);
+        if (!st || st.t > now + 0.3) break;
+        L.next = st.t + stepDur() * 0.5;
+        if (st.t < L.from - 1e-4 || (L.until !== null && st.t >= L.until - 1e-4) || st.countBars > 0 || (st.counting && st.step !== 0)) continue;
+        const M = METERS[S.meter], i = st.step % M.div;
+        for (const [inst, p4, p6] of ENS[L.id].pat) {
+          let v = V[(M.div === 6 ? p6 : p4)[i]] || 0;
+          if (v && M.strong.includes(st.step)) v = Math.min(1, v * 1.15);
+          if (v) ensPlay(() => hit(inst, st.t, v));
+        }
+      }
+    }
+  }
+  function ensStop() { loops = []; drawEns(); }
+  function loopState(id) {
+    const now = ctx ? ctx.currentTime : 0, L = loops.find((x) => x.id === id && (x.until === null || x.until > now));
+    return !L ? '' : L.until !== null ? 'stopping' : L.from > now ? 'armed' : 'playing';
+  }
+  const bedOn = (id) => S.layers.pad.on && S.pad === ENS[id].pad;
+  async function ensTap(slot) {
+    const id = S.ens[bank()][slot];
+    if (ensEditing) { pickSound(slot); return; }
+    if (!id) { toast(T('ens.empty')); return; }
+    const E = ENS[id];
+    if (E.t === 'bed') {
+      if (bedOn(id)) setLayer('pad', false);
+      else {
+        if (S.pad !== E.pad) { $('padtype').value = E.pad; $('padtype').dispatchEvent(new Event('change')); }
+        if (!S.layers.pad.on) setLayer('pad', true);
+        if (!playing) toast(T('ens.bed.play'));
+        statOnce('ensamble/fondo');
+      }
+      drawEns(); return;
+    }
+    if ((E.t === 'loop' || E.cut) && !playing) { toast(T(E.cut ? 'ens.cut.need' : 'ens.loop.play')); return; }
+    if (E.cut && !S.layers.drums.on) { toast(T('ens.cut.need')); return; }
+    await ensAudio();
+    const now = ctx.currentTime;
+    if (E.cut) {
+      // The drums go quiet for the next bar, then come back at their volume.
+      const t = nextBarAt(now); if (t === null) return;
+      const g = buses.drums.gain, back = (S.layers.drums.vol / 100) ** 1.5;
+      g.setTargetAtTime(0, t, 0.008); g.setTargetAtTime(S.layers.drums.on ? back : 0, t + METERS[S.meter].steps * stepDur(), 0.008);
+      flash(slot); statOnce('ensamble/golpe'); return;
+    }
+    if (E.t === 'hit') { const t = nextStepAt(now); ensPlay(() => E.hit(t)); flash(slot); statOnce('ensamble/golpe'); return; }
+    const t = nextBarAt(now); if (t === null) return;
+    const cur = loops.find((L) => L.id === id && L.until === null);
+    for (const L of loops) if (L.until === null || L.until > t) L.until = Math.max(t, L.from);
+    if (!cur) { loops.push({ id, from: t, next: now, until: null }); statOnce('ensamble/loop'); }
+    drawEns();
+  }
+  function flash(slot) { const b = $('ensgrid').children[slot]; b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 160); }
+  let ensSig = '';
+  function drawEns(force) {
+    const grid = $('ensgrid'), b = bank(), ids = S.ens[b];
+    if (!grid.children.length) for (let i = 0; i < 9; i++) {
+      const btn = document.createElement('button'); btn.type = 'button';
+      btn.innerHTML = '<span class="ty"></span><span class="n"></span><span class="k"></span>';
+      btn.addEventListener('click', () => ensTap(i));
+      onHold(btn, () => { if (S.ens[bank()][i] || ensEditing) pickSound(i); });
+      grid.appendChild(btn);
+    }
+    const states = ids.map((id) => (!id ? '' : ENS[id].t === 'loop' ? loopState(id) : ENS[id].t === 'bed' && bedOn(id) ? 'playing' : ''));
+    const keyName = NAMES[S.names][S.key];
+    const sig = [b, ensEditing, S.lang, S.adv, keyName, ...ids, ...states].join('|');
+    if (!force && sig === ensSig) return;
+    ensSig = sig;
+    ids.forEach((id, i) => {
+      const btn = grid.children[i], [ty, n, k] = btn.children, st = states[i];
+      if (!id) {
+        btn.className = 'lp empty' + (ensEditing ? ' editing' : ''); ty.textContent = ''; k.textContent = ''; n.textContent = '+';
+        btn.setAttribute('aria-label', T(ensEditing ? 'ens.add' : 'ens.slot')); return;
+      }
+      const E = ENS[id];
+      btn.className = `lp ${E.t}${st === 'stopping' ? ' playing' : st ? ' ' + st : ''}${ensEditing ? ' editing' : ''}`;
+      ty.textContent = T('type.' + E.t); n.textContent = ensName(id);
+      k.textContent = E.cut ? T('ens.k.cut') : E.t === 'hit' ? T('ens.k.hit') : st ? T('ens.k.' + st) : E.t === 'loop' ? T('ens.k.loop') : T('ens.k.bed', keyName);
+      btn.setAttribute('aria-label', `${ty.textContent}: ${n.textContent}, ${k.textContent}`);
+      btn.setAttribute('aria-pressed', String(st === 'playing' || st === 'armed'));
+    });
+    $('bank').hidden = !S.adv;
+    for (const x of $('bank').children) { const on = x.dataset.b === b; x.classList.toggle('on', on); x.setAttribute('aria-checked', String(on)); }
+    $('ensctx').textContent = T('ens.ctx', keyName);
+    const e = $('ensedit'); e.classList.toggle('on', ensEditing); e.textContent = T(ensEditing ? 'ens.done' : 'ens.edit'); e.setAttribute('aria-pressed', String(ensEditing));
+  }
+  function pickSound(slot) {
+    const b = bank(), cur = S.ens[b][slot];
+    openSheet((box) => {
+      sheetHead(box, T(cur ? 'ens.change' : 'ens.add'), T('ens.pick.why'));
+      for (const t of ['hit', 'loop', 'bed']) {
+        box.append(mk('div', 'cap', T('type.' + t)));
+        const g = mk('div', 'group');
+        for (const id in ENS) {
+          if (ENS[id].t !== t) continue;
+          const o = mk('button', 'opt'); o.type = 'button';
+          o.append(mk('span', null, ensName(id)), mk('span', 'ck', id === cur ? '✓' : ''));
+          o.addEventListener('click', () => { setSlot(b, slot, id); closeSheet(); });
+          g.append(o);
+        }
+        box.append(g);
+      }
+      if (cur) {
+        const g = mk('div', 'group'); g.style.marginTop = '12px';
+        const o = mk('button', 'opt rm', T('ens.remove')); o.type = 'button';
+        o.addEventListener('click', () => { setSlot(b, slot, null); closeSheet(); });
+        g.append(o); box.append(g);
+      }
+      doneBtn(box);
+    });
+  }
+  function setSlot(b, slot, id) {
+    const old = S.ens[b][slot];
+    if (old && ENS[old].t === 'loop' && ctx) for (const L of loops) if (L.id === old) L.until = ctx.currentTime;
+    S.ens[b][slot] = id; save(); drawEns(true);
+  }
+  $('ensedit').addEventListener('click', () => {
+    ensEditing = !ensEditing; drawEns(true);
+    if (ensEditing) { statOnce('ensamble/editar'); toast(T('ens.edit.hint')); }
+  });
+  for (const x of $('bank').children) x.addEventListener('click', () => { S.bank = x.dataset.b; save(); drawEns(true); });
+
+  // ---------- Ajustes › App ----------
+  function paintApp() {
+    for (const x of $('centerseg').children) { const on = x.dataset.c === S.center; x.classList.toggle('on', on); x.setAttribute('aria-checked', String(on)); }
+    $('adv').setAttribute('aria-checked', String(S.adv));
+    $('tips').setAttribute('aria-checked', String(S.tips));
+  }
+  const viewStat = (c) => (c === 'ens' ? 'ensamble' : 'pad');
+  for (const x of $('centerseg').children) x.addEventListener('click', () => {
+    if (S.center === x.dataset.c) return;
+    S.center = x.dataset.c; save(); window.acompOrder?.(S.center); paintApp(); stat('centro/' + viewStat(S.center));
+  });
+  $('adv').addEventListener('click', () => {
+    S.adv = !S.adv; if (!S.adv) S.bank = 'A';
+    save(); paintApp(); drawEns(true); toast(T(S.adv ? 'adv.on' : 'adv.off'));
+  });
+  $('tips').addEventListener('click', () => { S.tips = !S.tips; save(); paintApp(); toast(T(S.tips ? 'tips.on' : 'tips.off')); });
+  $('tourrow').addEventListener('click', () => startTour());
+  $('helprow').addEventListener('click', openHelp);
+  $('helpbtn').addEventListener('click', openHelp);
+
+  // ---------- First launch: language and the screen that goes in the centre ----------
+  function paintOnb() { for (const x of $('onblang').children) { const on = x.dataset.l === S.lang; x.classList.toggle('on', on); x.setAttribute('aria-checked', String(on)); } }
+  for (const x of $('onblang').children) x.addEventListener('click', () => { S.lang = x.dataset.l; save(); applyLang(); paintOnb(); });
+  for (const x of $('onb').querySelectorAll('.pick')) x.addEventListener('click', () => {
+    S.center = x.dataset.c; save();
+    stat('inicio/' + viewStat(S.center)); stat('idioma/' + S.lang);
+    $('onb').hidden = true;
+    window.acompOrder?.(S.center); window.acompShow?.(S.center); paintApp();
+    setTimeout(() => startTour(), 450);
+  });
+
+  // ---------- Quick tour (coach marks), tip at launch, help center ----------
+  const G = () => T('guide');
+  const TOUR_Q = { play: '#play', tiles: '#tiles', map: '#map', pad: '.harm', ens: '#ensgrid', tabs: '#tabbar', help: '#helpbtn' };
+  const TIP_Q = [['#map'], ['#tiles'], ['#next'], ['#fill'], ['.harm', 'pad'], ['#ensedit', 'ens']];
+  const HELP_Q = [
+    { l: 'b', q: ['#play', '#tiles', '.top1', '#map'] },
+    { l: 'm', v: 'pad', q: ['#dial', '.harmfoot', '#padmode'] },
+    { l: 'm', v: 'ens', q: ['#ensgrid', '#ensedit', null, null] },
+    { l: 'a', q: [null, '.tile[data-ch=click]', '#fill'] }
+  ];
+  let TS = [], TI = 0, tourOne = false;
+  function tourSteps() {
+    const g = G().tour, v = view(), other = S.center === 'ens' ? 'pad' : 'ens';
+    const st = ['play', 'tiles', 'map', v, 'tabs', 'help'].map((k) => ({ q: TOUR_Q[k], t: g[k][0], x: g[k][1] }));
+    st[4].x = g.tabs[1](T('tab.' + (S.center || 'pad')), T('tab.' + other));
+    return st;
+  }
+  function startTour(steps, one, v) {
+    closeSheet(); $('tipday').hidden = true;
+    window.acompShow?.(v || 'tocar');
+    TS = steps || tourSteps(); TI = 0; tourOne = !!one;
+    $('coach').hidden = false;
+    requestAnimationFrame(showStep);
+  }
+  function showStep() {
+    const st = TS[TI], el = st && document.querySelector(st.q);
+    if (!st) { endTour(false); return; }
+    const r = el && el.getBoundingClientRect();
+    if (!r || !r.width) { nextStep(); return; }
+    const ring = $('ring'), pad = 6, round = st.q === '#play' || st.q === '#helpbtn';
+    Object.assign(ring.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: r.height + pad * 2 + 'px', borderRadius: round ? '999px' : '20px' });
+    const c = $('ccard'), below = r.top + r.height / 2 < innerHeight / 2;
+    c.style.top = below ? r.bottom + 18 + 'px' : 'auto';
+    c.style.bottom = below ? 'auto' : innerHeight - r.top + 18 + 'px';
+    $('cstep').textContent = tourOne ? T('tour.one') : T('tour.step', TI + 1, TS.length);
+    $('ctitle').textContent = st.t; $('ctext').textContent = st.x;
+    const last = TI === TS.length - 1;
+    $('cnext').textContent = T(last ? (tourOne ? 'tour.ok' : 'tour.start') : 'tour.next');
+    $('cskip').style.visibility = last ? 'hidden' : 'visible';
+    $('cnext').focus({ preventScroll: true });
+  }
+  function nextStep() { TI++; if (TI >= TS.length) endTour(false); else showStep(); }
+  function endTour(skipped) {
+    if ($('coach').hidden) return;
+    $('coach').hidden = true;
+    if (tourOne) return;
+    if (!S.tourDone) stat('guia/' + (skipped ? 'omitida' : 'completa'));
+    S.tourDone = true; save();
+    if (!skipped) toast(T(view() === 'ens' ? 'tour.end.ens' : 'tour.end.pad'));
+  }
+  $('cnext').addEventListener('click', nextStep);
+  $('cskip').addEventListener('click', () => endTour(true));
+  addEventListener('resize', () => { if (!$('coach').hidden) showStep(); });
+  let tipNow = 0, tipT = null;
+  function showTip() {
+    if (!S.tips || !$('coach').hidden || !$('onb').hidden) return;
+    tipNow = Math.floor(Math.random() * G().tips.length);
+    $('tiptext').textContent = G().tips[tipNow][0]; $('tipday').hidden = false;
+    clearTimeout(tipT); tipT = setTimeout(() => { $('tipday').hidden = true; }, 9000);
+  }
+  $('tipx').addEventListener('click', () => { $('tipday').hidden = true; toast(T('tip.closed')); });
+  $('tipmore').addEventListener('click', () => {
+    const [, t, x] = G().tips[tipNow], [q, v] = TIP_Q[tipNow];
+    startTour([{ q, t, x }], true, v);
+  });
+  function openHelp() {
+    statOnce('ayuda/abierta');
+    const first = view() === 'ens' ? 2 : 1;
+    openSheet((box) => {
+      sheetHead(box, T('help.title'), T('help.why'));
+      const tour = mk('button', 'btn2', T('help.tour')); tour.type = 'button'; tour.addEventListener('click', () => startTour()); box.append(tour);
+      G().help.forEach((sec, si) => {
+        const H = HELP_Q[si], cap = mk('div', 'cap', sec.h);
+        cap.append(mk('span', 'lvl ' + H.l, T('lvl.' + H.l))); box.append(cap);
+        const g = mk('div', 'group');
+        sec.it.forEach(([q, a, t, x], ii) => {
+          const open = si === first && ii === 0;
+          const b = mk('button', 'hq'); b.type = 'button'; b.setAttribute('aria-expanded', String(open));
+          b.append(mk('span', null, q)); b.insertAdjacentHTML('beforeend', CHEV);
+          const ans = mk('div', 'ha', a); ans.hidden = !open;
+          b.addEventListener('click', () => { ans.hidden = !ans.hidden; b.setAttribute('aria-expanded', String(!ans.hidden)); });
+          if (H.q[ii]) {
+            const s = mk('button', 'show', T('help.show')); s.type = 'button';
+            s.addEventListener('click', () => startTour([{ q: H.q[ii], t, x }], true, H.v));
+            ans.append(s);
+          }
+          g.append(b, ans);
+        });
+        box.append(g);
+      });
+      const f = mk('p', 'foot', T('help.foot')); f.style.marginTop = '12px'; box.append(f);
+      doneBtn(box);
+    });
+  }
+  function applyLang2() { drawEns(true); paintApp(); paintOnb(); }
+
   // ---------- Boot ----------
   setBpm(S.bpm);
   setMeter(S.meter);
@@ -2692,7 +3378,14 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   // Closing the app while it plays never reaches Stop: count that Play when the page goes away.
   addEventListener('pagehide', statPlayEnd);
   applyLang();
+  // First launch asks for the language and the centre screen; after that, an optional short tip.
+  if (!S.center) $('onb').hidden = false;
+  else {
+    window.acompOrder?.(S.center);
+    if (S.tips && S.tourDone) setTimeout(showTip, 800);
+  }
   stat(location.pathname, false);
+  if (S.center) stat('centro/' + viewStat(S.center));
   stat('version/' + RELEASE);
   stat('abrir/' + (matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'instalada' : 'navegador'));
   window.acompLoaded = () => Object.keys(SB).length;

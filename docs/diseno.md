@@ -172,6 +172,8 @@ Pendiente de decidir: dónde viven los acordes cuando el panel muestra los pads,
 
 Prototipo interactivo: [prototipos/navegacion-2026-11-24.html](prototipos/navegacion-2026-11-24.html) (también publicado como Artifact privado).
 
+**Implementado en 2.0.0 (2026-11-24, D-2026-11-24-7).** Diferencias con el prototipo, para que la app siga simple y sin sonidos nuevos: un **Fondo** usa el canal Pad (suena uno a la vez y sigue la tonalidad y los acordes como el pad), en lugar de dos fondos propios; suena **un loop a la vez**; el Banco B trae Aro, Toms bajando, Corte, Conga, Bombo a negras, Gospel B3 y Coro "Aah" con dos botones vacíos; Remate sigue gris sin batería (no muestra aviso). El desenfoque de fondo queda solo en lo que flota (barra, hojas, avisos, guía): en cada panel le cuesta CPU a un teléfono mientras genera el audio. Probado en 390×844 y 375×667.
+
 #### Preguntas abiertas para Frederik
 
 - ¿B te parece bien, o prefieres empezar por A (más rápido) y luego crecer a B?
