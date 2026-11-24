@@ -138,6 +138,11 @@ Depende de la Fase 3 (sonido): los pads exponen cada muestra sola, así que la c
 #### Actualización 2026-11-24
 Frederik no quedó convencido con A, B ni C. Se ilustraron tres paradigmas nuevos (batería dibujada, pad de 9 muestras tipo Octapad/SPD, botones de arreglo tipo teclado Yamaha): `/mnt/project-files/diseno/pad-bateria-3-ideas.png` del proyecto. La investigación de usuarios está en [auditorias/2026-11-24-pad-bateria-usuarios.md](auditorias/2026-11-24-pad-bateria-usuarios.md): el músico que canta y toca no tiene manos libres, valora remates y transiciones, y los pads en pantalla se usan para jugar más que en vivo.
 
+#### Dirección actual (2026-11-24): lanzador configurable
+Frederik propuso pads **configurables por el usuario**, como un Octapad: el baterista suma efectos a su repertorio y el pianista deja un colchón de piano o cuerdas sonando. Hay tres tipos de pad: **Golpe** (cae en la siguiente semicorchea y reemplaza la misma pieza de la base en ese golpe), **Loop** (entra en el siguiente compás y se repite hasta volver a tocarlo) y **Sostenido** (piano, cuerdas o atmósfera en la tonalidad de la canción, con el motor de pad actual). Son 9 pads en 2 bancos y se editan manteniendo el pad presionado. Al principio los sonidos salen de una biblioteca CC0; importar audios propios queda para después. Boceto: [img/pad-lanzador-boceto.png](img/pad-lanzador-boceto.png).
+
+Pendiente de decidir: dónde viven los acordes cuando el panel muestra los pads, y el nombre del tipo "Sostenido", para no confundirlo con el canal Pad.
+
 #### Preguntas abiertas para Frederik
 
 - ¿B te parece bien, o prefieres empezar por A (más rápido) y luego crecer a B?
