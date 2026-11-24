@@ -42,7 +42,7 @@ Punto de entrada para personas y agentes. Lee esto primero, abre solo el archivo
 
 - **App publicada:** https://frederikfor.github.io/M-Companion/ (GitHub Pages, rama `main`, raíz).
 - **Repositorio:** https://github.com/frederikfor/m-companion
-- **Versión actual:** ver la primera entrada de [`src/changelog.json`](../src/changelog.json) (1.8.0 al 2026-11-23).
+- **Versión actual:** ver la primera entrada de [`src/changelog.json`](../src/changelog.json) (1.9.0 al 2026-11-24).
 - **Analítica:** GoatCounter, panel https://forozco.goatcounter.com/ (sin cookies). Ver README §5.14.
 - **Dueño del producto:** Frederik (músico de iglesia, prueba en iPhone).
 - **Copia vieja:** `/mnt/project-files/acompanante/` del proyecto es una versión anterior al repo (800 líneas de `script.js` contra 2068 de `src/engine.js`). No es fuente de verdad.

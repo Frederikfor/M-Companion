@@ -108,6 +108,20 @@ select.native { display: none; }
 #partname { font-size: 28px; line-height: 34px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #partpos { font-family: var(--mono); font-size: 17px; color: var(--muted); white-space: nowrap; }
 #partpos b { color: var(--fg); font-weight: 400; }
+/* The current part's chords, under its name: tap to edit them; "Usar acordes" when the pad does not follow them. */
+.pchrow { margin: 0 0 -4px; display: flex; align-items: center; gap: 6px; }
+#pchords { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 6px; text-align: left; }
+.pch-list { flex: 1; min-width: 0; display: flex; gap: 4px; overflow: hidden; scroll-behavior: smooth; -webkit-mask-image: linear-gradient(to right, #000 85%, transparent); mask-image: linear-gradient(to right, #000 85%, transparent); }
+.pch-list i { flex: none; font-style: normal; font-size: 13px; font-weight: 600; line-height: 26px; height: 26px; padding: 0 8px; border-radius: 7px; white-space: nowrap; }
+.pch-list i small { font-size: 11px; font-weight: 400; opacity: .75; margin-left: 3px; }
+.pch-list .rest { background: rgba(255, 159, 10, .16); color: #FFB340; }
+.pch-list .away { background: rgba(100, 210, 255, .16); color: var(--away); }
+.pch-list .tense { background: rgba(191, 90, 242, .2); color: #DA8FFF; }
+.pch-list .rest.now { background: var(--rest); color: #000; } .pch-list .away.now { background: var(--away); color: #000; } .pch-list .tense.now { background: var(--tense); color: #000; }
+#pchords.idle .pch-list i:not(.now) { opacity: .55; }
+.pch-empty { font-size: 13px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#pchords .pen { flex: none; width: 16px; height: 16px; color: var(--dim); }
+#pchuse { flex: none; min-height: 44px; padding: 0 2px 0 6px; font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 #map { margin-top: 8px; display: flex; gap: 2px; }
 #map button { min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-bottom: 4px; }
 #map .seg-bar { position: relative; overflow: hidden; height: 22px; border-radius: 4px; background: var(--edge); }
@@ -277,7 +291,7 @@ select.native { display: none; }
 }
 @media (max-height: 700px) {
   #bpm { font-size: 32px; line-height: 32px; } .bpmrow { margin-top: 6px; }
-  #partname { font-size: 22px; line-height: 26px; } #map .seg-bar { height: 16px; } #map .lb { font-size: 10px; }
+  #partname { font-size: 22px; line-height: 26px; } #map .seg-bar { height: 16px; } #map .lb { font-size: 10px; } .pchrow { margin: -10px 0 -12px; } .pch-list i { height: 22px; line-height: 22px; }
   .harm { gap: 8px; padding: 8px 0; } #dial { height: 34px; }
   .win .big { height: 48px; } .win .small { height: 40px; } .win button.big b { font-size: 19px; } .win button.small b { font-size: 15px; }
   .win button span { font-size: 11px; } #padmode { min-height: 36px; }
@@ -308,6 +322,10 @@ select.native { display: none; }
       </div>
 
       <div class="partline"><span id="partname">Intro</span><span id="partpos"></span></div>
+      <div class="pchrow">
+        <button type="button" id="pchords"><span class="pch-list" aria-hidden="true"></span><svg class="pen" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg></button>
+        <button type="button" id="pchuse" hidden data-i18n="pch.use" data-i18n-aria="pch.use.aria">Usar acordes</button>
+      </div>
       <div id="map" role="group" aria-label="Mapa de la canción" data-i18n-aria="map"></div>
 
       <div class="padsel">
@@ -368,6 +386,8 @@ select.native { display: none; }
         </select><button type="button" class="pd" data-for="autofill" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-autofill val-autofill"><span class="pd-val" id="val-autofill"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
       <p class="foot" data-i18n="advance.foot">Apagado, la parte elegida se repite hasta que toques otra o Siguiente.</p>
+      <!-- Micrófono: oculto mientras MIC_UI sea false en engine.js (auditoría 2026-11-23). -->
+      <div id="micbox" hidden>
       <div class="cap" data-i18n="mic.cap">Micrófono · beta</div>
       <div class="group">
         <div class="row"><span class="lbl" id="lbl-mic" data-i18n="mic.listen">Escuchar mi tempo</span><button class="switch" id="mic" role="switch" aria-checked="false" aria-labelledby="lbl-mic"></button></div>
@@ -375,6 +395,7 @@ select.native { display: none; }
         <div class="row"><span class="lbl" id="micread">—</span></div>
       </div>
       <p class="foot" id="micmsg">Te avisa si te aceleras o frenas respecto al tempo marcado.</p>
+      </div>
     </div>
   </section>
 
@@ -414,7 +435,7 @@ select.native { display: none; }
 
   <section class="screen" id="tab-parte" data-parent="sonido" aria-labelledby="ptitle" hidden>
     <div class="wrap">
-      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <button type="button" class="back" id="pback" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
       <h1 id="ptitle"></h1>
       <div class="cap" data-i18n="part.tap">Toca un acorde para añadirlo</div>
       <div class="group">
@@ -606,6 +627,10 @@ select.native { display: none; }
   ];
   // Harmonic function of each degree, for the chord colours: rest (I, iii, vi), moves away (ii, IV), tension (V).
   const FN = ['rest', 'away', 'rest', 'away', 'tense', 'rest'];
+  // Ritmo › Micrófono (Escuchar mi tempo, La base me sigue) stays hidden until it works on stage: with the backing
+  // in the microphone it reads "on tempo" when the musician is not (docs/auditorias/2026-11-23-codigo.md).
+  // The code stays; true shows it again.
+  const MIC_UI = false;
 
   // ---------- Rhythm styles ----------
   // One character per step: X strong, x normal, o soft, g ghost, . silence.
@@ -778,6 +803,7 @@ select.native { display: none; }
       'fn.rest': 'Reposo', 'fn.away': 'Se aleja', 'fn.tense': 'Tensión', sounding: 'suena',
       'mode.aria': 'Cómo cambia el pad', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Tónica + 5ª',
       'hint.fifths': 'Tónica + 5ª: el pad no cambia de acorde', 'hint.held': 'Toca para cambiar · mantén uno y toca otro para sumar', 'hint.silent': 'Pad en silencio · toca un acorde',
+      'pch.aria': (p) => `Acordes de ${p}. Toca para editarlos`, 'pch.empty': '+ Acordes de esta parte', 'pch.use': 'Usar acordes', 'pch.use.aria': 'Que el pad toque los acordes de la canción (Auto)',
       style: 'Estilo', 'shaker.pattern': 'Patrón de shaker', 'shaker.sound': 'Sonido del shaker', feel: 'Interpretación', human: 'Toque humano',
       'shaker.tone': 'Tono de la percusión', 'tone.soft': 'Suave', 'tone.normal': 'Normal', 'tone.bright': 'Brillante',
       'click.cap': 'Clic', 'click.beats': 'Pulsos del clic', 'click.foot': 'Toca un pulso para cambiar su fuerza: fuerte, normal, suave o en silencio. Cada compás guarda los suyos.',
@@ -804,7 +830,7 @@ select.native { display: none; }
       'mix.foot': 'Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar. Clic es el metrónomo. En iPhone quita el modo silencio si no suena.',
       struct: 'Estructura de la canción', 'struct.order': 'Orden', 'struct.parts': 'Partes', 'struct.add': '+ Añadir', 'struct.add.aria': 'Añadir una parte al orden', 'struct.new': '+ Nueva parte',
       'struct.foot.order': 'El orden en que suenan las partes. Toca × para quitar una; Añadir pone una parte al final.',
-      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. Al tocar, la app pasa sola a la parte siguiente y el pad cambia de acorde cuando termina cada uno.',
+      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. En Tocar se ven bajo el nombre de la parte; con el pad en Auto cambia de acorde cuando termina cada uno. Para pasar sola de parte en parte, activa Ritmo › Avanzar por la canción.',
       'seq.remove': (p) => 'Quitar ' + p, 'bars.short': 'c.', 'bars.n': (n) => n === 1 ? '1 compás' : n === .5 ? 'medio compás' : `${fmtBars(n)} compases`,
       'dur.half': 'medio', 'dur.one': 'compás', 'dur.many': 'compases',
       'part.tap': 'Toca un acorde para añadirlo', 'part.ask': '¿cuántos compases?', cancel: 'Cancelar', 'part.sounds': 'Así suena', 'part.nochords': 'sin acordes',
@@ -838,6 +864,7 @@ select.native { display: none; }
       'fn.rest': 'Rest', 'fn.away': 'Moves away', 'fn.tense': 'Tension', sounding: 'on',
       'mode.aria': 'How the pad changes', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Root + 5th',
       'hint.fifths': 'Root + 5th: the pad does not change chords', 'hint.held': 'Tap to change · hold one and tap another to add', 'hint.silent': 'Pad silent · tap a chord',
+      'pch.aria': (p) => `Chords of ${p}. Tap to edit them`, 'pch.empty': '+ Chords for this part', 'pch.use': 'Use chords', 'pch.use.aria': 'Make the pad play the song\'s chords (Auto)',
       style: 'Style', 'shaker.pattern': 'Shaker pattern', 'shaker.sound': 'Shaker sound', feel: 'Feel', human: 'Human feel',
       'shaker.tone': 'Percussion tone', 'tone.soft': 'Soft', 'tone.normal': 'Normal', 'tone.bright': 'Bright',
       'click.cap': 'Click', 'click.beats': 'Click beats', 'click.foot': 'Tap a beat to change how hard it sounds: strong, normal, soft or silent. Each time signature keeps its own.',
@@ -864,7 +891,7 @@ select.native { display: none; }
       'mix.foot': 'Tap a channel name to turn it on or off; you can also do it from Play. Click is the metronome. On iPhone, turn off silent mode if there is no sound.',
       struct: 'Song structure', 'struct.order': 'Order', 'struct.parts': 'Parts', 'struct.add': '+ Add', 'struct.add.aria': 'Add a part to the order', 'struct.new': '+ New part',
       'struct.foot.order': 'The order the parts play in. Tap × to remove one; Add puts a part at the end.',
-      'struct.foot.parts': 'Each part has its chords and how long each one lasts. While playing, the app moves on to the next part by itself and the pad changes chord as each one ends.',
+      'struct.foot.parts': 'Each part has its chords and how long each one lasts. Play shows them under the part name; with the pad on Auto it changes chord as each one ends. To move from part to part on its own, turn on Rhythm › Move through the song.',
       'seq.remove': (p) => 'Remove ' + p, 'bars.short': 'bars', 'bars.n': (n) => n === 1 ? '1 bar' : n === .5 ? 'half a bar' : `${fmtBars(n)} bars`,
       'dur.half': 'half', 'dur.one': 'bar', 'dur.many': 'bars',
       'part.tap': 'Tap a chord to add it', 'part.ask': 'how many bars?', cancel: 'Cancel', 'part.sounds': 'How it goes', 'part.nochords': 'no chords',
@@ -902,8 +929,8 @@ select.native { display: none; }
   // ---------- Version ----------
   // tools/build.py fills CHANGELOG from src/changelog.json (newest first) and BUILD with the content hash
   // that also names the service worker's cache, so what the screen shows is what is cached offline.
-  const CHANGELOG = [{"version": "1.8.0", "date": "2026-11-22", "es": ["Estadísticas anónimas (Sonido › App): la app cuenta cuántas veces se abre, qué estilos y pads suenan y cuánto se toca, sin cookies ni datos personales, para saber qué mejorar. Se apagan con un toque y tus canciones nunca salen del teléfono."], "en": ["Anonymous statistics (Sound › App): the app counts how often it is opened, which styles and pads play and for how long, with no cookies or personal data, to learn what to improve. One tap turns them off, and your songs never leave the phone."]}, {"version": "1.7.0", "date": "2026-11-08", "es": ["Sonido más estable en Android y computadoras: la app pide un búfer de audio más amplio, el ritmo viejo sigue sonando hasta que el nuevo está listo (sin huecos al cambiar tempo o parte, ni al volver de otra app) y los acordes del pad se preparan aparte, sin frenar la página.", "Un limitador final evita que la suma de canales, clic incluido, pase del máximo.", "La app arranca sencilla: pad en Manual con Tónica + 5ª, la parte elegida se repite y el remate automático viene apagado. Para recorrer la canción sola, enciende Ritmo › Avanzar por la canción. Las canciones guardadas recuerdan este ajuste.", "Clic con fuerza por pulso: en Ritmo › Clic toca cada pulso para pasar por fuerte, normal, suave o en silencio.", "Shaker pequeño menos brillante y nuevo ajuste Ritmo › Tono de la percusión (Suave, Normal, Brillante).", "Los pads ya no llevan subgraves bajo 35 Hz ni agudos sobre 12 kHz, que no suman y pueden hacer sonar feo un parlante pequeño.", "Sonido › App › Diagnóstico de audio muestra cómo responde el audio en tu equipo y permite copiar esos datos para compartirlos."], "en": ["Steadier sound on Android and computers: the app asks for a larger audio buffer, the old rhythm keeps playing until the new one is ready (no gaps when you change tempo or part, or come back from another app), and pad chords are prepared on the side without stalling the page.", "A final limiter keeps the sum of the channels, click included, from going over full scale.", "The app starts simple: pad in Manual with Root + 5th, the chosen part repeats and auto fill is off. To move through the song on its own, turn on Rhythm › Move through the song. Saved songs remember this setting.", "Click with a level per beat: in Rhythm › Click, tap each beat to step through strong, normal, soft or silent.", "The small shaker is less bright, and there is a new Rhythm › Percussion tone setting (Soft, Normal, Bright).", "Pads no longer carry sub-bass below 35 Hz or highs above 12 kHz, which add nothing and can make a small speaker sound rough.", "Sound › App › Audio diagnostics shows how the audio is coping on your device and lets you copy that data to share it."]}, {"version": "1.6.0", "date": "2026-10-27", "es": ["Tocar nuevo: tempo arriba, la parte que suena con su mapa de la canción, el selector de pad, un dial de tonalidad que se desliza y la ventana de acordes con colores por función (reposo, se aleja, tensión).", "Estructura de la canción en Sonido: Orden (qué partes y en qué orden) y Partes (los acordes de cada una, de medio compás a 4 compases). La app pasa sola a la parte siguiente y el pad cambia de acorde a tiempo. Partes nuevas: Pre-coro, Interludio, Instrumental, Tag, Vamp y Outro.", "Modo Manual: el pad no sigue la canción y tú eliges el acorde. Mantén uno y toca otro para sumar hasta tres; tocar el único que suena lo silencia.", "Canal Clic (metrónomo) y paneo: cada canal puede ir a la izquierda, al centro o a la derecha (Sonido › Mezcla › Paneo), para mandar cada lado a un canal de la mezcladora.", "Al abrir esta versión solo queda encendido el Pad; Shaker, Batería y Clic se encienden desde Tocar. Remate se apaga cuando la batería está apagada.", "Las canciones guardan su estructura y sus acordes; las que ya tenías cargan con una estructura de ejemplo."], "en": ["New Play screen: tempo on top, the playing part with a song map, the pad picker, a key dial you can swipe and a chord window coloured by function (rest, moves away, tension).", "Song structure in Sound: Order (which parts, in what order) and Parts (each part's chords, from half a bar to 4 bars). The app moves on to the next part by itself and the pad changes chord in time. New parts: Pre-chorus, Interlude, Instrumental, Tag, Vamp and Outro.", "Manual mode: the pad does not follow the song and you pick the chord. Hold one and tap another to stack up to three; tapping the only one playing silences it.", "Click channel (metronome) and pan: each channel can go left, centre or right (Sound › Mix › Pan), to send each side to its own mixer channel.", "When you open this version only the Pad is on; Shaker, Drums and Click turn on from Play. Fill is off while the drums are off.", "Songs save their structure and chords; the ones you already had load with an example structure."]}, {"version": "1.5.2", "date": "2026-10-27", "es": ["Con Movimiento alto, los pads oscuros (Senoidal, Quintas, Pad cálido, Cuerdas) ya no se apagan por ratos: el barrido del filtro se mueve en proporción a cada pad.", "Coro \"Aah\" más natural: la vocal se forma en cada nota, voces de hombres y mujeres a la vez, sin el vibrato que lo hacía sonar a una sola voz robótica."], "en": ["With high Movement, dark pads (Sine, Power 5th, Warm Pad, Strings) no longer drop out: the filter sweep now moves in proportion to each pad.", "More natural Choir Aahs: the vowel is shaped on each note, men's and women's voices together, without the vibrato that made it sound like one robotic voice."]}, {"version": "1.5.1", "date": "2026-10-27", "es": ["Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."], "en": ["Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."]}, {"version": "1.5.0", "date": "2026-10-27", "es": ["Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.", "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.", "Reverb nueva para el pad y la batería, con más sala y menos siseo."], "en": ["New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.", "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.", "New reverb for the pad and the drums, with more room and less hiss."]}, {"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
-  const BUILD = 'f307e8a1';
+  const CHANGELOG = [{"version": "1.9.0", "date": "2026-11-24", "es": ["Los acordes de cada parte se ven en Tocar, bajo el nombre de la parte. Mientras suena, el acorde en que va la canción se ilumina, también en Manual, para que sepas cuál tocar.", "Toca esos acordes para cambiarlos: se abre el editor de esa parte y ‹ Tocar te devuelve.", "Si el pad no sigue los acordes (Manual o Tónica + 5ª), aparece Usar acordes: un toque pone el pad en Auto con acordes completos.", "La sección Micrófono de Ritmo se oculta por ahora: si el micrófono oye la base, decía que ibas a tempo aunque no fuera así. Volverá cuando funcione en vivo."], "en": ["Each part's chords show on Play, under the part name. While it plays, the chord the song is on lights up, also in Manual, so you know which one to play.", "Tap those chords to change them: that part's editor opens and ‹ Play takes you back.", "If the pad does not follow the chords (Manual or Root + 5th), Use chords appears: one tap puts the pad on Auto with full chords.", "The Microphone section in Rhythm is hidden for now: when the microphone heard the backing, it said you were on tempo even when you were not. It will come back once it works live."]}, {"version": "1.8.0", "date": "2026-11-22", "es": ["Estadísticas anónimas (Sonido › App): la app cuenta cuántas veces se abre, qué estilos y pads suenan y cuánto se toca, sin cookies ni datos personales, para saber qué mejorar. Se apagan con un toque y tus canciones nunca salen del teléfono."], "en": ["Anonymous statistics (Sound › App): the app counts how often it is opened, which styles and pads play and for how long, with no cookies or personal data, to learn what to improve. One tap turns them off, and your songs never leave the phone."]}, {"version": "1.7.0", "date": "2026-11-08", "es": ["Sonido más estable en Android y computadoras: la app pide un búfer de audio más amplio, el ritmo viejo sigue sonando hasta que el nuevo está listo (sin huecos al cambiar tempo o parte, ni al volver de otra app) y los acordes del pad se preparan aparte, sin frenar la página.", "Un limitador final evita que la suma de canales, clic incluido, pase del máximo.", "La app arranca sencilla: pad en Manual con Tónica + 5ª, la parte elegida se repite y el remate automático viene apagado. Para recorrer la canción sola, enciende Ritmo › Avanzar por la canción. Las canciones guardadas recuerdan este ajuste.", "Clic con fuerza por pulso: en Ritmo › Clic toca cada pulso para pasar por fuerte, normal, suave o en silencio.", "Shaker pequeño menos brillante y nuevo ajuste Ritmo › Tono de la percusión (Suave, Normal, Brillante).", "Los pads ya no llevan subgraves bajo 35 Hz ni agudos sobre 12 kHz, que no suman y pueden hacer sonar feo un parlante pequeño.", "Sonido › App › Diagnóstico de audio muestra cómo responde el audio en tu equipo y permite copiar esos datos para compartirlos."], "en": ["Steadier sound on Android and computers: the app asks for a larger audio buffer, the old rhythm keeps playing until the new one is ready (no gaps when you change tempo or part, or come back from another app), and pad chords are prepared on the side without stalling the page.", "A final limiter keeps the sum of the channels, click included, from going over full scale.", "The app starts simple: pad in Manual with Root + 5th, the chosen part repeats and auto fill is off. To move through the song on its own, turn on Rhythm › Move through the song. Saved songs remember this setting.", "Click with a level per beat: in Rhythm › Click, tap each beat to step through strong, normal, soft or silent.", "The small shaker is less bright, and there is a new Rhythm › Percussion tone setting (Soft, Normal, Bright).", "Pads no longer carry sub-bass below 35 Hz or highs above 12 kHz, which add nothing and can make a small speaker sound rough.", "Sound › App › Audio diagnostics shows how the audio is coping on your device and lets you copy that data to share it."]}, {"version": "1.6.0", "date": "2026-10-27", "es": ["Tocar nuevo: tempo arriba, la parte que suena con su mapa de la canción, el selector de pad, un dial de tonalidad que se desliza y la ventana de acordes con colores por función (reposo, se aleja, tensión).", "Estructura de la canción en Sonido: Orden (qué partes y en qué orden) y Partes (los acordes de cada una, de medio compás a 4 compases). La app pasa sola a la parte siguiente y el pad cambia de acorde a tiempo. Partes nuevas: Pre-coro, Interludio, Instrumental, Tag, Vamp y Outro.", "Modo Manual: el pad no sigue la canción y tú eliges el acorde. Mantén uno y toca otro para sumar hasta tres; tocar el único que suena lo silencia.", "Canal Clic (metrónomo) y paneo: cada canal puede ir a la izquierda, al centro o a la derecha (Sonido › Mezcla › Paneo), para mandar cada lado a un canal de la mezcladora.", "Al abrir esta versión solo queda encendido el Pad; Shaker, Batería y Clic se encienden desde Tocar. Remate se apaga cuando la batería está apagada.", "Las canciones guardan su estructura y sus acordes; las que ya tenías cargan con una estructura de ejemplo."], "en": ["New Play screen: tempo on top, the playing part with a song map, the pad picker, a key dial you can swipe and a chord window coloured by function (rest, moves away, tension).", "Song structure in Sound: Order (which parts, in what order) and Parts (each part's chords, from half a bar to 4 bars). The app moves on to the next part by itself and the pad changes chord in time. New parts: Pre-chorus, Interlude, Instrumental, Tag, Vamp and Outro.", "Manual mode: the pad does not follow the song and you pick the chord. Hold one and tap another to stack up to three; tapping the only one playing silences it.", "Click channel (metronome) and pan: each channel can go left, centre or right (Sound › Mix › Pan), to send each side to its own mixer channel.", "When you open this version only the Pad is on; Shaker, Drums and Click turn on from Play. Fill is off while the drums are off.", "Songs save their structure and chords; the ones you already had load with an example structure."]}, {"version": "1.5.2", "date": "2026-10-27", "es": ["Con Movimiento alto, los pads oscuros (Senoidal, Quintas, Pad cálido, Cuerdas) ya no se apagan por ratos: el barrido del filtro se mueve en proporción a cada pad.", "Coro \"Aah\" más natural: la vocal se forma en cada nota, voces de hombres y mujeres a la vez, sin el vibrato que lo hacía sonar a una sola voz robótica."], "en": ["With high Movement, dark pads (Sine, Power 5th, Warm Pad, Strings) no longer drop out: the filter sweep now moves in proportion to each pad.", "More natural Choir Aahs: the vowel is shaped on each note, men's and women's voices together, without the vibrato that made it sound like one robotic voice."]}, {"version": "1.5.1", "date": "2026-10-27", "es": ["Arreglado: la batería y el shaker ya no se aceleran al darle Play ni se amontonan como ruido. Eso también hacía que la app se reiniciara y quedara en silencio."], "en": ["Fixed: drums and shaker no longer speed up after Play or pile up into noise. That also made the app restart and go silent."]}, {"version": "1.5.0", "date": "2026-10-27", "es": ["Pads nuevos con síntesis PADsynth: más amplios, en estéreo y sin el batido de antes. Rhodes y Gospel B3 no cambian.", "Nuevos controles en Sonido › Pad: Movimiento (cuánto ondula el pad) y Riqueza (cuántos armónicos acumula). Se guardan con cada canción.", "Reverb nueva para el pad y la batería, con más sala y menos siseo."], "en": ["New pads made with PADsynth synthesis: wider, in stereo and without the old beating. Rhodes and Gospel B3 are unchanged.", "New controls in Sound › Pad: Movement (how much the pad sways) and Richness (how many harmonics it stacks). They are saved with each song.", "New reverb for the pad and the drums, with more room and less hiss."]}, {"version": "1.4.0", "date": "2026-10-27", "es": ["Nueva pantalla Sonido › App › Versión: muestra la versión instalada y las novedades de cada versión.", "Avisa cuando ya se descargó una versión nueva y basta con cerrar y abrir la app para usarla."], "en": ["New Sound › App › Version screen: shows the installed version and what changed in each version.", "Tells you when a new version has downloaded and you only need to close and reopen the app to use it."]}, {"version": "1.3.0", "date": "2026-10-27", "es": ["El shaker, la percusión y la batería siguen sonando a tiempo con la pantalla bloqueada o la app en segundo plano.", "Los cambios de tempo, parte, estilo o remate reemplazan lo que suena casi al instante, y Parar silencia de inmediato."], "en": ["Shaker, percussion and drums keep playing in time with the screen locked or the app in the background.", "Changes of tempo, part, style or fill replace what is playing almost at once, and Stop silences immediately."]}, {"version": "1.2.0", "date": "2026-10-12", "es": ["Idioma español o inglés para toda la app (Sonido › App › Idioma).", "Las listas de opciones se abren como menús de iPhone, con palomita en la opción elegida."], "en": ["Spanish or English for the whole app (Sound › App › Language).", "Option lists open as iPhone pull-down menus, with a checkmark on the chosen option."]}, {"version": "1.1.0", "date": "2026-10-12", "es": ["Nueve pads nuevos para worship, oración, alabanza, himnos y gospel, agrupados por momento del servicio.", "Los pads llevan nombres de teclado conocidos (Supersaw, Pad cálido, Rhodes, Cuerdas, Gospel B3…) y suenan a un volumen parejo."], "en": ["Nine new pads for worship, prayer, praise, hymns and gospel, grouped by moment of the service.", "Pads use familiar keyboard names (Supersaw, Warm Pad, Rhodes, Strings, Gospel B3…) and play at an even volume."]}, {"version": "1.0.0", "date": "2026-10-12", "es": ["Primera versión: shaker y percusión, batería y pad a tu tempo, con remates según el compás y la parte de la canción.", "Partes Intro, Estrofa, Coro, Puente y Final; el cambio entra en el siguiente compás con remate y platillo.", "Micrófono (beta) que avisa si te aceleras o frenas, canciones guardadas y funcionamiento sin internet."], "en": ["First version: shaker and percussion, drums and pad at your tempo, with fills that follow the time signature and the song part.", "Intro, Verse, Chorus, Bridge and Ending parts; a change comes in on the next bar with a fill and a cymbal.", "Microphone (beta) that warns you if you speed up or slow down, saved songs and offline use."]}];
+  const BUILD = 'c18fd119';
   const RELEASE = CHANGELOG.length ? CHANGELOG[0].version : '';
   let updateReady = false;
   function renderVersion() {
@@ -1969,6 +1996,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       b.firstChild.firstChild.style.width = i === at && live ? Math.min(100, (bar - 1 + (pos.s + 1) / steps) / len * 100) + '%' : '0';
     });
     $('partname').textContent = partLabel(at);
+    drawChords(at, live ? (bar - 1) + pos.s / steps : null);
     const pp = $('partpos'); pp.textContent = '';
     if (playing && pos && pos.counting) pp.textContent = T('counting');
     else {
@@ -1983,6 +2011,46 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     $('nextname').textContent = nextPart === null ? '—' : partLabel(nextPart);
     $('next').setAttribute('aria-label', T('next.aria', $('nextname').textContent));
   }
+  // The chords of the part on the line above, as chips: the one the song is on is lit while playing. They are
+  // shown in Manual too, so the musician sees what to play. Tapping them opens that part's editor. When the
+  // part has chords but the pad does not follow them (Manual or Tónica + 5ª), "Usar acordes" puts it on Auto.
+  const followsSong = () => S.padHand === 'auto' && S.padMode !== 'fifths';
+  let pchSig = '', pchNow = -1;
+  function drawChords(at, off) {
+    const P = partOf(at), btn = $('pchords'), list = btn.firstChild;
+    const sig = [seqAt(at), JSON.stringify(P.ch), S.key, S.names, S.lang, at].join('|');
+    if (sig !== pchSig) {
+      pchSig = sig; pchNow = -1; list.textContent = '';
+      if (!P.ch.length) { const e = document.createElement('span'); e.className = 'pch-empty'; e.textContent = T('pch.empty'); list.appendChild(e); }
+      for (const [c, n] of P.ch) {
+        const i = document.createElement('i'); i.className = FN[c]; i.textContent = chordName(c);
+        if (n !== 1) { const sm = document.createElement('small'); sm.textContent = fmtBars(n); i.appendChild(sm); }
+        list.appendChild(i);
+      }
+      btn.setAttribute('aria-label', T('pch.aria', partLabel(at)) + (P.ch.length ? ': ' + P.ch.map(([c]) => chordName(c)).join(', ') : ''));
+    }
+    // Which chord the song is on: off is bars into the part (null when stopped).
+    let now = -1;
+    if (off !== null && P.ch.length) {
+      let b = 0; now = P.ch.length - 1;
+      for (let k = 0; k < P.ch.length; k++) { b += P.ch[k][1]; if (off < b - 1e-6) { now = k; break; } }
+    }
+    if (now !== pchNow) {
+      pchNow = now;
+      [...list.children].forEach((x, k) => x.classList.toggle('now', k === now));
+      const x = list.children[now];
+      if (x && (x.offsetLeft + x.offsetWidth > list.scrollLeft + list.clientWidth - 24 || x.offsetLeft < list.scrollLeft)) list.scrollLeft = x.offsetLeft - 4;
+      else if (now <= 0) list.scrollLeft = 0;
+    }
+    btn.classList.toggle('idle', !followsSong());
+    $('pchuse').hidden = !P.ch.length || followsSong();
+  }
+  function followSong() {
+    S.padHand = 'auto'; S.padMode = 'chord'; S.chord = songChord();
+    save(); paintWin(); padPlay(); drawPos();
+  }
+  $('pchords').addEventListener('click', () => editPart(seqAt(Math.min(playing && pos && !pos.counting ? pos.at : S.at, S.song.seq.length - 1)), 'tocar'));
+  $('pchuse').addEventListener('click', followSong);
   // A part on the map (or Siguiente). Stopped: Play starts there. Playing: it comes in on the next bar, with a
   // fill before it. The part that is playing asks for a fill instead.
   function choosePart(i) {
@@ -2123,6 +2191,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     $('hint').textContent = T(fifths ? 'hint.fifths' : S.held.length ? 'hint.held' : 'hint.silent');
     document.querySelectorAll('#mode button').forEach((b) => { const o = b.dataset.m === S.padHand; b.classList.toggle('on', o); b.setAttribute('aria-checked', String(o)); });
     $('padmode').setAttribute('aria-checked', String(fifths));
+    if (pchSig) drawPos(); // "Usar acordes" shows only while the pad does not follow the song
   }
   function toggleHeld(c) {
     const i = S.held.indexOf(c);
@@ -2276,7 +2345,13 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     save(); renderSeq(); renderParts(); drawPos();
     if (playing) { if (moved) { ui.pend = null; want.pend = null; want.at = S.at; } changed(); }
   }
-  function editPart(k) { editing = k; adding = null; selChord = null; drawPart(); window.acompShow?.('parte'); }
+  // The editor opens from Sonido › Partes or from the chords on Tocar; its back button returns there.
+  function editPart(k, from = 'sonido') {
+    editing = k; adding = null; selChord = null; drawPart();
+    const back = $('pback'); back.dataset.go = from; back.lastChild.dataset.i18n = 'tab.' + from; back.lastChild.textContent = T('tab.' + from);
+    $('tab-parte').dataset.parent = from;
+    window.acompShow?.('parte');
+  }
   // Part editor: chords first. Tapping one asks how long it lasts and adds it; tapping one already in the
   // list opens its length and Quitar. The part lasts what its chords add up to.
   const DUR_BTN = [[.5, '½', 'dur.half'], [1, '1', 'dur.one'], [2, '2', 'dur.many'], [4, '4', 'dur.many']];
@@ -2343,7 +2418,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     if (!k || partKeys().length <= 1) return;
     delete S.song.parts[k]; editing = null;
     dropFromSeq((x) => x === k);
-    window.acompShow?.('sonido');
+    window.acompShow?.($('pback').dataset.go);
   });
 
   function buildStyles() {
@@ -2623,6 +2698,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   $('autofill').value = String(S.autoFill);
   $('shktone').value = S.shkTone;
   $('follow').setAttribute('aria-checked', String(S.follow));
+  $('micbox').hidden = !MIC_UI;
   $('stats').setAttribute('aria-checked', String(S.stats));
   $('stats').addEventListener('click', () => { S.stats = !S.stats; save(); $('stats').setAttribute('aria-checked', String(S.stats)); });
   // Closing the app while it plays never reaches Stop: count that Play when the page goes away.

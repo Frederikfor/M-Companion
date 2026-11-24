@@ -17,6 +17,10 @@
   ];
   // Harmonic function of each degree, for the chord colours: rest (I, iii, vi), moves away (ii, IV), tension (V).
   const FN = ['rest', 'away', 'rest', 'away', 'tense', 'rest'];
+  // Ritmo › Micrófono (Escuchar mi tempo, La base me sigue) stays hidden until it works on stage: with the backing
+  // in the microphone it reads "on tempo" when the musician is not (docs/auditorias/2026-11-23-codigo.md).
+  // The code stays; true shows it again.
+  const MIC_UI = false;
 
   // ---------- Rhythm styles ----------
   // One character per step: X strong, x normal, o soft, g ghost, . silence.
@@ -189,6 +193,7 @@
       'fn.rest': 'Reposo', 'fn.away': 'Se aleja', 'fn.tense': 'Tensión', sounding: 'suena',
       'mode.aria': 'Cómo cambia el pad', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Tónica + 5ª',
       'hint.fifths': 'Tónica + 5ª: el pad no cambia de acorde', 'hint.held': 'Toca para cambiar · mantén uno y toca otro para sumar', 'hint.silent': 'Pad en silencio · toca un acorde',
+      'pch.aria': (p) => `Acordes de ${p}. Toca para editarlos`, 'pch.empty': '+ Acordes de esta parte', 'pch.use': 'Usar acordes', 'pch.use.aria': 'Que el pad toque los acordes de la canción (Auto)',
       style: 'Estilo', 'shaker.pattern': 'Patrón de shaker', 'shaker.sound': 'Sonido del shaker', feel: 'Interpretación', human: 'Toque humano',
       'shaker.tone': 'Tono de la percusión', 'tone.soft': 'Suave', 'tone.normal': 'Normal', 'tone.bright': 'Brillante',
       'click.cap': 'Clic', 'click.beats': 'Pulsos del clic', 'click.foot': 'Toca un pulso para cambiar su fuerza: fuerte, normal, suave o en silencio. Cada compás guarda los suyos.',
@@ -215,7 +220,7 @@
       'mix.foot': 'Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar. Clic es el metrónomo. En iPhone quita el modo silencio si no suena.',
       struct: 'Estructura de la canción', 'struct.order': 'Orden', 'struct.parts': 'Partes', 'struct.add': '+ Añadir', 'struct.add.aria': 'Añadir una parte al orden', 'struct.new': '+ Nueva parte',
       'struct.foot.order': 'El orden en que suenan las partes. Toca × para quitar una; Añadir pone una parte al final.',
-      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. Al tocar, la app pasa sola a la parte siguiente y el pad cambia de acorde cuando termina cada uno.',
+      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. En Tocar se ven bajo el nombre de la parte; con el pad en Auto cambia de acorde cuando termina cada uno. Para pasar sola de parte en parte, activa Ritmo › Avanzar por la canción.',
       'seq.remove': (p) => 'Quitar ' + p, 'bars.short': 'c.', 'bars.n': (n) => n === 1 ? '1 compás' : n === .5 ? 'medio compás' : `${fmtBars(n)} compases`,
       'dur.half': 'medio', 'dur.one': 'compás', 'dur.many': 'compases',
       'part.tap': 'Toca un acorde para añadirlo', 'part.ask': '¿cuántos compases?', cancel: 'Cancelar', 'part.sounds': 'Así suena', 'part.nochords': 'sin acordes',
@@ -249,6 +254,7 @@
       'fn.rest': 'Rest', 'fn.away': 'Moves away', 'fn.tense': 'Tension', sounding: 'on',
       'mode.aria': 'How the pad changes', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Root + 5th',
       'hint.fifths': 'Root + 5th: the pad does not change chords', 'hint.held': 'Tap to change · hold one and tap another to add', 'hint.silent': 'Pad silent · tap a chord',
+      'pch.aria': (p) => `Chords of ${p}. Tap to edit them`, 'pch.empty': '+ Chords for this part', 'pch.use': 'Use chords', 'pch.use.aria': 'Make the pad play the song\'s chords (Auto)',
       style: 'Style', 'shaker.pattern': 'Shaker pattern', 'shaker.sound': 'Shaker sound', feel: 'Feel', human: 'Human feel',
       'shaker.tone': 'Percussion tone', 'tone.soft': 'Soft', 'tone.normal': 'Normal', 'tone.bright': 'Bright',
       'click.cap': 'Click', 'click.beats': 'Click beats', 'click.foot': 'Tap a beat to change how hard it sounds: strong, normal, soft or silent. Each time signature keeps its own.',
@@ -275,7 +281,7 @@
       'mix.foot': 'Tap a channel name to turn it on or off; you can also do it from Play. Click is the metronome. On iPhone, turn off silent mode if there is no sound.',
       struct: 'Song structure', 'struct.order': 'Order', 'struct.parts': 'Parts', 'struct.add': '+ Add', 'struct.add.aria': 'Add a part to the order', 'struct.new': '+ New part',
       'struct.foot.order': 'The order the parts play in. Tap × to remove one; Add puts a part at the end.',
-      'struct.foot.parts': 'Each part has its chords and how long each one lasts. While playing, the app moves on to the next part by itself and the pad changes chord as each one ends.',
+      'struct.foot.parts': 'Each part has its chords and how long each one lasts. Play shows them under the part name; with the pad on Auto it changes chord as each one ends. To move from part to part on its own, turn on Rhythm › Move through the song.',
       'seq.remove': (p) => 'Remove ' + p, 'bars.short': 'bars', 'bars.n': (n) => n === 1 ? '1 bar' : n === .5 ? 'half a bar' : `${fmtBars(n)} bars`,
       'dur.half': 'half', 'dur.one': 'bar', 'dur.many': 'bars',
       'part.tap': 'Tap a chord to add it', 'part.ask': 'how many bars?', cancel: 'Cancel', 'part.sounds': 'How it goes', 'part.nochords': 'no chords',
@@ -1380,6 +1386,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       b.firstChild.firstChild.style.width = i === at && live ? Math.min(100, (bar - 1 + (pos.s + 1) / steps) / len * 100) + '%' : '0';
     });
     $('partname').textContent = partLabel(at);
+    drawChords(at, live ? (bar - 1) + pos.s / steps : null);
     const pp = $('partpos'); pp.textContent = '';
     if (playing && pos && pos.counting) pp.textContent = T('counting');
     else {
@@ -1394,6 +1401,46 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     $('nextname').textContent = nextPart === null ? '—' : partLabel(nextPart);
     $('next').setAttribute('aria-label', T('next.aria', $('nextname').textContent));
   }
+  // The chords of the part on the line above, as chips: the one the song is on is lit while playing. They are
+  // shown in Manual too, so the musician sees what to play. Tapping them opens that part's editor. When the
+  // part has chords but the pad does not follow them (Manual or Tónica + 5ª), "Usar acordes" puts it on Auto.
+  const followsSong = () => S.padHand === 'auto' && S.padMode !== 'fifths';
+  let pchSig = '', pchNow = -1;
+  function drawChords(at, off) {
+    const P = partOf(at), btn = $('pchords'), list = btn.firstChild;
+    const sig = [seqAt(at), JSON.stringify(P.ch), S.key, S.names, S.lang, at].join('|');
+    if (sig !== pchSig) {
+      pchSig = sig; pchNow = -1; list.textContent = '';
+      if (!P.ch.length) { const e = document.createElement('span'); e.className = 'pch-empty'; e.textContent = T('pch.empty'); list.appendChild(e); }
+      for (const [c, n] of P.ch) {
+        const i = document.createElement('i'); i.className = FN[c]; i.textContent = chordName(c);
+        if (n !== 1) { const sm = document.createElement('small'); sm.textContent = fmtBars(n); i.appendChild(sm); }
+        list.appendChild(i);
+      }
+      btn.setAttribute('aria-label', T('pch.aria', partLabel(at)) + (P.ch.length ? ': ' + P.ch.map(([c]) => chordName(c)).join(', ') : ''));
+    }
+    // Which chord the song is on: off is bars into the part (null when stopped).
+    let now = -1;
+    if (off !== null && P.ch.length) {
+      let b = 0; now = P.ch.length - 1;
+      for (let k = 0; k < P.ch.length; k++) { b += P.ch[k][1]; if (off < b - 1e-6) { now = k; break; } }
+    }
+    if (now !== pchNow) {
+      pchNow = now;
+      [...list.children].forEach((x, k) => x.classList.toggle('now', k === now));
+      const x = list.children[now];
+      if (x && (x.offsetLeft + x.offsetWidth > list.scrollLeft + list.clientWidth - 24 || x.offsetLeft < list.scrollLeft)) list.scrollLeft = x.offsetLeft - 4;
+      else if (now <= 0) list.scrollLeft = 0;
+    }
+    btn.classList.toggle('idle', !followsSong());
+    $('pchuse').hidden = !P.ch.length || followsSong();
+  }
+  function followSong() {
+    S.padHand = 'auto'; S.padMode = 'chord'; S.chord = songChord();
+    save(); paintWin(); padPlay(); drawPos();
+  }
+  $('pchords').addEventListener('click', () => editPart(seqAt(Math.min(playing && pos && !pos.counting ? pos.at : S.at, S.song.seq.length - 1)), 'tocar'));
+  $('pchuse').addEventListener('click', followSong);
   // A part on the map (or Siguiente). Stopped: Play starts there. Playing: it comes in on the next bar, with a
   // fill before it. The part that is playing asks for a fill instead.
   function choosePart(i) {
@@ -1534,6 +1581,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     $('hint').textContent = T(fifths ? 'hint.fifths' : S.held.length ? 'hint.held' : 'hint.silent');
     document.querySelectorAll('#mode button').forEach((b) => { const o = b.dataset.m === S.padHand; b.classList.toggle('on', o); b.setAttribute('aria-checked', String(o)); });
     $('padmode').setAttribute('aria-checked', String(fifths));
+    if (pchSig) drawPos(); // "Usar acordes" shows only while the pad does not follow the song
   }
   function toggleHeld(c) {
     const i = S.held.indexOf(c);
@@ -1687,7 +1735,13 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     save(); renderSeq(); renderParts(); drawPos();
     if (playing) { if (moved) { ui.pend = null; want.pend = null; want.at = S.at; } changed(); }
   }
-  function editPart(k) { editing = k; adding = null; selChord = null; drawPart(); window.acompShow?.('parte'); }
+  // The editor opens from Sonido › Partes or from the chords on Tocar; its back button returns there.
+  function editPart(k, from = 'sonido') {
+    editing = k; adding = null; selChord = null; drawPart();
+    const back = $('pback'); back.dataset.go = from; back.lastChild.dataset.i18n = 'tab.' + from; back.lastChild.textContent = T('tab.' + from);
+    $('tab-parte').dataset.parent = from;
+    window.acompShow?.('parte');
+  }
   // Part editor: chords first. Tapping one asks how long it lasts and adds it; tapping one already in the
   // list opens its length and Quitar. The part lasts what its chords add up to.
   const DUR_BTN = [[.5, '½', 'dur.half'], [1, '1', 'dur.one'], [2, '2', 'dur.many'], [4, '4', 'dur.many']];
@@ -1754,7 +1808,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     if (!k || partKeys().length <= 1) return;
     delete S.song.parts[k]; editing = null;
     dropFromSeq((x) => x === k);
-    window.acompShow?.('sonido');
+    window.acompShow?.($('pback').dataset.go);
   });
 
   function buildStyles() {
@@ -2034,6 +2088,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   $('autofill').value = String(S.autoFill);
   $('shktone').value = S.shkTone;
   $('follow').setAttribute('aria-checked', String(S.follow));
+  $('micbox').hidden = !MIC_UI;
   $('stats').setAttribute('aria-checked', String(S.stats));
   $('stats').addEventListener('click', () => { S.stats = !S.stats; save(); $('stats').setAttribute('aria-checked', String(S.stats)); });
   // Closing the app while it plays never reaches Stop: count that Play when the page goes away.

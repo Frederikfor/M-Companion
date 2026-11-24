@@ -21,11 +21,12 @@ De arriba abajo (diseño C5a, ver [decisiones.md](decisiones.md)):
 | Cabecera | Nombre de canción (`.songbtn`), compás (`#meterlbl`), BPM (`#bpm`) | Abre Canciones; cambia compás; muestra tempo | estable |
 | Tempo | −5, −, **Marcar tempo** (`#tap`), +, +5 | Ajuste fino y tap tempo | estable |
 | Parte | `#partname`, `#partpos` (compás/total → siguiente, ↻ si repite), mapa `#map` | Tocar una parte la elige o la pide para el siguiente compás | estable |
+| Acordes de la parte (1.9.0) | `#pchords` (chips con los acordes de la parte, colores por función, el que suena se ilumina también en Manual, lápiz), `#pchuse` *Usar acordes* | Tocar los acordes abre el editor de esa parte (vuelve a Tocar). *Usar acordes* aparece si la parte tiene acordes y el pad no los sigue (Manual o Tónica + 5ª) y pone Auto con acordes completos | nuevo |
 | Pad | `< nombre >` (`#padprev`, `#padmid`, `#padnext`) | Cambia el sonido del pad | estable |
 | Armonía | Dial de tonalidad (`#dial`), ventana de acordes (`#win`, I IV V / ii vi iii, colores por función), **Auto/Manual** (`#mode`), **Tónica + 5ª** (`#padmode`), leyenda/pista | Elige tono y acorde del pad | estable |
 | Zona del pulgar | Canales **Shaker · Batería · Pad · Clic** (`#tiles`, con LED), **Remate** (`#fill`), **Play/Stop** (`#play`), **Siguiente** (`#next`) | Encender canales, remate a mano, transporte | estable |
 
-**Importante (causa de confusión):** por defecto (desde 1.7.0) el pad está en **Manual + Tónica + 5ª** (`src/engine.js:381`). En ese modo los acordes de la estructura **no suenan**: `autoChord()` solo actúa en Auto (`src/engine.js:1003-1009`) y con Tónica + 5ª la ventana de acordes está apagada. Tocar no muestra los acordes de la parte actual ni del siguiente compás.
+**Valores por defecto:** desde 1.7.0 el pad está en **Manual + Tónica + 5ª** (D-2026-11-08-2). En ese modo los acordes de la estructura no suenan (`autoChord()` solo actúa en Auto). Desde 1.9.0 Tocar lo hace visible: los acordes de la parte se ven atenuados y aparece *Usar acordes* (D-2026-11-24-2). Los valores por defecto no cambiaron.
 
 ## Ritmo (`#tab-ritmo`)
 | Grupo | Controles | Estado |
@@ -33,7 +34,7 @@ De arriba abajo (diseño C5a, ver [decisiones.md](decisiones.md)):
 | Estilo | Estilo, Patrón de shaker, Sonido del shaker, Tono de la percusión | estable |
 | Clic | Pulsos del clic (fuerte/normal/suave/silencio por pulso) | estable |
 | Interpretación | Toque humano, **Avanzar por la canción**, Conteo de entrada, Remate automático | estable |
-| Micrófono · beta | **Escuchar mi tempo** (`#mic`), **La base me sigue** (`#follow`), lectura `#micread`, mensaje `#micmsg` | **beta, no fiable en vivo** → recomendación: ocultar. Ver [auditoría](auditorias/2026-11-23-codigo.md#1-micrófono-escuchar-mi-tempo-y-la-base-me-sigue) |
+| Micrófono · beta | **Escuchar mi tempo** (`#mic`), **La base me sigue** (`#follow`), lectura `#micread`, mensaje `#micmsg`, dentro de `#micbox` | **oculto desde 1.9.0** (`MIC_UI = false` en `src/engine.js`, código intacto; D-2026-11-24-1). Ver [auditoría](auditorias/2026-11-23-codigo.md#1-micrófono-escuchar-mi-tempo-y-la-base-me-sigue) |
 
 ## Sonido (`#tab-sonido`)
 | Grupo | Controles | Estado |
@@ -55,7 +56,7 @@ No guarda mezcla, paneo ni fuerza del clic (son del equipo, README §5.9).
 ## Funciones pedidas o en discusión
 | Función | Estado | Dónde se sigue |
 |---|---|---|
-| Acordes por parte visibles/editables desde Tocar ("modo construcción") | pendiente (Fase 2) | [feedback.md](feedback.md) F-2026-11-22-3, [roadmap.md](roadmap.md) |
+| Acordes por parte visibles/editables desde Tocar ("modo construcción") | **hecho en 1.9.0** (opción A: chips en Tocar que abren el editor) | [feedback.md](feedback.md) F-2026-11-22-3, [roadmap.md](roadmap.md) |
 | Mejor calidad de batería, shakers y pads (tope ~100 MB) | pendiente (Fase 3) | [sonido.md](sonido.md) |
 | Pad de batería (tocar golpes a mano) | pendiente (Fase 4, prototipo primero) | [roadmap.md](roadmap.md) |
 | Multitrack + videokaraoke | **descartado** 2026-11-23 | [decisiones.md](decisiones.md) |
