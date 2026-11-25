@@ -6,9 +6,9 @@ Aprobada por Frederik el 2026-11-23 (D-2026-11-23-2). Cada fase termina con algo
 |---|---|---|---|
 | **0. Diagnóstico** (en paralelo, solo lectura) | a) Auditoría de código + documentación base. b) Auditoría de sonido y fuentes CC0 (~100 MB). c) Principios de UX para apps musicales en vivo. | a) hecha 2026-11-23 ([auditoría](auditorias/2026-11-23-codigo.md)). b) y c) en curso | `docs/` completo; [sonido.md](sonido.md) y [diseno.md](diseno.md) llenos |
 | **1. Propósito y decisiones** | Una página con propósito, usuario principal, qué no es, y las recomendaciones de la Fase 0 con fuentes. | pendiente | Base: [proposito.md](proposito.md) |
-| **2. Cambios rápidos** | Ocultar micrófono (si se confirma); acordes por parte visibles y editables desde Tocar; corregir textos que contradicen los valores por defecto. | pendiente | Versión 1.9.0 |
+| **2. Cambios rápidos** | Ocultar micrófono; acordes por parte visibles y editables desde Tocar; corregir textos que contradicen los valores por defecto. | **hecha en 1.9.0** (2026-11-24, D-2026-11-24-1 y -2), en revisión en su PR | Versión 1.9.0 |
 | **3. Sonido** | Nuevas muestras con capas de intensidad y variantes; carga por demanda para seguir abriendo rápido. | pendiente | Versión con batería mejorada |
-| **4. Pad de batería** | Prototipo de pantalla para aprobar; luego código. | pendiente | Prototipo → versión |
+| **4. Pad de batería** | Prototipo de pantalla para aprobar; luego código. | **hecho en 2.0.0** como pestaña Ensamble (golpes, loops y fondos con las muestras actuales); falta probar en tablet y en vivo | Prototipo → versión 2.0.0 |
 
 ## Ideas abiertas (sin fase)
 - Setlist por servicio (README §7).
