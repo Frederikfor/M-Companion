@@ -17,6 +17,10 @@
   ];
   // Harmonic function of each degree, for the chord colours: rest (I, iii, vi), moves away (ii, IV), tension (V).
   const FN = ['rest', 'away', 'rest', 'away', 'tense', 'rest'];
+  // Ritmo › Micrófono (Escuchar mi tempo, La base me sigue) stays hidden until it works on stage: with the backing
+  // in the microphone it reads "on tempo" when the musician is not (docs/auditorias/2026-11-23-codigo.md).
+  // The code stays; true shows it again.
+  const MIC_UI = false;
 
   // ---------- Rhythm styles ----------
   // One character per step: X strong, x normal, o soft, g ghost, . silence.
@@ -189,6 +193,7 @@
       'fn.rest': 'Reposo', 'fn.away': 'Se aleja', 'fn.tense': 'Tensión', sounding: 'suena',
       'mode.aria': 'Cómo cambia el pad', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Tónica + 5ª',
       'hint.fifths': 'Tónica + 5ª: el pad no cambia de acorde', 'hint.held': 'Toca para cambiar · mantén uno y toca otro para sumar', 'hint.silent': 'Pad en silencio · toca un acorde',
+      'pch.aria': (p) => `Acordes de ${p}. Toca para editarlos`, 'pch.empty': '+ Acordes de esta parte', 'pch.use': 'Usar acordes', 'pch.use.aria': 'Que el pad toque los acordes de la canción (Auto)',
       style: 'Estilo', 'shaker.pattern': 'Patrón de shaker', 'shaker.sound': 'Sonido del shaker', feel: 'Interpretación', human: 'Toque humano',
       'shaker.tone': 'Tono de la percusión', 'tone.soft': 'Suave', 'tone.normal': 'Normal', 'tone.bright': 'Brillante',
       'click.cap': 'Clic', 'click.beats': 'Pulsos del clic', 'click.foot': 'Toca un pulso para cambiar su fuerza: fuerte, normal, suave o en silencio. Cada compás guarda los suyos.',
@@ -207,15 +212,15 @@
       'mic.read': (det, set) => `Detecto <b>${det}</b> BPM · marcado ${set}`, 'mic.fast': 'Te estás acelerando', 'mic.slow': 'Te estás frenando',
       'mic.adjusted': ' · ajusté el tempo', 'mic.suggest': ' · activa "La base me sigue" para que la base te siga', 'mic.ok': 'Vas a tempo.',
       key: 'Tonalidad', 'key.opt': 'Tono', 'pad.sound': 'Sonido del pad', 'pad.fifths': 'Solo tónica y quinta', 'pad.move': 'Movimiento', 'pad.rich': 'Riqueza', names: 'Nombres de notas',
-      'pad.foot': 'Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Tocar.',
+      'pad.foot': 'Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Pad.',
       mix: 'Mezcla', 'ch.shaker': 'Shaker', 'ch.drums': 'Batería', 'ch.pad': 'Pad', 'ch.click': 'Clic',
       'ch.mute': (c) => `Encender o apagar ${c}`, 'ch.vol': (c) => `Volumen ${c}`,
       pan: 'Paneo', 'pan.center': 'Todo al centro', 'pan.aria': (c) => `Lado de ${c}`, 'side.L': 'Izq', 'side.C': 'Centro', 'side.R': 'Der', 'tag.L': 'IZQ', 'tag.R': 'DER',
       'pan.foot': 'Centro suena por los dos lados. Con el adaptador USB-C y un cable de 3.5 mm a dos plugs, cada lado entra a su propio canal de la mezcladora.',
-      'mix.foot': 'Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar. Clic es el metrónomo. En iPhone quita el modo silencio si no suena.',
+      'mix.foot': 'Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Pad o Ensamble. Clic es el metrónomo. En iPhone quita el modo silencio si no suena.',
       struct: 'Estructura de la canción', 'struct.order': 'Orden', 'struct.parts': 'Partes', 'struct.add': '+ Añadir', 'struct.add.aria': 'Añadir una parte al orden', 'struct.new': '+ Nueva parte',
       'struct.foot.order': 'El orden en que suenan las partes. Toca × para quitar una; Añadir pone una parte al final.',
-      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. Al tocar, la app pasa sola a la parte siguiente y el pad cambia de acorde cuando termina cada uno.',
+      'struct.foot.parts': 'Cada parte tiene sus acordes y cuánto dura cada uno. En Pad y Ensamble se ven bajo el nombre de la parte; con el pad en Auto cambia de acorde cuando termina cada uno. Para pasar sola de parte en parte, activa Ritmo › Avanzar por la canción.',
       'seq.remove': (p) => 'Quitar ' + p, 'bars.short': 'c.', 'bars.n': (n) => n === 1 ? '1 compás' : n === .5 ? 'medio compás' : `${fmtBars(n)} compases`,
       'dur.half': 'medio', 'dur.one': 'compás', 'dur.many': 'compases',
       'part.tap': 'Toca un acorde para añadirlo', 'part.ask': '¿cuántos compases?', cancel: 'Cancelar', 'part.sounds': 'Así suena', 'part.nochords': 'sin acordes',
@@ -230,6 +235,71 @@
       'songs.foot': 'Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.',
       'songs.empty': 'Todavía no hay canciones. Ajusta tempo, compás, estilo y tono, escribe el nombre y pulsa Guardar.',
       del: 'Borrar', 'del.aria': (name) => 'Borrar ' + name,
+      // 2.0: three tabs, Ensamble, first launch, guide and help. Help texts: 15 words at most, plain musical words.
+      'tab.ajustes': 'Ajustes', 'tab.pad': 'Pad', 'tab.ens': 'Ensamble', 'tab.app': 'App', 'app.general': 'General',
+      center: 'Pantalla en el centro', 'center.foot': 'La que más usas. Las pestañas no cambian de lugar.',
+      adv: 'Modo avanzado', 'adv.sub': 'Banco B y más sonidos en Ensamble', 'adv.on': 'Modo avanzado: banco B en Ensamble.', 'adv.off': 'Modo sencillo: lo esencial.',
+      'guide.cap': 'Ayuda', tips: 'Consejo al abrir', 'tips.sub': 'Un consejo corto cada vez que abres la app',
+      'tips.on': 'Verás un consejo corto al abrir la app.', 'tips.off': 'Listo, sin consejos al abrir. La ayuda sigue en el botón ?.',
+      'tour.again': 'Repetir la guía rápida', 'help.center': 'Centro de ayuda', 'help.title': 'Ayuda', close: 'Cerrar', done: 'Listo',
+      'onb.title': '¿Cómo quieres empezar?', 'onb.sub': 'Elige lo que más vas a usar. Lo demás queda a un toque.', 'onb.rec': 'Recomendado',
+      'onb.pad': 'Si quieres algo sencillo, para tocar solo o en grupo: pad, shaker y clic.',
+      'onb.ens': 'Para combinaciones más completas: remates de batería, platillos y otros sonidos.',
+      'onb.foot': 'Empiezas en modo sencillo. Todo se cambia luego en Ajustes › App.',
+      'tour.skip': 'Omitir', 'tour.next': 'Siguiente', 'tour.start': 'Empezar', 'tour.ok': 'Entendido', 'tour.step': (n, m) => `PASO ${n} DE ${m}`, 'tour.one': 'AYUDA',
+      'tour.end.pad': 'Dale ▶ para escuchar el Pad.', 'tour.end.ens': 'Dale ▶ y prueba los botones de Ensamble.',
+      'tip.more': 'Más', 'tip.closed': 'Puedes apagar los consejos en Ajustes › App.',
+      'help.why': 'De lo básico a lo avanzado. "Muéstramelo" te lo señala en pantalla.', 'help.tour': '▶ Repetir la guía rápida', 'help.show': 'Muéstramelo',
+      'help.foot': 'Los consejos al abrir se apagan en Ajustes › App.', 'lvl.b': 'BÁSICO', 'lvl.m': 'INTERMEDIO', 'lvl.a': 'AVANZADO',
+      'play.padon': 'Encendí el Pad para que suene algo. Puedes cambiarlo abajo.',
+      'ens.bank': 'Banco', 'ens.bankA': 'Banco A', 'ens.bankB': 'Banco B', 'ens.edit': 'Editar', 'ens.done': 'Listo',
+      'type.hit': 'Golpe', 'type.loop': 'Loop', 'type.bed': 'Fondo',
+      'ens.k.hit': 'suena una vez', 'ens.k.cut': 'calla la batería', 'ens.k.loop': 'se repite', 'ens.k.armed': 'próximo compás…', 'ens.k.playing': 'sonando',
+      'ens.k.stopping': 'se detiene…', 'ens.k.bed': (k) => 'fondo en ' + k, 'ens.ctx': (k) => 'Fondos en ' + k + ' · golpes y loops a tiempo',
+      'ens.empty': 'Toca Editar para añadir un sonido aquí.', 'ens.slot': 'Botón vacío',
+      'ens.loop.play': 'Los loops entran a tiempo con la canción: dale ▶ y luego tócalo.', 'ens.bed.play': 'Listo. Dale ▶ para escuchar el fondo.',
+      'ens.cut.need': 'Corte calla la batería un compás. Enciende Batería y dale ▶.',
+      'ens.edit.hint': 'Toca un botón para cambiarlo, o + para sumar uno. Toca Listo al final.',
+      'ens.change': 'Cambiar sonido', 'ens.add': 'Añadir sonido', 'ens.pick.why': 'Golpe suena una vez. Loop se repite. Fondo se queda sonando.', 'ens.remove': 'Quitar este sonido',
+      guide: {
+        tour: {
+          play: ['Empieza aquí', '▶ empieza y para. Los cambios entran en el siguiente compás, sin cortar.'],
+          tiles: ['Tocar enciende, mantener configura', 'Toca para encender o apagar. Mantén presionado para elegir el sonido.'],
+          map: ['Las partes de la canción', 'Toca una parte para ir ahí. Mantenla para ver sus acordes.'],
+          pad: ['Tu pad', 'Desliza para cambiar la tonalidad. Auto sigue la canción; Manual sigue tus dedos.'],
+          ens: ['Ensamble', 'Golpe suena una vez. Loop se repite. Fondo se queda sonando.'],
+          tabs: ['Tus pantallas', (c, o) => `Ajustes a la izquierda, ${c} en el centro y ${o} a la derecha.`],
+          help: ['Si te pierdes', '¿Dudas? Toca ? y te mostramos cada cosa paso a paso.']
+        },
+        tips: [
+          ['Mantén una parte del mapa para ver y editar sus acordes.', 'Acordes por parte', 'Mantén presionada cualquier parte del mapa para ver sus acordes y cambiarlos.'],
+          ['Mantén un canal para configurarlo sin ir a Ajustes.', 'Configurar un canal', 'Mantén presionado Shaker, Batería, Pad o Clic para cambiar su sonido.'],
+          ['Siguiente cambia de parte justo al terminar el compás.', 'Cambiar de parte', 'Siguiente pasa a la próxima parte al terminar el compás.'],
+          ['Remate necesita la batería encendida.', 'Remate', 'Remate toca un redoble de batería. Primero enciende Batería.'],
+          ['Arrastra el dial de tonalidad hacia los lados.', 'Cambiar tonalidad', 'En Pad, desliza el dial. Al soltarlo, el pad cambia de nota.'],
+          ['En Ensamble, toca Editar para elegir tus propios sonidos.', 'Armar tu ensamble', 'Toca Editar: los botones tiemblan, tocas uno para cambiarlo y + para añadir.']
+        ],
+        help: [
+          { h: 'Lo básico', it: [
+            ['¿Cómo empiezo a tocar?', 'Toca ▶. Primero suena el Pad. Toca Shaker, Batería o Clic para sumarlos.', 'Empezar', 'Toca ▶ para arrancar y ■ para detener.'],
+            ['Encender y configurar canales', 'Toca para encender o apagar. Mantén presionado para cambiar estilo o sonido.', 'Canales', 'Toca para encender, mantén para configurar.'],
+            ['Cambiar de canción y tempo', 'Toca el título para cambiar de canción. Usa −/+ para el tempo.', 'Canción y tempo', 'El título abre tus canciones; el número grande es el tempo.'],
+            ['Moverme por la canción', 'Siguiente pasa a la próxima parte. También puedes tocar el mapa.', 'Mapa', 'Toca una parte para ir a ella en el próximo compás.']] },
+          { h: 'Pad', it: [
+            ['Elegir la tonalidad', 'Arrastra el dial hacia los lados o tócalo para ver la lista.', 'Dial', 'Arrastra hacia los lados para cambiar de tonalidad.'],
+            ['Auto o Manual', 'Auto: el pad sigue los acordes. Manual: tú eliges el acorde.', 'Auto y Manual', 'Elige si el pad sigue la canción o tus dedos.'],
+            ['Tónica + 5ª', 'Encendido, suena una sola nota base. Funciona con cualquier canción.', 'Tónica + 5ª', 'La forma más segura de acompañar sin saber los acordes.']] },
+          { h: 'Ensamble', it: [
+            ['Golpe, Loop y Fondo', 'Golpe suena una vez. Loop se repite hasta que lo tocas. Fondo se queda sonando.', 'Tipos de botón', 'Naranja: golpe. Verde: loop. Azul: fondo.'],
+            ['Cambiar o añadir sonidos', 'Toca Editar y luego un botón para cambiar su sonido, o + para sumar.', 'Editar', 'Entra al modo edición desde aquí.'],
+            ['¿Por qué se calló un loop?', 'Suena un loop a la vez. El nuevo entra y el anterior se calla.'],
+            ['¿Por qué cambió el Pad?', 'Un Fondo usa el canal Pad: elegir otro fondo cambia su sonido.']] },
+          { h: 'Avanzado', it: [
+            ['Modo avanzado', 'En Ajustes › App: banco B con más golpes, loops y fondos.'],
+            ['Clic solo para mí', 'El clic sale solo por la izquierda. Así solo tú lo oyes con audífonos.', 'Clic IZQ', 'Mantén Clic para elegir la fuerza de cada tiempo.'],
+            ['Remate y Corte', 'Remate toca un redoble de batería. Corte calla la batería un compás.', 'Remate', 'Necesita la batería encendida.']] }
+        ]
+      },
       groups: { 'Worship': 'Worship', 'Oración y ministración': 'Oración y ministración', 'Alabanza': 'Alabanza', 'Himnos y gospel': 'Himnos y gospel' }
     },
     en: {
@@ -249,6 +319,7 @@
       'fn.rest': 'Rest', 'fn.away': 'Moves away', 'fn.tense': 'Tension', sounding: 'on',
       'mode.aria': 'How the pad changes', 'mode.auto': 'Auto', 'mode.manual': 'Manual', 'fifths.short': 'Root + 5th',
       'hint.fifths': 'Root + 5th: the pad does not change chords', 'hint.held': 'Tap to change · hold one and tap another to add', 'hint.silent': 'Pad silent · tap a chord',
+      'pch.aria': (p) => `Chords of ${p}. Tap to edit them`, 'pch.empty': '+ Chords for this part', 'pch.use': 'Use chords', 'pch.use.aria': 'Make the pad play the song\'s chords (Auto)',
       style: 'Style', 'shaker.pattern': 'Shaker pattern', 'shaker.sound': 'Shaker sound', feel: 'Feel', human: 'Human feel',
       'shaker.tone': 'Percussion tone', 'tone.soft': 'Soft', 'tone.normal': 'Normal', 'tone.bright': 'Bright',
       'click.cap': 'Click', 'click.beats': 'Click beats', 'click.foot': 'Tap a beat to change how hard it sounds: strong, normal, soft or silent. Each time signature keeps its own.',
@@ -267,15 +338,15 @@
       'mic.read': (det, set) => `Hearing <b>${det}</b> BPM · set ${set}`, 'mic.fast': 'You are speeding up', 'mic.slow': 'You are slowing down',
       'mic.adjusted': ' · tempo adjusted', 'mic.suggest': ' · turn on "Backing follows me" so the backing follows you', 'mic.ok': 'You are on tempo.',
       key: 'Key', 'key.opt': 'Key', 'pad.sound': 'Pad sound', 'pad.fifths': 'Root and fifth only', 'pad.move': 'Movement', 'pad.rich': 'Richness', names: 'Note names',
-      'pad.foot': 'Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed. Root + 5th and Manual mode are on Play.',
+      'pad.foot': 'Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed. Root + 5th and Manual mode are on Pad.',
       mix: 'Mix', 'ch.shaker': 'Shaker', 'ch.drums': 'Drums', 'ch.pad': 'Pad', 'ch.click': 'Click',
       'ch.mute': (c) => `Turn ${c} on or off`, 'ch.vol': (c) => `${c} volume`,
       pan: 'Pan', 'pan.center': 'All centred', 'pan.aria': (c) => `${c} side`, 'side.L': 'Left', 'side.C': 'Centre', 'side.R': 'Right', 'tag.L': 'L', 'tag.R': 'R',
       'pan.foot': 'Centre plays on both sides. With the USB-C adapter and a 3.5 mm to two-plug cable, each side goes into its own mixer channel.',
-      'mix.foot': 'Tap a channel name to turn it on or off; you can also do it from Play. Click is the metronome. On iPhone, turn off silent mode if there is no sound.',
+      'mix.foot': 'Tap a channel name to turn it on or off; you can also do it from Pad or Ensemble. Click is the metronome. On iPhone, turn off silent mode if there is no sound.',
       struct: 'Song structure', 'struct.order': 'Order', 'struct.parts': 'Parts', 'struct.add': '+ Add', 'struct.add.aria': 'Add a part to the order', 'struct.new': '+ New part',
       'struct.foot.order': 'The order the parts play in. Tap × to remove one; Add puts a part at the end.',
-      'struct.foot.parts': 'Each part has its chords and how long each one lasts. While playing, the app moves on to the next part by itself and the pad changes chord as each one ends.',
+      'struct.foot.parts': 'Each part has its chords and how long each one lasts. Pad and Ensemble show them under the part name; with the pad on Auto it changes chord as each one ends. To move from part to part on its own, turn on Rhythm › Move through the song.',
       'seq.remove': (p) => 'Remove ' + p, 'bars.short': 'bars', 'bars.n': (n) => n === 1 ? '1 bar' : n === .5 ? 'half a bar' : `${fmtBars(n)} bars`,
       'dur.half': 'half', 'dur.one': 'bar', 'dur.many': 'bars',
       'part.tap': 'Tap a chord to add it', 'part.ask': 'how many bars?', cancel: 'Cancel', 'part.sounds': 'How it goes', 'part.nochords': 'no chords',
@@ -290,6 +361,70 @@
       'songs.foot': 'Tap a song to load it. Tap ✕ twice to delete it.',
       'songs.empty': 'No songs yet. Set the tempo, time signature, style and key, type a name and tap Save.',
       del: 'Delete', 'del.aria': (name) => 'Delete ' + name,
+      'tab.ajustes': 'Settings', 'tab.pad': 'Pad', 'tab.ens': 'Ensemble', 'tab.app': 'App', 'app.general': 'General',
+      center: 'Center screen', 'center.foot': 'The one you use most. Tabs never change place.',
+      adv: 'Advanced mode', 'adv.sub': 'Bank B and more sounds in Ensemble', 'adv.on': 'Advanced mode: bank B in Ensemble.', 'adv.off': 'Simple mode: the essentials.',
+      'guide.cap': 'Help', tips: 'Tip at launch', 'tips.sub': 'A short tip each time you open the app',
+      'tips.on': 'You will see a short tip when you open the app.', 'tips.off': 'Done, no tips at launch. Help is still on the ? button.',
+      'tour.again': 'Replay the quick tour', 'help.center': 'Help center', 'help.title': 'Help', close: 'Close', done: 'Done',
+      'onb.title': 'Your first step', 'onb.sub': 'Pick what you will use most. Everything else is one tap away.', 'onb.rec': 'Recommended',
+      'onb.pad': 'If you want something simple, solo or with a band: pad, shaker and click.',
+      'onb.ens': 'For richer combinations: drum fills, cymbals and other sounds.',
+      'onb.foot': 'You start in simple mode. Change anything later in Settings › App.',
+      'tour.skip': 'Skip', 'tour.next': 'Next', 'tour.start': 'Start', 'tour.ok': 'Got it', 'tour.step': (n, m) => `STEP ${n} OF ${m}`, 'tour.one': 'HELP',
+      'tour.end.pad': 'Press ▶ to hear the Pad.', 'tour.end.ens': 'Press ▶ and try the Ensemble buttons.',
+      'tip.more': 'More', 'tip.closed': 'You can turn tips off in Settings › App.',
+      'help.why': 'From basic to advanced. "Show me" points to it on screen.', 'help.tour': '▶ Replay the quick tour', 'help.show': 'Show me',
+      'help.foot': 'Turn off tips at launch in Settings › App.', 'lvl.b': 'BASIC', 'lvl.m': 'INTERMEDIATE', 'lvl.a': 'ADVANCED',
+      'play.padon': 'I turned on the Pad so something plays. You can change it below.',
+      'ens.bank': 'Bank', 'ens.bankA': 'Bank A', 'ens.bankB': 'Bank B', 'ens.edit': 'Edit', 'ens.done': 'Done',
+      'type.hit': 'Hit', 'type.loop': 'Loop', 'type.bed': 'Bed',
+      'ens.k.hit': 'plays once', 'ens.k.cut': 'silences the drums', 'ens.k.loop': 'repeats', 'ens.k.armed': 'next bar…', 'ens.k.playing': 'playing',
+      'ens.k.stopping': 'stopping…', 'ens.k.bed': (k) => 'bed in ' + k, 'ens.ctx': (k) => 'Beds in ' + k + ' · hits and loops in time',
+      'ens.empty': 'Tap Edit to add a sound here.', 'ens.slot': 'Empty button',
+      'ens.loop.play': 'Loops come in on time with the song: press ▶, then tap it.', 'ens.bed.play': 'Done. Press ▶ to hear the bed.',
+      'ens.cut.need': 'Cut silences the drums for a bar. Turn on Drums and press ▶.',
+      'ens.edit.hint': 'Tap a button to change it, or + to add one. Tap Done when finished.',
+      'ens.change': 'Change sound', 'ens.add': 'Add a sound', 'ens.pick.why': 'Hit plays once. Loop repeats. Bed keeps ringing.', 'ens.remove': 'Remove this sound',
+      guide: {
+        tour: {
+          play: ['Start here', '▶ starts and stops. Changes come in on the next bar, smoothly.'],
+          tiles: ['Tap turns on, hold sets up', 'Tap to turn on or off. Hold to choose the sound.'],
+          map: ['The song parts', 'Tap a part to go there. Hold it to see its chords.'],
+          pad: ['Your pad', 'Slide to change the key. Auto follows the song; Manual follows your fingers.'],
+          ens: ['Ensemble', 'Hit plays once. Loop repeats. Bed keeps ringing.'],
+          tabs: ['Your screens', (c, o) => `Settings on the left, ${c} in the center and ${o} on the right.`],
+          help: ['If you get lost', 'Questions? Tap ? and we will show you each thing, step by step.']
+        },
+        tips: [
+          ['Hold a part on the map to see and edit its chords.', 'Chords per part', 'Hold any part on the map to see its chords and change them.'],
+          ['Hold a channel to set it up without going to Settings.', 'Setting up a channel', 'Hold Shaker, Drums, Pad or Click to change its sound.'],
+          ['Next changes part right when the bar ends.', 'Changing part', 'Next moves to the next part when the bar ends.'],
+          ['Fill needs the drums on.', 'Fill', 'Fill plays a drum roll. Turn on Drums first.'],
+          ['Drag the key dial sideways.', 'Changing key', 'In Pad, slide the dial. When you let go, the pad changes note.'],
+          ['In Ensemble, tap Edit to pick your own sounds.', 'Build your ensemble', 'Tap Edit: buttons jiggle, tap one to change it and + to add.']
+        ],
+        help: [
+          { h: 'The basics', it: [
+            ['How do I start?', 'Tap ▶. The Pad plays first. Tap Shaker, Drums or Click to add them.', 'Start', 'Tap ▶ to start and ■ to stop.'],
+            ['Turning channels on and setting them up', 'Tap to turn on or off. Hold to change style or sound.', 'Channels', 'Tap to turn on, hold to set up.'],
+            ['Changing song and tempo', 'Tap the title to change song. Use −/+ for the tempo.', 'Song and tempo', 'The title opens your songs; the big number is the tempo.'],
+            ['Moving through the song', 'Next moves to the next part. You can also tap the map.', 'Map', 'Tap a part to jump to it on the next bar.']] },
+          { h: 'Pad', it: [
+            ['Choosing the key', 'Drag the dial sideways or tap it to see the list.', 'Dial', 'Drag sideways to change key.'],
+            ['Auto or Manual', 'Auto: the pad follows the chords. Manual: you pick the chord.', 'Auto and Manual', 'Choose whether the pad follows the song or your fingers.'],
+            ['Root + 5th', 'When on, one base note plays. It works with any song.', 'Root + 5th', 'The safest way to accompany without knowing the chords.']] },
+          { h: 'Ensemble', it: [
+            ['Hit, Loop and Bed', 'Hit plays once. Loop repeats until you tap it. Bed keeps ringing.', 'Button types', 'Orange: hit. Green: loop. Blue: bed.'],
+            ['Changing or adding sounds', 'Tap Edit, then a button to change its sound, or + to add one.', 'Edit', 'Enter edit mode from here.'],
+            ['Why did a loop stop?', 'One loop plays at a time. The new one comes in, the old one stops.'],
+            ['Why did the Pad change?', 'A Bed uses the Pad channel: picking another bed changes its sound.']] },
+          { h: 'Advanced', it: [
+            ['Advanced mode', 'In Settings › App: bank B with more hits, loops and beds.'],
+            ['Click only for me', 'The click plays only on the left. So only you hear it in headphones.', 'Click L', 'Hold Click to set the accent of each beat.'],
+            ['Fill and Cut', 'Fill plays a drum roll. Cut silences the drums for one bar.', 'Fill', 'Needs the drums on.']] }
+        ]
+      },
       groups: { 'Worship': 'Worship', 'Oración y ministración': 'Prayer & ministry', 'Alabanza': 'Praise', 'Himnos y gospel': 'Hymns & gospel' }
     }
   };
@@ -307,7 +442,7 @@
     $('play').setAttribute('aria-label', T(playing ? 'stop' : 'play'));
     if (!micOn) $('micmsg').textContent = T('mic.hint');
     setUnit(); setFillUi(); buildStyles(); buildShakers(); buildPadUi(); buildKeys(); buildWin(); drawTiles(); buildMix();
-    renderSeq(); renderParts(); tabTo(structTab); drawPos(); drawPart(); renderSongs(); renderVersion(); buildBeats();
+    renderSeq(); renderParts(); tabTo(structTab); drawPos(); drawPart(); renderSongs(); renderVersion(); buildBeats(); applyLang2();
   }
 
   // ---------- Version ----------
@@ -362,6 +497,9 @@
     song: DEFAULT_SONG(), follow: false, lang: 'es'
   };
   const LAYERS0 = JSON.parse(JSON.stringify(S.layers));
+  let firstRun = false;
+  try { firstRun = localStorage.getItem('acomp') === null; } catch (e) {}
+  if (firstRun) S.lang = /^es\b/i.test(navigator.language || 'es') ? 'es' : 'en';
   try { Object.assign(S, JSON.parse(localStorage.getItem('acomp') || '{}')); } catch (e) {}
   delete S.section; delete S.pending;
   if (!STYLES[S.style] || STYLES[S.style].meter !== S.meter) S.style = firstStyle(S.meter);
@@ -448,7 +586,7 @@
   try {
     new PerformanceObserver((l) => { for (const e of l.getEntries()) { diag.longs++; diag.longMax = Math.max(diag.longMax, Math.round(e.duration)); } }).observe({ type: 'longtask', buffered: true });
   } catch (e) {}
-  let ctx, master, buses = {}, pans = {}, meters = {}, countBus, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
+  let ctx, master, buses = {}, pans = {}, meters = {}, countBus, ensBus, noise, padFilter, padLfo, padVoices = [], hall, hallSend;
   let playing = false, timer = null, rhythmIn;
   const uiQueue = [];
 
@@ -484,6 +622,9 @@
       const sg = ctx.createGain(); sg.gain.value = sends[k]; pans[k].connect(sg); sg.connect(room);
     }
     // The click skips the compressor, which would duck the other channels on every beat.
+    // Ensamble plays on its own bus, in the centre, with a little room: Batería or Shaker off does not mute it.
+    ensBus = ctx.createGain(); ensBus.gain.value = 0.85; ensBus.connect(master);
+    const ensSend = ctx.createGain(); ensSend.gain.value = 0.25; ensBus.connect(ensSend); ensSend.connect(room);
     const clickOut = ctx.createGain(); clickOut.gain.value = 0.9; pans.click.connect(clickOut); clickOut.connect(out);
     // The count-in always sounds, even with the click channel off, on the click's side.
     countBus = ctx.createGain(); countBus.connect(pans.click);
@@ -1256,6 +1397,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     if (!playing || !ctx) return;
     const now = ctx.currentTime;
     while (evq.length && evq[0].t <= now + (evq[0].onTime ? 0 : 0.3)) { const e = evq.shift(); e.fn(e.t); if (!playing) return; }
+    ensTick(now);
     if (dirty && chunks.length && now - lastCut > 0.15) { dirty = false; interrupt(); return; }
     if (rendering) return;
     const c = chunks[chunks.length - 1];
@@ -1290,6 +1432,8 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
 
   let wakeLock = null;
   async function start() {
+    // Play with every channel off in Pad would sound like nothing works: turn the pad on and say so.
+    if (view() === 'pad' && !CHANNELS.some((k) => S.layers[k].on)) { setLayer('pad', true); toast(T('play.padon')); }
     initAudio();
     if (ctx.state !== 'running') await ctx.resume();
     $('status').textContent = T('status.loading');
@@ -1310,7 +1454,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
     statT0 = Date.now();
     const on = CHANNELS.filter((k) => S.layers[k].on);
-    stat('play'); stat('canales/' + (on.join('+') || 'ninguno'));
+    stat('play'); stat('modo/' + viewStat(view())); stat('canales/' + (on.join('+') || 'ninguno'));
     if (S.layers.shaker.on || S.layers.drums.on) stat('estilo/' + S.style);
     if (S.layers.pad.on) stat('pad/' + S.pad);
   }
@@ -1326,6 +1470,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       }
     }
     chunks = []; evq = []; uiQueue.length = 0; want = {}; dirty = false;
+    ensStop();
     padStop(soft ? 0.1 : 0.4);
     Object.assign(ui, { queued: false, active: false, counting: false, pend: null }); pos = null;
     if (soft) S.at = 0;
@@ -1354,7 +1499,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
         }
       }
     }
-    drawLeds();
+    drawLeds(); drawEns();
     requestAnimationFrame(frame);
   }
   // Part line, song map and Siguiente: where the song is, what comes next, what is waiting for the next bar.
@@ -1370,6 +1515,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
         const b = document.createElement('button'); b.type = 'button';
         b.innerHTML = '<span class="seg-bar"><i></i></span><span class="lb"></span>';
         b.addEventListener('click', () => choosePart(i));
+        onHold(b, () => editPart(seqAt(i), 'tocar'));
         box.appendChild(b);
       });
     }
@@ -1380,6 +1526,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       b.firstChild.firstChild.style.width = i === at && live ? Math.min(100, (bar - 1 + (pos.s + 1) / steps) / len * 100) + '%' : '0';
     });
     $('partname').textContent = partLabel(at);
+    drawChords(at, live ? (bar - 1) + pos.s / steps : null);
     const pp = $('partpos'); pp.textContent = '';
     if (playing && pos && pos.counting) pp.textContent = T('counting');
     else {
@@ -1394,6 +1541,46 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     $('nextname').textContent = nextPart === null ? '—' : partLabel(nextPart);
     $('next').setAttribute('aria-label', T('next.aria', $('nextname').textContent));
   }
+  // The chords of the part on the line above, as chips: the one the song is on is lit while playing. They are
+  // shown in Manual too, so the musician sees what to play. Tapping them opens that part's editor. When the
+  // part has chords but the pad does not follow them (Manual or Tónica + 5ª), "Usar acordes" puts it on Auto.
+  const followsSong = () => S.padHand === 'auto' && S.padMode !== 'fifths';
+  let pchSig = '', pchNow = -1;
+  function drawChords(at, off) {
+    const P = partOf(at), btn = $('pchords'), list = btn.firstChild;
+    const sig = [seqAt(at), JSON.stringify(P.ch), S.key, S.names, S.lang, at].join('|');
+    if (sig !== pchSig) {
+      pchSig = sig; pchNow = -1; list.textContent = '';
+      if (!P.ch.length) { const e = document.createElement('span'); e.className = 'pch-empty'; e.textContent = T('pch.empty'); list.appendChild(e); }
+      for (const [c, n] of P.ch) {
+        const i = document.createElement('i'); i.className = FN[c]; i.textContent = chordName(c);
+        if (n !== 1) { const sm = document.createElement('small'); sm.textContent = fmtBars(n); i.appendChild(sm); }
+        list.appendChild(i);
+      }
+      btn.setAttribute('aria-label', T('pch.aria', partLabel(at)) + (P.ch.length ? ': ' + P.ch.map(([c]) => chordName(c)).join(', ') : ''));
+    }
+    // Which chord the song is on: off is bars into the part (null when stopped).
+    let now = -1;
+    if (off !== null && P.ch.length) {
+      let b = 0; now = P.ch.length - 1;
+      for (let k = 0; k < P.ch.length; k++) { b += P.ch[k][1]; if (off < b - 1e-6) { now = k; break; } }
+    }
+    if (now !== pchNow) {
+      pchNow = now;
+      [...list.children].forEach((x, k) => x.classList.toggle('now', k === now));
+      const x = list.children[now];
+      if (x && (x.offsetLeft + x.offsetWidth > list.scrollLeft + list.clientWidth - 24 || x.offsetLeft < list.scrollLeft)) list.scrollLeft = x.offsetLeft - 4;
+      else if (now <= 0) list.scrollLeft = 0;
+    }
+    btn.classList.toggle('idle', !followsSong());
+    $('pchuse').hidden = !P.ch.length || followsSong();
+  }
+  function followSong() {
+    S.padHand = 'auto'; S.padMode = 'chord'; S.chord = songChord();
+    save(); paintWin(); padPlay(); drawPos();
+  }
+  $('pchords').addEventListener('click', () => editPart(seqAt(Math.min(playing && pos && !pos.counting ? pos.at : S.at, S.song.seq.length - 1)), 'tocar'));
+  $('pchuse').addEventListener('click', followSong);
   // A part on the map (or Siguiente). Stopped: Play starts there. Playing: it comes in on the next bar, with a
   // fill before it. The part that is playing asks for a fill instead.
   function choosePart(i) {
@@ -1534,6 +1721,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     $('hint').textContent = T(fifths ? 'hint.fifths' : S.held.length ? 'hint.held' : 'hint.silent');
     document.querySelectorAll('#mode button').forEach((b) => { const o = b.dataset.m === S.padHand; b.classList.toggle('on', o); b.setAttribute('aria-checked', String(o)); });
     $('padmode').setAttribute('aria-checked', String(fifths));
+    if (pchSig) drawPos(); // "Usar acordes" shows only while the pad does not follow the song
   }
   function toggleHeld(c) {
     const i = S.held.indexOf(c);
@@ -1564,6 +1752,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       const b = document.createElement('button'); b.type = 'button'; b.className = 'tile'; b.dataset.ch = k;
       b.innerHTML = '<span class="led"></span><span class="tl"></span><span class="side"></span>';
       b.addEventListener('click', () => setLayer(k, !S.layers[k].on));
+      onHold(b, () => holdChannel(k, b));
       leds[k] = b.firstChild; box.appendChild(b);
     }
     for (const b of box.children) {
@@ -1687,7 +1876,15 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     save(); renderSeq(); renderParts(); drawPos();
     if (playing) { if (moved) { ui.pend = null; want.pend = null; want.at = S.at; } changed(); }
   }
-  function editPart(k) { editing = k; adding = null; selChord = null; drawPart(); window.acompShow?.('parte'); }
+  // The editor opens from Canciones › Partes, from the chords under the part name or by holding a part on the
+  // map; its back button returns there ('tocar' is the live view, Pad or Ensamble).
+  function editPart(k, from = 'canciones') {
+    editing = k; adding = null; selChord = null; drawPart();
+    const lbl = 'tab.' + (from === 'tocar' ? view() : from);
+    const back = $('pback'); back.dataset.go = from; back.lastChild.dataset.i18n = lbl; back.lastChild.textContent = T(lbl);
+    $('tab-parte').dataset.parent = from;
+    window.acompShow?.('parte');
+  }
   // Part editor: chords first. Tapping one asks how long it lasts and adds it; tapping one already in the
   // list opens its length and Quitar. The part lasts what its chords add up to.
   const DUR_BTN = [[.5, '½', 'dur.half'], [1, '1', 'dur.one'], [2, '2', 'dur.many'], [4, '4', 'dur.many']];
@@ -1754,7 +1951,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     if (!k || partKeys().length <= 1) return;
     delete S.song.parts[k]; editing = null;
     dropFromSeq((x) => x === k);
-    window.acompShow?.('sonido');
+    window.acompShow?.($('pback').dataset.go);
   });
 
   function buildStyles() {
@@ -2026,6 +2223,352 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
 
   $('lang').addEventListener('change', (e) => { S.lang = e.target.value; save(); applyLang(); });
 
+  // ---------- 2.0: Ensamble, holding a control, first launch, guide and help ----------
+  const view = () => ($('tab-tocar').dataset.view === 'ens' ? 'ens' : 'pad');
+  const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const seen = new Set();
+  const statOnce = (p) => { if (!seen.has(p)) { seen.add(p); stat(p); } };
+  let toastT = null;
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  // Holding a control half a second does its second job (open its options) and swallows the click that follows.
+  function onHold(el, fn) {
+    let tm = null, x = 0, y = 0;
+    const cancel = () => { clearTimeout(tm); tm = null; };
+    el.addEventListener('pointerdown', (e) => {
+      delete el.dataset.held; x = e.clientX; y = e.clientY; cancel();
+      tm = setTimeout(() => { tm = null; el.dataset.held = '1'; try { navigator.vibrate?.(15); } catch (er) {} fn(); }, 480);
+    });
+    el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - x, e.clientY - y) > 10) cancel(); });
+    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, cancel);
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+    el.addEventListener('click', (e) => { if (el.dataset.held) { delete el.dataset.held; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  }
+  function holdChannel(k, btn) {
+    if (k === 'click') { window.acompShow?.('ritmo'); return; }
+    window.acompMenu?.({ drums: 'style', shaker: 'shaker', pad: 'padtype' }[k], btn);
+  }
+
+  // A bottom sheet for the help center and for choosing a sound.
+  let sheetFrom = null;
+  function openSheet(build) {
+    const b = $('sheetbody'); b.textContent = ''; build(b);
+    sheetFrom = document.activeElement;
+    $('scrim').classList.add('show'); $('sheet').classList.add('show'); $('sheet').scrollTop = 0;
+    $('sheet').querySelector('button')?.focus({ preventScroll: true });
+  }
+  function closeSheet() {
+    if (!$('sheet').classList.contains('show')) return;
+    $('scrim').classList.remove('show'); $('sheet').classList.remove('show');
+    try { sheetFrom?.focus({ preventScroll: true }); } catch (e) {}
+    sheetFrom = null;
+  }
+  $('scrim').addEventListener('click', closeSheet);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeSheet(); if (!$('coach').hidden) endTour(true); } });
+  const sheetHead = (box, title, why) => { const h = mk('h2', null, title); h.id = 'sheettitle'; box.append(h); if (why) box.append(mk('p', 'why', why)); };
+  const doneBtn = (box) => { const d = mk('button', 'btn', T('done')); d.type = 'button'; d.addEventListener('click', closeSheet); box.append(d); };
+
+  // ---------- Ensamble: buttons over the same song, tempo and key ----------
+  // Golpe (hit) plays once, on the next 1/16 while playing, at once when stopped. Loop plays a one-bar
+  // pattern from the next bar until tapped again; one loop at a time. Fondo (bed) is a pad sound: it
+  // picks that sound on the Pad channel, so it follows the key and the chords like the Pad does.
+  // Patterns per beat: [instrument, 4 steps for 4/4 and 3/4, 6 steps for 6/8]; X x o g are the levels in V.
+  const ENS = {
+    crash: { t: 'hit', name: 'Crash', en: 'Crash', hit: (t) => hit('crash', t, 1) },
+    kickcrash: { t: 'hit', name: 'Bombo + crash', en: 'Kick + crash', hit: (t) => { hit('kick', t, 1); hit('crash', t, .9); } },
+    clap: { t: 'hit', name: 'Aplauso', en: 'Clap', hit: (t) => { hit('clap', t, 1); hit('clap', t + .018, .75); } },
+    rim: { t: 'hit', name: 'Aro', en: 'Rim', hit: (t) => hit('rim', t, 1) },
+    tomroll: { t: 'hit', name: 'Toms bajando', en: 'Tom roll', hit: (t) => { const d = stepDur(); ['tomH', 'tomH', 'tomM', 'tomM', 'tomL', 'tomL'].forEach((k, i) => hit(k, t + i * d, .95 - i * .05)); } },
+    cut: { t: 'hit', name: 'Corte', en: 'Cut', cut: true },
+    toms: { t: 'loop', name: 'Toms tribal', en: 'Tribal toms', pat: [['tomL', 'X--x', 'X--x--'], ['tomM', '--o-', '---o-o']] },
+    tamb: { t: 'loop', name: 'Pandero', en: 'Tambourine', pat: [['tamb', 'x-o-', 'x-oo-o']] },
+    shk16: { t: 'loop', name: 'Shaker 1/16', en: 'Shaker 1/16', pat: [['shaker', 'xgog', 'xgogog']] },
+    conga: { t: 'loop', name: 'Conga', en: 'Conga', pat: [['conga', 'x-ox', 'x-o-ox']] },
+    kick4: { t: 'loop', name: 'Bombo a negras', en: 'Four on the floor', pat: [['kick', 'x---', 'x-----']] }
+  };
+  for (const k of ['cuerdas', 'teclas', 'shimmer', 'organo', 'coro', 'oracion', 'atmos']) ENS['bed_' + k] = { t: 'bed', pad: k };
+  const ensName = (id) => (ENS[id].t === 'bed' ? NM(PADS[ENS[id].pad]) : NM(ENS[id]));
+  const ENS0 = () => ({
+    A: ['crash', 'kickcrash', 'clap', 'toms', 'tamb', 'shk16', 'bed_cuerdas', 'bed_teclas', 'bed_shimmer'],
+    B: ['rim', 'tomroll', 'cut', 'conga', 'kick4', null, 'bed_organo', 'bed_coro', null]
+  });
+  {
+    const D = ENS0(), ok = S.ens && typeof S.ens === 'object' ? S.ens : {};
+    S.ens = {};
+    for (const b of ['A', 'B']) S.ens[b] = Array.isArray(ok[b]) && ok[b].length === 9 && ok[b].every((x) => x === null || ENS[x]) ? ok[b] : D[b];
+  }
+  if (S.bank !== 'B') S.bank = 'A';
+  if (S.center !== 'pad' && S.center !== 'ens') S.center = null;
+  S.adv = S.adv === true; S.tips = S.tips !== false; S.tourDone = S.tourDone === true;
+  const bank = () => (S.adv ? S.bank : 'A');
+  // The sounds go to their own bus (in initAudio), so Ensamble plays even with Batería or Shaker off.
+  function ensPlay(fn) { const live = buses; buses = { ...live, drums: ensBus, shaker: ensBus }; try { fn(); } finally { buses = live; } }
+  async function ensAudio() { initAudio(); if (ctx.state !== 'running') await ctx.resume(); await loadSamples(); }
+  const nextStepAt = (now) => { const st = playing && stateAt(now + 0.02); return st ? st.t : now + 0.01; };
+  function nextBarAt(now) {
+    const st = stateAt(now + 0.05); if (!st) return null;
+    return st.t + ((METERS[S.meter].steps - st.step) % METERS[S.meter].steps) * stepDur();
+  }
+  let loops = [], ensEditing = false;
+  // Called from tick(): schedules the loop's steps a little ahead on the sequencer's own steps, so it follows
+  // tempo, time signature and part changes. Not during the count-in.
+  function ensTick(now) {
+    if (!loops.length) return;
+    loops = loops.filter((L) => L.until === null || L.until > now);
+    for (const L of loops) {
+      L.next = Math.max(L.next, now);
+      for (let g = 0; g < 64; g++) {
+        const st = stateAt(L.next);
+        if (!st || st.t > now + 0.3) break;
+        L.next = st.t + stepDur() * 0.5;
+        if (st.t < L.from - 1e-4 || (L.until !== null && st.t >= L.until - 1e-4) || st.countBars > 0 || (st.counting && st.step !== 0)) continue;
+        const M = METERS[S.meter], i = st.step % M.div;
+        for (const [inst, p4, p6] of ENS[L.id].pat) {
+          let v = V[(M.div === 6 ? p6 : p4)[i]] || 0;
+          if (v && M.strong.includes(st.step)) v = Math.min(1, v * 1.15);
+          if (v) ensPlay(() => hit(inst, st.t, v));
+        }
+      }
+    }
+  }
+  function ensStop() { loops = []; drawEns(); }
+  function loopState(id) {
+    const now = ctx ? ctx.currentTime : 0, L = loops.find((x) => x.id === id && (x.until === null || x.until > now));
+    return !L ? '' : L.until !== null ? 'stopping' : L.from > now ? 'armed' : 'playing';
+  }
+  const bedOn = (id) => S.layers.pad.on && S.pad === ENS[id].pad;
+  async function ensTap(slot) {
+    const id = S.ens[bank()][slot];
+    if (ensEditing) { pickSound(slot); return; }
+    if (!id) { toast(T('ens.empty')); return; }
+    const E = ENS[id];
+    if (E.t === 'bed') {
+      if (bedOn(id)) setLayer('pad', false);
+      else {
+        if (S.pad !== E.pad) { $('padtype').value = E.pad; $('padtype').dispatchEvent(new Event('change')); }
+        if (!S.layers.pad.on) setLayer('pad', true);
+        if (!playing) toast(T('ens.bed.play'));
+        statOnce('ensamble/fondo');
+      }
+      drawEns(); return;
+    }
+    if ((E.t === 'loop' || E.cut) && !playing) { toast(T(E.cut ? 'ens.cut.need' : 'ens.loop.play')); return; }
+    if (E.cut && !S.layers.drums.on) { toast(T('ens.cut.need')); return; }
+    await ensAudio();
+    const now = ctx.currentTime;
+    if (E.cut) {
+      // The drums go quiet for the next bar, then come back at their volume.
+      const t = nextBarAt(now); if (t === null) return;
+      const g = buses.drums.gain, back = (S.layers.drums.vol / 100) ** 1.5;
+      g.setTargetAtTime(0, t, 0.008); g.setTargetAtTime(S.layers.drums.on ? back : 0, t + METERS[S.meter].steps * stepDur(), 0.008);
+      flash(slot); statOnce('ensamble/golpe'); return;
+    }
+    if (E.t === 'hit') { const t = nextStepAt(now); ensPlay(() => E.hit(t)); flash(slot); statOnce('ensamble/golpe'); return; }
+    const t = nextBarAt(now); if (t === null) return;
+    const cur = loops.find((L) => L.id === id && L.until === null);
+    for (const L of loops) if (L.until === null || L.until > t) L.until = Math.max(t, L.from);
+    if (!cur) { loops.push({ id, from: t, next: now, until: null }); statOnce('ensamble/loop'); }
+    drawEns();
+  }
+  function flash(slot) { const b = $('ensgrid').children[slot]; b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 160); }
+  let ensSig = '';
+  function drawEns(force) {
+    const grid = $('ensgrid'), b = bank(), ids = S.ens[b];
+    if (!grid.children.length) for (let i = 0; i < 9; i++) {
+      const btn = document.createElement('button'); btn.type = 'button';
+      btn.innerHTML = '<span class="ty"></span><span class="n"></span><span class="k"></span>';
+      btn.addEventListener('click', () => ensTap(i));
+      onHold(btn, () => { if (S.ens[bank()][i] || ensEditing) pickSound(i); });
+      grid.appendChild(btn);
+    }
+    const states = ids.map((id) => (!id ? '' : ENS[id].t === 'loop' ? loopState(id) : ENS[id].t === 'bed' && bedOn(id) ? 'playing' : ''));
+    const keyName = NAMES[S.names][S.key];
+    const sig = [b, ensEditing, S.lang, S.adv, keyName, ...ids, ...states].join('|');
+    if (!force && sig === ensSig) return;
+    ensSig = sig;
+    ids.forEach((id, i) => {
+      const btn = grid.children[i], [ty, n, k] = btn.children, st = states[i];
+      if (!id) {
+        btn.className = 'lp empty' + (ensEditing ? ' editing' : ''); ty.textContent = ''; k.textContent = ''; n.textContent = '+';
+        btn.setAttribute('aria-label', T(ensEditing ? 'ens.add' : 'ens.slot')); return;
+      }
+      const E = ENS[id];
+      btn.className = `lp ${E.t}${st === 'stopping' ? ' playing' : st ? ' ' + st : ''}${ensEditing ? ' editing' : ''}`;
+      ty.textContent = T('type.' + E.t); n.textContent = ensName(id);
+      k.textContent = E.cut ? T('ens.k.cut') : E.t === 'hit' ? T('ens.k.hit') : st ? T('ens.k.' + st) : E.t === 'loop' ? T('ens.k.loop') : T('ens.k.bed', keyName);
+      btn.setAttribute('aria-label', `${ty.textContent}: ${n.textContent}, ${k.textContent}`);
+      btn.setAttribute('aria-pressed', String(st === 'playing' || st === 'armed'));
+    });
+    $('bank').hidden = !S.adv;
+    for (const x of $('bank').children) { const on = x.dataset.b === b; x.classList.toggle('on', on); x.setAttribute('aria-checked', String(on)); }
+    $('ensctx').textContent = T('ens.ctx', keyName);
+    const e = $('ensedit'); e.classList.toggle('on', ensEditing); e.textContent = T(ensEditing ? 'ens.done' : 'ens.edit'); e.setAttribute('aria-pressed', String(ensEditing));
+  }
+  function pickSound(slot) {
+    const b = bank(), cur = S.ens[b][slot];
+    openSheet((box) => {
+      sheetHead(box, T(cur ? 'ens.change' : 'ens.add'), T('ens.pick.why'));
+      for (const t of ['hit', 'loop', 'bed']) {
+        box.append(mk('div', 'cap', T('type.' + t)));
+        const g = mk('div', 'group');
+        for (const id in ENS) {
+          if (ENS[id].t !== t) continue;
+          const o = mk('button', 'opt'); o.type = 'button';
+          o.append(mk('span', null, ensName(id)), mk('span', 'ck', id === cur ? '✓' : ''));
+          o.addEventListener('click', () => { setSlot(b, slot, id); closeSheet(); });
+          g.append(o);
+        }
+        box.append(g);
+      }
+      if (cur) {
+        const g = mk('div', 'group'); g.style.marginTop = '12px';
+        const o = mk('button', 'opt rm', T('ens.remove')); o.type = 'button';
+        o.addEventListener('click', () => { setSlot(b, slot, null); closeSheet(); });
+        g.append(o); box.append(g);
+      }
+      doneBtn(box);
+    });
+  }
+  function setSlot(b, slot, id) {
+    const old = S.ens[b][slot];
+    if (old && ENS[old].t === 'loop' && ctx) for (const L of loops) if (L.id === old) L.until = ctx.currentTime;
+    S.ens[b][slot] = id; save(); drawEns(true);
+  }
+  $('ensedit').addEventListener('click', () => {
+    ensEditing = !ensEditing; drawEns(true);
+    if (ensEditing) { statOnce('ensamble/editar'); toast(T('ens.edit.hint')); }
+  });
+  for (const x of $('bank').children) x.addEventListener('click', () => { S.bank = x.dataset.b; save(); drawEns(true); });
+
+  // ---------- Ajustes › App ----------
+  function paintApp() {
+    for (const x of $('centerseg').children) { const on = x.dataset.c === S.center; x.classList.toggle('on', on); x.setAttribute('aria-checked', String(on)); }
+    $('adv').setAttribute('aria-checked', String(S.adv));
+    $('tips').setAttribute('aria-checked', String(S.tips));
+  }
+  const viewStat = (c) => (c === 'ens' ? 'ensamble' : 'pad');
+  for (const x of $('centerseg').children) x.addEventListener('click', () => {
+    if (S.center === x.dataset.c) return;
+    S.center = x.dataset.c; save(); window.acompOrder?.(S.center); paintApp(); stat('centro/' + viewStat(S.center));
+  });
+  $('adv').addEventListener('click', () => {
+    S.adv = !S.adv; if (!S.adv) S.bank = 'A';
+    save(); paintApp(); drawEns(true); toast(T(S.adv ? 'adv.on' : 'adv.off'));
+  });
+  $('tips').addEventListener('click', () => { S.tips = !S.tips; save(); paintApp(); toast(T(S.tips ? 'tips.on' : 'tips.off')); });
+  $('tourrow').addEventListener('click', () => startTour());
+  $('helprow').addEventListener('click', openHelp);
+  $('helpbtn').addEventListener('click', openHelp);
+
+  // ---------- First launch: language and the screen that goes in the centre ----------
+  function paintOnb() { for (const x of $('onblang').children) { const on = x.dataset.l === S.lang; x.classList.toggle('on', on); x.setAttribute('aria-checked', String(on)); } }
+  for (const x of $('onblang').children) x.addEventListener('click', () => { S.lang = x.dataset.l; save(); applyLang(); paintOnb(); });
+  for (const x of $('onb').querySelectorAll('.pick')) x.addEventListener('click', () => {
+    S.center = x.dataset.c; save();
+    stat('inicio/' + viewStat(S.center)); stat('idioma/' + S.lang);
+    $('onb').hidden = true;
+    window.acompOrder?.(S.center); window.acompShow?.(S.center); paintApp();
+    setTimeout(() => startTour(), 450);
+  });
+
+  // ---------- Quick tour (coach marks), tip at launch, help center ----------
+  const G = () => T('guide');
+  const TOUR_Q = { play: '#play', tiles: '#tiles', map: '#map', pad: '.harm', ens: '#ensgrid', tabs: '#tabbar', help: '#helpbtn' };
+  const TIP_Q = [['#map'], ['#tiles'], ['#next'], ['#fill'], ['.harm', 'pad'], ['#ensedit', 'ens']];
+  const HELP_Q = [
+    { l: 'b', q: ['#play', '#tiles', '.top1', '#map'] },
+    { l: 'm', v: 'pad', q: ['#dial', '.harmfoot', '#padmode'] },
+    { l: 'm', v: 'ens', q: ['#ensgrid', '#ensedit', null, null] },
+    { l: 'a', q: [null, '.tile[data-ch=click]', '#fill'] }
+  ];
+  let TS = [], TI = 0, tourOne = false;
+  function tourSteps() {
+    const g = G().tour, v = view(), other = S.center === 'ens' ? 'pad' : 'ens';
+    const st = ['play', 'tiles', 'map', v, 'tabs', 'help'].map((k) => ({ q: TOUR_Q[k], t: g[k][0], x: g[k][1] }));
+    st[4].x = g.tabs[1](T('tab.' + (S.center || 'pad')), T('tab.' + other));
+    return st;
+  }
+  function startTour(steps, one, v) {
+    closeSheet(); $('tipday').hidden = true;
+    window.acompShow?.(v || 'tocar');
+    TS = steps || tourSteps(); TI = 0; tourOne = !!one;
+    $('coach').hidden = false;
+    requestAnimationFrame(showStep);
+  }
+  function showStep() {
+    const st = TS[TI], el = st && document.querySelector(st.q);
+    if (!st) { endTour(false); return; }
+    const r = el && el.getBoundingClientRect();
+    if (!r || !r.width) { nextStep(); return; }
+    const ring = $('ring'), pad = 6, round = st.q === '#play' || st.q === '#helpbtn';
+    Object.assign(ring.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: r.height + pad * 2 + 'px', borderRadius: round ? '999px' : '20px' });
+    const c = $('ccard'), below = r.top + r.height / 2 < innerHeight / 2;
+    c.style.top = below ? r.bottom + 18 + 'px' : 'auto';
+    c.style.bottom = below ? 'auto' : innerHeight - r.top + 18 + 'px';
+    $('cstep').textContent = tourOne ? T('tour.one') : T('tour.step', TI + 1, TS.length);
+    $('ctitle').textContent = st.t; $('ctext').textContent = st.x;
+    const last = TI === TS.length - 1;
+    $('cnext').textContent = T(last ? (tourOne ? 'tour.ok' : 'tour.start') : 'tour.next');
+    $('cskip').style.visibility = last ? 'hidden' : 'visible';
+    $('cnext').focus({ preventScroll: true });
+  }
+  function nextStep() { TI++; if (TI >= TS.length) endTour(false); else showStep(); }
+  function endTour(skipped) {
+    if ($('coach').hidden) return;
+    $('coach').hidden = true;
+    if (tourOne) return;
+    if (!S.tourDone) stat('guia/' + (skipped ? 'omitida' : 'completa'));
+    S.tourDone = true; save();
+    if (!skipped) toast(T(view() === 'ens' ? 'tour.end.ens' : 'tour.end.pad'));
+  }
+  $('cnext').addEventListener('click', nextStep);
+  $('cskip').addEventListener('click', () => endTour(true));
+  addEventListener('resize', () => { if (!$('coach').hidden) showStep(); });
+  let tipNow = 0, tipT = null;
+  function showTip() {
+    if (!S.tips || !$('coach').hidden || !$('onb').hidden) return;
+    tipNow = Math.floor(Math.random() * G().tips.length);
+    $('tiptext').textContent = G().tips[tipNow][0]; $('tipday').hidden = false;
+    clearTimeout(tipT); tipT = setTimeout(() => { $('tipday').hidden = true; }, 9000);
+  }
+  $('tipx').addEventListener('click', () => { $('tipday').hidden = true; toast(T('tip.closed')); });
+  $('tipmore').addEventListener('click', () => {
+    const [, t, x] = G().tips[tipNow], [q, v] = TIP_Q[tipNow];
+    startTour([{ q, t, x }], true, v);
+  });
+  function openHelp() {
+    statOnce('ayuda/abierta');
+    const first = view() === 'ens' ? 2 : 1;
+    openSheet((box) => {
+      sheetHead(box, T('help.title'), T('help.why'));
+      const tour = mk('button', 'btn2', T('help.tour')); tour.type = 'button'; tour.addEventListener('click', () => startTour()); box.append(tour);
+      G().help.forEach((sec, si) => {
+        const H = HELP_Q[si], cap = mk('div', 'cap', sec.h);
+        cap.append(mk('span', 'lvl ' + H.l, T('lvl.' + H.l))); box.append(cap);
+        const g = mk('div', 'group');
+        sec.it.forEach(([q, a, t, x], ii) => {
+          const open = si === first && ii === 0;
+          const b = mk('button', 'hq'); b.type = 'button'; b.setAttribute('aria-expanded', String(open));
+          b.append(mk('span', null, q)); b.insertAdjacentHTML('beforeend', CHEV);
+          const ans = mk('div', 'ha', a); ans.hidden = !open;
+          b.addEventListener('click', () => { ans.hidden = !ans.hidden; b.setAttribute('aria-expanded', String(!ans.hidden)); });
+          if (H.q[ii]) {
+            const s = mk('button', 'show', T('help.show')); s.type = 'button';
+            s.addEventListener('click', () => startTour([{ q: H.q[ii], t, x }], true, H.v));
+            ans.append(s);
+          }
+          g.append(b, ans);
+        });
+        box.append(g);
+      });
+      const f = mk('p', 'foot', T('help.foot')); f.style.marginTop = '12px'; box.append(f);
+      doneBtn(box);
+    });
+  }
+  function applyLang2() { drawEns(true); paintApp(); paintOnb(); }
+
   // ---------- Boot ----------
   setBpm(S.bpm);
   setMeter(S.meter);
@@ -2034,12 +2577,20 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   $('autofill').value = String(S.autoFill);
   $('shktone').value = S.shkTone;
   $('follow').setAttribute('aria-checked', String(S.follow));
+  $('micbox').hidden = !MIC_UI;
   $('stats').setAttribute('aria-checked', String(S.stats));
   $('stats').addEventListener('click', () => { S.stats = !S.stats; save(); $('stats').setAttribute('aria-checked', String(S.stats)); });
   // Closing the app while it plays never reaches Stop: count that Play when the page goes away.
   addEventListener('pagehide', statPlayEnd);
   applyLang();
+  // First launch asks for the language and the centre screen; after that, an optional short tip.
+  if (!S.center) $('onb').hidden = false;
+  else {
+    window.acompOrder?.(S.center);
+    if (S.tips && S.tourDone) setTimeout(showTip, 800);
+  }
   stat(location.pathname, false);
+  if (S.center) stat('centro/' + viewStat(S.center));
   stat('version/' + RELEASE);
   stat('abrir/' + (matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'instalada' : 'navegador'));
   window.acompLoaded = () => Object.keys(SB).length;
