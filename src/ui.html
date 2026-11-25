@@ -1,6 +1,7 @@
 <title>Acompañante de Ensayo</title>
 <style>
-/* Layout: iOS-style app shell, dark on purpose for stages; four tabs, live controls in the thumb zone. Tocar follows design C5a. */
+/* Layout: iOS-style app shell, dark on purpose for stages; three tabs (Ajustes, Pad, Ensamble), live controls in the thumb zone.
+   Pad follows design C5a; 2.0 adds a glass finish (translucent panels over a soft coloured background). */
 :root {
   --bg: #0B0B0C;
   --card: #1C1C1E;
@@ -23,8 +24,12 @@
   --stop: #FF453A;
   --off: #39393D;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
-  --mono: ui-monospace, "SF Mono", Menlo, monospace;
-  --tabbar: calc(56px + env(safe-area-inset-bottom, 0px));
+  --num: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --glass: rgba(255, 255, 255, .07);
+  --gbrd: rgba(255, 255, 255, .14);
+  --ghi: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 -1px 0 rgba(255, 255, 255, .03);
+  --blur: blur(28px) saturate(170%);
+  --tabbar: calc(70px + env(safe-area-inset-bottom, 0px));
   color-scheme: dark;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -85,7 +90,7 @@ select.native { display: none; }
 .pd.meterpd { min-height: 44px; margin: -10px 0; font-size: 13px; font-weight: 600; color: #C7C7CC; gap: 4px; }
 .pd.meterpd .ud { width: 7px; height: 11px; }
 .bpmread { display: flex; align-items: baseline; gap: 4px; }
-#bpm { font-family: var(--mono); font-size: 40px; line-height: 40px; font-weight: 600; font-variant-numeric: tabular-nums; transition: color .08s; }
+#bpm { font-family: var(--num); font-size: 44px; line-height: 40px; font-weight: 700; letter-spacing: -.04em; font-variant-numeric: tabular-nums; transition: color .08s; }
 #bpm.flash { color: var(--accent); }
 #bpmunit { font-size: 13px; color: var(--muted); }
 .bpmrow { margin-top: 8px; display: grid; grid-template-columns: 44px 44px minmax(0, 1fr) 44px 44px; gap: 6px; }
@@ -94,8 +99,22 @@ select.native { display: none; }
 #tap { font-size: 15px; font-weight: 600; color: var(--accent); }
 .partline { margin-top: 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 #partname { font-size: 28px; line-height: 34px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#partpos { font-family: var(--mono); font-size: 17px; color: var(--muted); white-space: nowrap; }
+#partpos { font-family: var(--num); font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; color: rgba(235, 235, 245, .5); white-space: nowrap; }
 #partpos b { color: var(--fg); font-weight: 400; }
+/* The current part's chords, under its name: tap to edit them; "Usar acordes" when the pad does not follow them. */
+.pchrow { margin: 0 0 -4px; display: flex; align-items: center; gap: 6px; }
+#pchords { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 6px; text-align: left; }
+.pch-list { flex: 1; min-width: 0; display: flex; gap: 4px; overflow: hidden; scroll-behavior: smooth; -webkit-mask-image: linear-gradient(to right, #000 85%, transparent); mask-image: linear-gradient(to right, #000 85%, transparent); }
+.pch-list i { flex: none; font-style: normal; font-size: 13px; font-weight: 600; line-height: 26px; height: 26px; padding: 0 8px; border-radius: 7px; white-space: nowrap; }
+.pch-list i small { font-size: 11px; font-weight: 400; opacity: .75; margin-left: 3px; }
+.pch-list .rest { background: rgba(255, 159, 10, .16); color: #FFB340; }
+.pch-list .away { background: rgba(100, 210, 255, .16); color: var(--away); }
+.pch-list .tense { background: rgba(191, 90, 242, .2); color: #DA8FFF; }
+.pch-list .rest.now { background: var(--rest); color: #000; } .pch-list .away.now { background: var(--away); color: #000; } .pch-list .tense.now { background: var(--tense); color: #000; }
+#pchords.idle .pch-list i:not(.now) { opacity: .55; }
+.pch-empty { font-size: 13px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#pchords .pen { flex: none; width: 16px; height: 16px; color: var(--dim); }
+#pchuse { flex: none; min-height: 44px; padding: 0 2px 0 6px; font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 #map { margin-top: 8px; display: flex; gap: 2px; }
 #map button { min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-bottom: 4px; }
 #map .seg-bar { position: relative; overflow: hidden; height: 22px; border-radius: 4px; background: var(--edge); }
@@ -115,7 +134,7 @@ select.native { display: none; }
 .harm { margin-top: 12px; padding: 12px 0; border-radius: 18px; background: var(--surf2); display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
 #dial { position: relative; height: 44px; display: flex; flex-direction: column; justify-content: flex-end; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 #dial .needle { position: absolute; left: 50%; top: 0; margin-left: -7px; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 9px solid var(--accent); }
-#dial .names { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); align-items: end; font-family: var(--mono); text-align: center; white-space: nowrap; transition: transform .12s ease-out; }
+#dial .names { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); align-items: end; font-family: var(--num); font-weight: 500; text-align: center; white-space: nowrap; transition: transform .12s ease-out; }
 #dial .d0 { font-size: 22px; font-weight: 700; color: var(--accent); }
 #dial .d1 { font-size: 15px; color: #C7C7CC; }
 #dial .d2 { font-size: 13px; color: #8E8E93; }
@@ -237,7 +256,7 @@ select.native { display: none; }
 .credits { font-size: 12px; }
 .row.link { width: 100%; text-align: left; }
 .beats { display: flex; gap: 6px; margin-top: 10px; }
-.beats button { flex: 1 1 0; min-width: 0; height: 64px; border-radius: 9px; background: var(--fill); position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; font: 600 13px var(--mono); color: var(--fg); }
+.beats button { flex: 1 1 0; min-width: 0; height: 64px; border-radius: 9px; background: var(--fill); position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; font: 600 13px var(--num); font-variant-numeric: tabular-nums; color: var(--fg); }
 .beats button::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--lv) * 30%); background: var(--accent); opacity: .85; }
 .beats button span { position: relative; }
 .beats button[data-lv="0"] { color: var(--dim); }
@@ -252,9 +271,10 @@ select.native { display: none; }
 .notes li::before { content: ""; position: absolute; left: 16px; top: 16px; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
 
 /* Tab bar */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--tabbar); padding: 6px 8px env(safe-area-inset-bottom, 0px); background: rgba(18, 18, 20, .94); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border-top: .5px solid var(--edge); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); z-index: 10; }
-.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--dim); font-size: 10px; font-weight: 600; min-height: 44px; }
-.tab[aria-selected="true"] { color: var(--accent); }
+.tabbar { position: fixed; left: max(14px, env(safe-area-inset-left, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-width: 532px; margin: 0 auto; height: 58px; padding: 5px; border-radius: 29px; background: rgba(30, 30, 34, .6); border: .5px solid rgba(255, 255, 255, .16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 10px 30px rgba(0, 0, 0, .45); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); z-index: 10; }
+.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border-radius: 24px; color: var(--dim); font-size: 11px; font-weight: 600; min-height: 44px; }
+.tab svg { width: 24px; height: 24px; }
+.tab[aria-selected="true"] { color: var(--accent); background: rgba(255, 255, 255, .12); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18); }
 /* Shorter phones (mini, 16e) and the SE: the same layout, tighter, so Play never hides under the tab bar. */
 @media (max-height: 880px) {
   #partname { font-size: 24px; line-height: 28px; } .partline { margin-top: 8px; }
@@ -265,13 +285,139 @@ select.native { display: none; }
 }
 @media (max-height: 700px) {
   #bpm { font-size: 32px; line-height: 32px; } .bpmrow { margin-top: 6px; }
-  #partname { font-size: 22px; line-height: 26px; } #map .seg-bar { height: 16px; } #map .lb { font-size: 10px; }
+  #partname { font-size: 22px; line-height: 26px; } #map .seg-bar { height: 16px; } #map .lb { font-size: 10px; } .pchrow { margin: -10px 0 -12px; } .pch-list i { height: 22px; line-height: 22px; }
   .harm { gap: 8px; padding: 8px 0; } #dial { height: 34px; }
   .win .big { height: 48px; } .win .small { height: 40px; } .win button.big b { font-size: 19px; } .win button.small b { font-size: 15px; }
   .win button span { font-size: 11px; } #padmode { min-height: 36px; }
   .tile { height: 44px; } .tbtn { height: 54px; } #play { width: 64px; height: 64px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .pd-menu, .pd-menu.closing { animation-duration: .01s; } }
+/* ---------- 2.0: glass finish ---------- */
+body { background: #08080A; letter-spacing: -.01em; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(120% 60% at 0% 0%, rgba(255, 159, 10, .18), transparent 55%), radial-gradient(90% 55% at 100% 45%, rgba(100, 210, 255, .12), transparent 60%), radial-gradient(100% 50% at 20% 100%, rgba(191, 90, 242, .14), transparent 60%); }
+#songtitle { letter-spacing: -.02em; }
+#partname, h1 { letter-spacing: -.03em; }
+#bpmunit { font-weight: 600; letter-spacing: .04em; color: rgba(235, 235, 245, .5); }
+.cap { letter-spacing: .06em; }
+/* Panels get the glass look from a translucent fill, a hairline edge and a top highlight. The blur behind is kept for
+   what floats over content (tab bar, sheets, toasts): on every panel it costs a phone too much while the audio renders. */
+.bpmrow button, .padsel, .tile, .tbtn, .seg, .group, .save input, .lp, .ebtn, .helpbtn { background: var(--glass); border: .5px solid var(--gbrd); box-shadow: var(--ghi); }
+.bpmrow button { border-radius: 14px; }
+.padsel { border-radius: 16px; }
+.harm { background: rgba(255, 255, 255, .045); border: .5px solid rgba(255, 255, 255, .1); box-shadow: var(--ghi); border-radius: 24px; }
+.seg { border-radius: 12px; padding: 3px; }
+.seg button { border-radius: 9px; }
+.seg .on { background: rgba(255, 255, 255, .18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 2px 8px rgba(0, 0, 0, .25); }
+.tile { border-radius: 18px; }
+.tile.on { background: rgba(255, 255, 255, .2); border-color: rgba(255, 255, 255, .28); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 4px 18px rgba(0, 0, 0, .25); }
+.tbtn { border-radius: 20px; }
+#fill { background: rgba(255, 159, 10, .16); border-color: rgba(255, 159, 10, .3); }
+#fill:disabled { background: var(--glass); border-color: var(--gbrd); }
+#fill.armed { background: var(--accent); box-shadow: 0 0 24px rgba(255, 159, 10, .45); }
+#play { background: radial-gradient(circle at 50% 30%, #5CF07F, #2BC24F 70%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 8px 26px rgba(48, 209, 88, .4); border: .5px solid rgba(255, 255, 255, .3); }
+#play.stop { background: radial-gradient(circle at 50% 30%, #FF7A70, #E5372D 70%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 8px 26px rgba(255, 69, 58, .4); }
+.win .nb span { background: rgba(255, 255, 255, .05); }
+.win .frame { border-color: rgba(255, 255, 255, .28); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12); }
+.win button { border: .5px solid rgba(255, 255, 255, .08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1); }
+#map .seg-bar { background: rgba(255, 255, 255, .08); }
+#map .now .seg-bar { background: rgba(255, 255, 255, .9); }
+#map .next .seg-bar { background: rgba(255, 255, 255, .22); }
+.row + .row::before, .songs .song + .song::before { background: rgba(255, 255, 255, .1); }
+.chip { background: rgba(255, 255, 255, .08); }
+.chip.add { background: var(--accent-soft); }
+.row .lbl small { display: block; font-size: 13px; color: var(--muted); }
+.panrows { background: rgba(0, 0, 0, .18); }
+.tile, #map button { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+
+/* ---------- 2.0: Ajustes sections ---------- */
+.aseg { margin: -4px 0 4px; }
+.aseg button { height: 34px; font-size: 14px; }
+
+/* ---------- 2.0: Ensamble (shares the song, map, channels and transport with Pad) ---------- */
+#tab-tocar[data-view="ens"] .padsel, #tab-tocar[data-view="ens"] .harm, #tab-tocar:not([data-view="ens"]) .ens { display: none; }
+.ens { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.lhead { display: flex; gap: 8px; align-items: center; min-height: 40px; }
+.lhead .seg { flex: 1; }
+.lhead .ctx { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lhead .seg:not([hidden]) + .ctx { display: none; }
+.ebtn { flex: none; height: 38px; padding: 0 16px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--accent); }
+.ebtn.on { background: var(--accent); color: #000; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.lp { position: relative; height: 84px; min-width: 0; border-radius: 18px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px 10px; text-align: left; overflow: hidden; transition: transform .05s, background .12s; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.lp:active { transform: scale(.97); }
+.lp .ty { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.lp .n { font-size: 15px; font-weight: 700; line-height: 1.15; letter-spacing: -.015em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.lp .k { font-size: 11px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp.hit { background: rgba(255, 159, 10, .15); border-color: rgba(255, 159, 10, .28); } .lp.hit .ty { color: #FFB340; }
+.lp.loop { background: rgba(48, 209, 88, .13); border-color: rgba(48, 209, 88, .26); } .lp.loop .ty { color: #5EDC7C; }
+.lp.bed { background: rgba(100, 210, 255, .13); border-color: rgba(100, 210, 255, .26); } .lp.bed .ty { color: var(--away); }
+.lp.flash { background: var(--accent) !important; color: #000; }
+.lp.armed { box-shadow: inset 0 0 0 2px var(--go); animation: blink .5s infinite alternate; }
+@keyframes blink { to { background: rgba(48, 209, 88, .28); } }
+.lp.playing.loop { background: rgba(48, 209, 88, .85); color: #000; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 6px 24px rgba(48, 209, 88, .35); }
+.lp.playing.bed { background: rgba(100, 210, 255, .85); color: #000; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 6px 24px rgba(100, 210, 255, .35); }
+.lp.playing .ty, .lp.playing .k { color: rgba(0, 0, 0, .6); }
+.lp.empty { background: transparent; border: 1.5px dashed var(--line); box-shadow: none; align-items: center; justify-content: center; color: var(--dim); font-size: 22px; }
+.lp.editing { animation: wig .28s infinite alternate ease-in-out; }
+.lp.editing:nth-child(2n) { animation-delay: -.14s; }
+@keyframes wig { from { transform: rotate(-1.2deg); } to { transform: rotate(1.2deg); } }
+
+/* ---------- 2.0: help button, coach marks, tip, sheet, toast, first launch ---------- */
+.helpbtn { align-self: center; margin-left: 8px; width: 32px; height: 32px; border-radius: 16px; font-size: 16px; font-weight: 700; background: rgba(255, 255, 255, .11); }
+.scrim { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.scrim.show { opacity: 1; pointer-events: auto; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 61; max-width: 560px; margin: 0 auto; max-height: 84%; overflow-y: auto; overscroll-behavior: contain; padding: 8px 16px calc(20px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; background: rgba(28, 28, 32, .78); border-top: .5px solid rgba(255, 255, 255, .18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(40px) saturate(180%); backdrop-filter: blur(40px) saturate(180%); transform: translateY(105%); transition: transform .22s; visibility: hidden; }
+.sheet.show { transform: none; visibility: visible; }
+.grab { width: 36px; height: 5px; border-radius: 3px; background: var(--seg); margin: 0 auto 10px; }
+.sheet h2 { margin: 0 0 2px; font-size: 20px; letter-spacing: -.02em; }
+.sheet .why { font-size: 13px; line-height: 18px; color: var(--muted); margin: 0 0 10px; }
+.sheet .cap { padding-left: 4px; }
+.opt { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 50px; padding: 8px 16px; text-align: left; position: relative; font-size: 17px; }
+.opt + .opt::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: rgba(255, 255, 255, .1); }
+.opt .ck { color: var(--accent); font-weight: 700; }
+.opt.rm { color: var(--stop); }
+.btn { width: 100%; height: 50px; margin-top: 12px; border-radius: 16px; background: var(--accent); color: #000; font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 6px 20px rgba(255, 159, 10, .3); }
+.btn2 { width: 100%; height: 44px; margin: 0 0 6px; border-radius: 16px; background: var(--glass); border: .5px solid var(--gbrd); color: var(--accent); font-weight: 600; font-size: 15px; }
+.hq { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 48px; padding: 8px 16px; text-align: left; font-size: 16px; position: relative; }
+.hq + .hq::before, .ha + .hq::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: rgba(255, 255, 255, .1); }
+.hq .chev { transition: transform .2s; }
+.hq[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.ha { padding: 0 16px 12px; font-size: 15px; line-height: 20px; color: rgba(235, 235, 245, .75); }
+.ha .show { display: block; margin-top: 6px; min-height: 36px; color: var(--accent); font-weight: 600; font-size: 15px; }
+.lvl { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; letter-spacing: .05em; vertical-align: middle; }
+.lvl.b { background: rgba(48, 209, 88, .18); color: #5EDC7C; } .lvl.m { background: rgba(100, 210, 255, .18); color: var(--away); } .lvl.a { background: rgba(191, 90, 242, .2); color: #DA8FFF; }
+.toast { position: fixed; left: 16px; right: 16px; max-width: 528px; margin: 0 auto; top: calc(60px + env(safe-area-inset-top, 0px)); z-index: 70; padding: 11px 14px; border-radius: 18px; font-size: 15px; line-height: 20px; background: rgba(40, 40, 44, .75); border: .5px solid rgba(255, 255, 255, .16); box-shadow: 0 12px 40px rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); opacity: 0; transform: translateY(-6px); transition: .2s; pointer-events: none; }
+.toast.show { opacity: 1; transform: none; }
+.coach { position: fixed; inset: 0; z-index: 65; }
+.coach .ring { position: absolute; border-radius: 20px; box-shadow: 0 0 0 2px var(--accent), 0 0 0 9999px rgba(0, 0, 0, .55), 0 0 24px rgba(255, 159, 10, .5); transition: all .3s cubic-bezier(.2, .9, .3, 1); pointer-events: none; }
+.ccard { position: absolute; left: 16px; right: 16px; max-width: 528px; margin: 0 auto; padding: 14px 16px; border-radius: 22px; background: rgba(36, 36, 40, .8); border: .5px solid rgba(255, 255, 255, .18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 12px 40px rgba(0, 0, 0, .5); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
+.cstep { font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: .04em; }
+.ccard h2 { margin: 4px 0; font-size: 18px; letter-spacing: -.02em; }
+.ccard p { margin: 0; font-size: 15px; line-height: 20px; color: rgba(235, 235, 245, .75); }
+.cbtns { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.cbtns button { min-height: 40px; padding: 0 4px; font-size: 15px; color: var(--muted); }
+.cbtns .cnext { padding: 0 18px; border-radius: 12px; background: var(--accent); color: #000; font-weight: 600; }
+.tipday { position: fixed; left: 16px; right: 16px; max-width: 528px; margin: 0 auto; top: calc(56px + env(safe-area-inset-top, 0px)); z-index: 15; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; border-radius: 18px; font-size: 14px; line-height: 18px; background: rgba(40, 40, 44, .78); border: .5px solid rgba(255, 255, 255, .16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 10px 30px rgba(0, 0, 0, .4); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); animation: tipin .3s ease-out; }
+@keyframes tipin { from { opacity: 0; transform: translateY(-8px); } }
+#tiptext { flex: 1; }
+#tipmore { min-height: 36px; padding: 0 6px; color: var(--accent); font-weight: 600; font-size: 14px; }
+#tipx { flex: none; width: 32px; height: 32px; border-radius: 16px; color: var(--muted); background: rgba(255, 255, 255, .08); }
+.onb { position: fixed; inset: 0; z-index: 80; overflow-y: auto; background: radial-gradient(120% 60% at 0% 0%, rgba(255, 159, 10, .22), transparent 55%), radial-gradient(100% 50% at 100% 100%, rgba(100, 210, 255, .16), transparent 60%), #08080A; }
+.onbin { max-width: 480px; min-height: 100%; margin: 0 auto; padding: calc(40px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; }
+.onb h2 { margin: 0 0 8px; font-size: 28px; line-height: 34px; letter-spacing: -.03em; }
+.onb p { margin: 0 0 20px; color: var(--muted); font-size: 15px; line-height: 20px; }
+.langseg { width: 220px; align-self: center; margin-bottom: 28px; }
+.onb .pick { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px; padding: 16px; border-radius: 22px; text-align: left; background: var(--glass); border: .5px solid var(--gbrd); box-shadow: var(--ghi); }
+.onb .pick.rec { box-shadow: var(--ghi), 0 0 0 1.5px rgba(255, 159, 10, .55); }
+.onb .pick svg { flex: none; width: 30px; height: 30px; color: var(--accent); }
+.onb .pick b { display: block; margin-bottom: 4px; font-size: 18px; }
+.onb .pick > span > span { color: var(--muted); font-size: 14px; line-height: 19px; }
+.onb .pick:active { box-shadow: inset 0 0 0 2px var(--accent); }
+.badge { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 8px; font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: #000; background: var(--accent); vertical-align: middle; }
+.foot2 { margin-top: auto; padding-top: 16px; color: var(--muted); font-size: 13px; text-align: center; }
+@media (max-height: 880px) { .lp { height: 80px; } }
+@media (max-height: 700px) { .lp { height: 58px; padding: 6px 8px; } .lp .n { font-size: 14px; -webkit-line-clamp: 1; } .grid { gap: 6px; } .ens { gap: 6px; margin-top: 6px; } .lhead { min-height: 34px; } .ebtn { height: 34px; } .tabbar { height: 52px; bottom: calc(6px + env(safe-area-inset-bottom, 0px)); } :root { --tabbar: calc(62px + env(safe-area-inset-bottom, 0px)); } .tab { font-size: 10px; } .tab svg { width: 22px; height: 22px; } #bpm { font-size: 34px; } }
+@media (prefers-reduced-motion: reduce) { .lp.editing, .lp.armed, .tipday { animation: none; } }
 </style>
 
 <main>
@@ -282,7 +428,7 @@ select.native { display: none; }
           <button type="button" class="songbtn" data-go="canciones" aria-label="Elegir canción" data-i18n-aria="song.choose"><b id="songtitle">Sin canción guardada</b></button>
           <div class="sub"><button type="button" class="pd meterpd" data-for="meter" aria-haspopup="listbox" aria-expanded="false" aria-label="Compás" data-i18n-aria="meter"><span id="meterlbl">4/4</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><span aria-hidden="true">·</span><span id="status">Detenido</span></div>
         </div>
-        <div class="bpmread"><output id="bpm" aria-label="Tempo" data-i18n-aria="tempo">72</output><span id="bpmunit">BPM</span></div>
+        <div class="bpmread"><output id="bpm" aria-label="Tempo" data-i18n-aria="tempo">72</output><span id="bpmunit">BPM</span><button type="button" class="helpbtn" id="helpbtn" aria-label="Ayuda" data-i18n-aria="help.title">?</button></div>
       </div>
       <select id="meter" class="native" tabindex="-1" aria-hidden="true">
         <option value="4/4">4/4</option><option value="3/4">3/4</option><option value="6/8">6/8</option>
@@ -296,6 +442,10 @@ select.native { display: none; }
       </div>
 
       <div class="partline"><span id="partname">Intro</span><span id="partpos"></span></div>
+      <div class="pchrow">
+        <button type="button" id="pchords"><span class="pch-list" aria-hidden="true"></span><svg class="pen" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg></button>
+        <button type="button" id="pchuse" hidden data-i18n="pch.use" data-i18n-aria="pch.use.aria">Usar acordes</button>
+      </div>
       <div id="map" role="group" aria-label="Mapa de la canción" data-i18n-aria="map"></div>
 
       <div class="padsel">
@@ -315,6 +465,11 @@ select.native { display: none; }
         <div id="hint" hidden></div>
       </div>
 
+      <div class="ens" id="ens">
+        <div class="lhead"><div class="seg" id="bank" role="radiogroup" aria-label="Banco" data-i18n-aria="ens.bank"><button type="button" role="radio" data-b="A" data-i18n="ens.bankA">Banco A</button><button type="button" role="radio" data-b="B" data-i18n="ens.bankB">Banco B</button></div><span class="ctx" id="ensctx"></span><button type="button" class="ebtn" id="ensedit" data-i18n="ens.edit">Editar</button></div>
+        <div class="grid" id="ensgrid" role="group" aria-label="Ensamble" data-i18n-aria="tab.ens"></div>
+      </div>
+
       <div class="live" role="group" aria-label="Control en vivo" data-i18n-aria="live">
         <div class="tiles" id="tiles"></div>
         <div class="transport">
@@ -331,7 +486,8 @@ select.native { display: none; }
 
   <section class="screen" id="tab-ritmo" aria-label="Ritmo" data-i18n-aria="tab.ritmo" hidden>
     <div class="wrap">
-      <h1 data-i18n="tab.ritmo">Ritmo</h1>
+      <h1 data-i18n="tab.ajustes">Ajustes</h1>
+      <div class="seg aseg" role="tablist" aria-label="Ajustes" data-i18n-aria="tab.ajustes"><button type="button" role="tab" data-s="ritmo" aria-selected="true" class="on" data-i18n="tab.ritmo">Ritmo</button><button type="button" role="tab" data-s="sonido" aria-selected="false" data-i18n="tab.sonido">Sonido</button><button type="button" role="tab" data-s="canciones" aria-selected="false" data-i18n="tab.canciones">Canciones</button><button type="button" role="tab" data-s="app" aria-selected="false" data-i18n="tab.app">App</button></div>
       <div class="cap" data-i18n="style">Estilo</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-style" data-i18n="style">Estilo</span><select id="style" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="style" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-style val-style"><span class="pd-val" id="val-style"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
@@ -356,6 +512,8 @@ select.native { display: none; }
         </select><button type="button" class="pd" data-for="autofill" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-autofill val-autofill"><span class="pd-val" id="val-autofill"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
       </div>
       <p class="foot" data-i18n="advance.foot">Apagado, la parte elegida se repite hasta que toques otra o Siguiente.</p>
+      <!-- Micrófono: oculto mientras MIC_UI sea false en engine.js (auditoría 2026-11-23). -->
+      <div id="micbox" hidden>
       <div class="cap" data-i18n="mic.cap">Micrófono · beta</div>
       <div class="group">
         <div class="row"><span class="lbl" id="lbl-mic" data-i18n="mic.listen">Escuchar mi tempo</span><button class="switch" id="mic" role="switch" aria-checked="false" aria-labelledby="lbl-mic"></button></div>
@@ -363,12 +521,14 @@ select.native { display: none; }
         <div class="row"><span class="lbl" id="micread">—</span></div>
       </div>
       <p class="foot" id="micmsg">Te avisa si te aceleras o frenas respecto al tempo marcado.</p>
+      </div>
     </div>
   </section>
 
   <section class="screen" id="tab-sonido" aria-label="Sonido" data-i18n-aria="tab.sonido" hidden>
     <div class="wrap">
-      <h1 data-i18n="tab.sonido">Sonido</h1>
+      <h1 data-i18n="tab.ajustes">Ajustes</h1>
+      <div class="seg aseg" role="tablist" aria-label="Ajustes" data-i18n-aria="tab.ajustes"><button type="button" role="tab" data-s="ritmo" aria-selected="false" data-i18n="tab.ritmo">Ritmo</button><button type="button" role="tab" data-s="sonido" aria-selected="true" class="on" data-i18n="tab.sonido">Sonido</button><button type="button" role="tab" data-s="canciones" aria-selected="false" data-i18n="tab.canciones">Canciones</button><button type="button" role="tab" data-s="app" aria-selected="false" data-i18n="tab.app">App</button></div>
       <div class="cap">Pad</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-key" data-i18n="key">Tonalidad</span><select id="key" class="native" tabindex="-1" aria-hidden="true"></select><button type="button" class="pd" data-for="key" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-key val-key"><span class="pd-val" id="val-key"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
@@ -381,14 +541,28 @@ select.native { display: none; }
       <div class="cap" data-i18n="mix">Mezcla</div>
       <div class="group mix" id="mix"></div>
       <p class="foot" data-i18n="mix.foot">Toca el nombre de un canal para encenderlo o apagarlo; también se hace desde Tocar.</p>
-      <div class="cap" data-i18n="struct">Estructura de la canción</div>
-      <div class="group" id="struct">
-        <div class="tabsrow"><div class="seg" role="tablist" aria-label="Estructura de la canción" data-i18n-aria="struct"><button type="button" role="tab" id="t-orden" class="on" aria-selected="true" data-i18n="struct.order">Orden</button><button type="button" role="tab" id="t-partes" aria-selected="false" data-i18n="struct.parts">Partes</button></div></div>
-        <div id="p-orden"><div class="seqbox" id="seq"><button type="button" class="chip add" id="addchip" data-for="addpart" aria-haspopup="listbox" aria-expanded="false" aria-label="Añadir una parte al orden" data-i18n-aria="struct.add.aria"><span data-i18n="struct.add">+ Añadir</span></button></div><select id="addpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
-        <div id="p-partes" hidden><div id="partlist"></div><button type="button" class="row link addrow" id="newrow" data-for="newpart" aria-haspopup="listbox" aria-expanded="false"><span class="lbl" data-i18n="struct.new">+ Nueva parte</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="newpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-app" aria-label="App" data-i18n-aria="tab.app" hidden>
+    <div class="wrap">
+      <h1 data-i18n="tab.ajustes">Ajustes</h1>
+      <div class="seg aseg" role="tablist" aria-label="Ajustes" data-i18n-aria="tab.ajustes"><button type="button" role="tab" data-s="ritmo" aria-selected="false" data-i18n="tab.ritmo">Ritmo</button><button type="button" role="tab" data-s="sonido" aria-selected="false" data-i18n="tab.sonido">Sonido</button><button type="button" role="tab" data-s="canciones" aria-selected="false" data-i18n="tab.canciones">Canciones</button><button type="button" role="tab" data-s="app" aria-selected="true" class="on" data-i18n="tab.app">App</button></div>
+      <div class="cap" data-i18n="center">Pantalla en el centro</div>
+      <div class="group">
+        <div class="row"><div class="seg" id="centerseg" role="radiogroup" aria-label="Pantalla en el centro" data-i18n-aria="center" style="flex:1"><button type="button" role="radio" data-c="pad" data-i18n="tab.pad">Pad</button><button type="button" role="radio" data-c="ens" data-i18n="tab.ens">Ensamble</button></div></div>
       </div>
-      <p class="foot" id="structfoot"></p>
-      <div class="cap" data-i18n="app">App</div>
+      <p class="foot" data-i18n="center.foot">La que más usas. Las pestañas no cambian de lugar.</p>
+      <div class="group" style="margin-top:8px">
+        <div class="row"><span class="lbl" id="lbl-adv"><span data-i18n="adv">Modo avanzado</span><small data-i18n="adv.sub">Banco B y más sonidos en Ensamble</small></span><button class="switch" id="adv" role="switch" aria-checked="false" aria-labelledby="lbl-adv"></button></div>
+      </div>
+      <div class="cap" data-i18n="guide.cap">Ayuda</div>
+      <div class="group">
+        <div class="row"><span class="lbl" id="lbl-tips"><span data-i18n="tips">Consejo al abrir</span><small data-i18n="tips.sub">Un consejo corto cada vez que abres la app</small></span><button class="switch" id="tips" role="switch" aria-checked="true" aria-labelledby="lbl-tips"></button></div>
+        <button type="button" class="row link" id="tourrow"><span class="lbl" data-i18n="tour.again">Repetir la guía rápida</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
+        <button type="button" class="row link" id="helprow"><span class="lbl" data-i18n="help.center">Centro de ayuda</span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
+      </div>
+      <div class="cap" data-i18n="app.general">General</div>
       <div class="group">
         <div class="row pick"><span class="lbl" id="lbl-lang" data-i18n="lang">Idioma</span><select id="lang" class="native" tabindex="-1" aria-hidden="true"><option value="es">Español</option><option value="en">English</option></select><button type="button" class="pd" data-for="lang" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl-lang val-lang"><span class="pd-val" id="val-lang"></span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button></div>
         <button type="button" class="row link" id="version" data-go="version"><span class="lbl" data-i18n="version">Versión</span><span class="val" id="versionval"></span><svg class="chev" viewBox="0 0 8 13" fill="none" stroke="#5A5A5F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg></button>
@@ -400,9 +574,9 @@ select.native { display: none; }
     </div>
   </section>
 
-  <section class="screen" id="tab-parte" data-parent="sonido" aria-labelledby="ptitle" hidden>
+  <section class="screen" id="tab-parte" data-parent="canciones" aria-labelledby="ptitle" hidden>
     <div class="wrap">
-      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <button type="button" class="back" id="pback" data-go="canciones"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.canciones">Canciones</span></button>
       <h1 id="ptitle"></h1>
       <div class="cap" data-i18n="part.tap">Toca un acorde para añadirlo</div>
       <div class="group">
@@ -416,9 +590,9 @@ select.native { display: none; }
     </div>
   </section>
 
-  <section class="screen" id="tab-version" data-parent="sonido" aria-label="Versión" data-i18n-aria="version" hidden>
+  <section class="screen" id="tab-version" data-parent="app" aria-label="Versión" data-i18n-aria="version" hidden>
     <div class="wrap">
-      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <button type="button" class="back" data-go="app"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.app">App</span></button>
       <h1 data-i18n="version.title">Novedades</h1>
       <div class="group">
         <div class="row"><span class="lbl" data-i18n="version.installed">Versión instalada</span><span class="val" id="vercur"></span></div>
@@ -429,9 +603,9 @@ select.native { display: none; }
     </div>
   </section>
 
-  <section class="screen" id="tab-diag" data-parent="sonido" aria-label="Diagnóstico de audio" data-i18n-aria="diag" hidden>
+  <section class="screen" id="tab-diag" data-parent="app" aria-label="Diagnóstico de audio" data-i18n-aria="diag" hidden>
     <div class="wrap">
-      <button type="button" class="back" data-go="sonido"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
+      <button type="button" class="back" data-go="app"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg><span data-i18n="tab.app">App</span></button>
       <h1 data-i18n="diag">Diagnóstico de audio</h1>
       <div class="group" id="diaglist"></div>
       <p class="foot" data-i18n="diag.foot">Cómo responde el audio en este equipo desde que abriste la app. Los datos no salen del teléfono: para compartirlos, cópialos y pégalos en un mensaje.</p>
@@ -441,37 +615,81 @@ select.native { display: none; }
 
   <section class="screen" id="tab-canciones" aria-label="Canciones" data-i18n-aria="tab.canciones" hidden>
     <div class="wrap">
-      <h1 data-i18n="tab.canciones">Canciones</h1>
+      <h1 data-i18n="tab.ajustes">Ajustes</h1>
+      <div class="seg aseg" role="tablist" aria-label="Ajustes" data-i18n-aria="tab.ajustes"><button type="button" role="tab" data-s="ritmo" aria-selected="false" data-i18n="tab.ritmo">Ritmo</button><button type="button" role="tab" data-s="sonido" aria-selected="false" data-i18n="tab.sonido">Sonido</button><button type="button" role="tab" data-s="canciones" aria-selected="true" class="on" data-i18n="tab.canciones">Canciones</button><button type="button" role="tab" data-s="app" aria-selected="false" data-i18n="tab.app">App</button></div>
       <div class="save"><input type="text" id="songname" placeholder="Nombre de la canción" aria-label="Nombre de la canción" data-i18n-ph="song.name" data-i18n-aria="song.name"><button id="savesong" data-i18n="save">Guardar</button></div>
       <p class="foot" data-i18n="save.foot">Guarda el tempo, compás, estilo, tono, pad y shaker actuales.</p>
       <div class="cap" data-i18n="mysongs">Mis canciones</div>
       <div class="group songs" id="songs"></div>
       <p class="foot" data-i18n="songs.foot">Toca una canción para cargarla. Pulsa ✕ dos veces para borrarla.</p>
+      <div class="cap" data-i18n="struct">Estructura de la canción</div>
+      <div class="group" id="struct">
+        <div class="tabsrow"><div class="seg" role="tablist" aria-label="Estructura de la canción" data-i18n-aria="struct"><button type="button" role="tab" id="t-orden" class="on" aria-selected="true" data-i18n="struct.order">Orden</button><button type="button" role="tab" id="t-partes" aria-selected="false" data-i18n="struct.parts">Partes</button></div></div>
+        <div id="p-orden"><div class="seqbox" id="seq"><button type="button" class="chip add" id="addchip" data-for="addpart" aria-haspopup="listbox" aria-expanded="false" aria-label="Añadir una parte al orden" data-i18n-aria="struct.add.aria"><span data-i18n="struct.add">+ Añadir</span></button></div><select id="addpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
+        <div id="p-partes" hidden><div id="partlist"></div><button type="button" class="row link addrow" id="newrow" data-for="newpart" aria-haspopup="listbox" aria-expanded="false"><span class="lbl" data-i18n="struct.new">+ Nueva parte</span><svg class="ud" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m1.5 5 3-3 3 3M1.5 9l3 3 3-3"/></svg></button><select id="newpart" class="native" tabindex="-1" aria-hidden="true"></select></div>
+      </div>
+      <p class="foot" id="structfoot"></p>
     </div>
   </section>
 </main>
 
-<nav class="tabbar" role="tablist" aria-label="Secciones" data-i18n-aria="tabbar">
-  <button class="tab" role="tab" data-tab="tocar" aria-selected="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="13" r="10"/><path d="M11 9v8l6-4-6-4Z" fill="currentColor"/></svg><span data-i18n="tab.tocar">Tocar</span></button>
-  <button class="tab" role="tab" data-tab="ritmo" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 13h2M8 8v10M12 5v16M16 9v8M20 11v4M22 13h1"/></svg><span data-i18n="tab.ritmo">Ritmo</span></button>
-  <button class="tab" role="tab" data-tab="sonido" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4v18M13 4v18M20 4v18"/><circle cx="6" cy="16" r="2.4" fill="#161618"/><circle cx="13" cy="9" r="2.4" fill="#161618"/><circle cx="20" cy="14" r="2.4" fill="#161618"/></svg><span data-i18n="tab.sonido">Sonido</span></button>
-  <button class="tab" role="tab" data-tab="canciones" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 7h13M9 13h13M9 19h13"/><circle cx="4.5" cy="7" r="1" fill="currentColor"/><circle cx="4.5" cy="13" r="1" fill="currentColor"/><circle cx="4.5" cy="19" r="1" fill="currentColor"/></svg><span data-i18n="tab.canciones">Canciones</span></button>
+<nav class="tabbar" id="tabbar" role="tablist" aria-label="Secciones" data-i18n-aria="tabbar">
+  <button class="tab" role="tab" data-tab="ajustes" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4v18M13 4v18M20 4v18"/><circle cx="6" cy="16" r="2.6" fill="#1E1E22"/><circle cx="13" cy="9" r="2.6" fill="#1E1E22"/><circle cx="20" cy="14" r="2.6" fill="#1E1E22"/></svg><span data-i18n="tab.ajustes">Ajustes</span></button>
+  <button class="tab" role="tab" data-tab="pad" aria-selected="true"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3" y="5" width="20" height="16" rx="3"/><path d="M9 5v10M14 5v10M19 5v10M9 15v6M14 15v6M19 15v6"/></svg><span data-i18n="tab.pad">Pad</span></button>
+  <button class="tab" role="tab" data-tab="ens" aria-selected="false"><svg width="26" height="26" viewBox="0 0 26 26" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="10" y="3" width="6" height="6" rx="1.5"/><rect x="17" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/><rect x="17" y="10" width="6" height="6" rx="1.5"/><rect x="3" y="17" width="6" height="6" rx="1.5"/><rect x="10" y="17" width="6" height="6" rx="1.5"/><rect x="17" y="17" width="6" height="6" rx="1.5"/></svg><span data-i18n="tab.ens">Ensamble</span></button>
 </nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheettitle"><div class="grab" aria-hidden="true"></div><div id="sheetbody"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="coach" id="coach" hidden><div class="ring" id="ring"></div><div class="ccard" id="ccard" role="dialog" aria-labelledby="ctitle"><div class="cstep" id="cstep"></div><h2 id="ctitle"></h2><p id="ctext"></p><div class="cbtns"><button type="button" id="cskip" data-i18n="tour.skip">Omitir</button><button type="button" class="cnext" id="cnext"></button></div></div></div>
+<div class="tipday" id="tipday" role="status" hidden><span aria-hidden="true">💡</span><span id="tiptext"></span><button type="button" id="tipmore" data-i18n="tip.more">Más</button><button type="button" id="tipx" aria-label="Cerrar" data-i18n-aria="close">✕</button></div>
+<div class="onb" id="onb" hidden>
+  <div class="onbin">
+    <div class="seg langseg" id="onblang" role="radiogroup" aria-label="Idioma" data-i18n-aria="lang"><button type="button" role="radio" data-l="es">Español</button><button type="button" role="radio" data-l="en">English</button></div>
+    <h2 data-i18n="onb.title">¿Cómo quieres empezar?</h2>
+    <p data-i18n="onb.sub">Elige lo que más vas a usar. Lo demás queda a un toque.</p>
+    <button type="button" class="pick rec" data-c="pad"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="20" height="16" rx="3"/><path d="M9 5v10M14 5v10M19 5v10M9 15v6M14 15v6M19 15v6"/></svg><span><b><span data-i18n="tab.pad">Pad</span> <em class="badge" data-i18n="onb.rec">Recomendado</em></b><span data-i18n="onb.pad">Si quieres algo sencillo, para tocar solo o en grupo: pad, shaker y clic.</span></span></button>
+    <button type="button" class="pick" data-c="ens"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="10" y="3" width="6" height="6" rx="1.5"/><rect x="17" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/><rect x="17" y="10" width="6" height="6" rx="1.5"/><rect x="3" y="17" width="6" height="6" rx="1.5"/><rect x="10" y="17" width="6" height="6" rx="1.5"/><rect x="17" y="17" width="6" height="6" rx="1.5"/></svg><span><b data-i18n="tab.ens">Ensamble</b><span data-i18n="onb.ens">Para combinaciones más completas: remates de batería, platillos y otros sonidos.</span></span></button>
+    <div class="foot2" data-i18n="onb.foot">Empiezas en modo sencillo. Todo se cambia luego en Ajustes › App.</div>
+  </div>
+</div>
 
 <script>
 (() => {
-  // A screen with data-parent (Versión, a part of the song) opens inside its tab: the tab bar keeps that tab selected.
+  // Two live views share one screen (#tab-tocar): Pad and Ensamble. Ajustes is four sections (Ritmo, Sonido,
+  // Canciones, App) under one tab, which reopens on the last one. A screen with data-parent (Versión, a part
+  // of the song) opens inside its section. 'tocar' means the live view last seen.
+  const SETS = ['ritmo', 'sonido', 'canciones', 'app'];
+  let live = 'pad', lastSet = 'ritmo';
   const show = (name) => {
-    let tab = name;
+    if (name === 'tocar') name = live;
+    if (name === 'ajustes') name = lastSet;
+    let screen = name;
+    if (name === 'pad' || name === 'ens') { screen = 'tocar'; live = name; document.getElementById('tab-tocar').dataset.view = name; }
+    let tab = screen === 'tocar' ? live : screen;
     document.querySelectorAll('.screen').forEach(s => {
-      s.hidden = s.id !== 'tab-' + name;
-      if (!s.hidden && s.dataset.parent) { s.scrollTop = 0; tab = s.dataset.parent; }
+      s.hidden = s.id !== 'tab-' + screen;
+      if (!s.hidden && s.dataset.parent) { s.scrollTop = 0; tab = s.dataset.parent === 'tocar' ? live : s.dataset.parent; }
     });
+    if (SETS.includes(tab)) {
+      lastSet = tab;
+      document.querySelectorAll('.aseg button').forEach(b => { const on = b.dataset.s === tab; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
+      tab = 'ajustes';
+    }
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
-    try { localStorage.setItem('acomp-tab', tab); } catch (e) {}
+    try { localStorage.setItem('acomp-tab', tab === 'ajustes' ? lastSet : live); } catch (e) {}
+    document.dispatchEvent(new CustomEvent('acomp-view', { detail: screen === 'tocar' ? live : 'ajustes' }));
   };
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
+  document.querySelectorAll('.aseg button').forEach(b => b.addEventListener('click', () => show(b.dataset.s)));
+  // Tab order: Ajustes, the centre screen the musician chose, the other one. It never moves on its own.
+  window.acompOrder = (center) => {
+    const bar = document.getElementById('tabbar'), other = center === 'ens' ? 'pad' : 'ens';
+    for (const k of ['ajustes', center, other]) bar.appendChild(bar.querySelector(`[data-tab="${k}"]`));
+  };
+  window.acompLive = () => live;
   document.getElementById('songs').addEventListener('click', (e) => { if (e.target.closest('.songload')) show('tocar'); });
 
   // iOS-style pull-down menus over hidden native selects. The engine keeps using the selects:
@@ -529,7 +747,7 @@ select.native { display: none; }
     layer.appendChild(menu); document.body.appendChild(layer);
     // Place under the button, right-aligned; flip above when there is no room; never under the tab bar.
     const r = btn.getBoundingClientRect(), vw = innerWidth;
-    const bottomLimit = innerHeight - (document.querySelector('.tabbar')?.offsetHeight || 0) - 8, topLimit = 12;
+    const bar = document.querySelector('.tabbar'), bottomLimit = (bar ? bar.getBoundingClientRect().top : innerHeight) - 8, topLimit = 12;
     const h = Math.min(menu.scrollHeight, bottomLimit - topLimit);
     menu.style.maxHeight = h + 'px';
     menu.style.right = Math.min(Math.max(16, vw - r.right), vw - menu.offsetWidth - 16) + 'px';
@@ -569,7 +787,7 @@ select.native { display: none; }
   document.querySelectorAll('.screen').forEach(sc => sc.addEventListener('scroll', () => close(false), { passive: true }));
   let start = 'tocar';
   try { start = localStorage.getItem('acomp-tab') || 'tocar'; } catch (e) {}
-  if (!document.getElementById('tab-' + start)) start = 'tocar';
+  if (start !== 'pad' && start !== 'ens' && !SETS.includes(start)) start = 'tocar';
   show(start);
 })();
 </script>
