@@ -29,7 +29,21 @@ Formatos y reglas: README §5.5 (pads), §5.8 (muestras). Licencias: [`samples/C
 - Fuentes CC0 ya identificadas: VCSL (Steinway B, Kawai, órgano, más percusión), VSCO-2 CE (cuerdas). Salamander Grand Piano es CC-BY: **no** sirve.
 
 ## Auditoría de calidad
-> **Sección reservada para el hilo "Auditoría de sonido" (Fase 0, 2026-11-23).** Debe dejar aquí: evaluación de batería, shakers y pads; fuentes CC0 candidatas con enlace y licencia; propuesta de capas/variantes; plan de peso dentro del tope de ~100 MB con carga por demanda; y una línea en [decisiones.md](decisiones.md).
+Detalle completo, mediciones y fuentes: [auditorias/2026-11-23-sonido.md](auditorias/2026-11-23-sonido.md). Decisión: [D-2026-11-23-4](decisiones.md) (pendiente).
+
+**Evaluación (medida 2026-11-23):**
+- Ruido bien controlado (colas entre −45 y −80 dB). El problema es la profundidad.
+- 32 kHz mono quita el aire sobre 16 kHz y el estéreo; los originales de VCSL son 44.1 kHz estéreo. Hi-hat, cabasa y shakers pequeños tienen el 95 % de su energía pegado a 14–15 kHz.
+- Batería: 1–2 capas de fuerza, 0 variantes; la fuerza solo cambia el volumen.
+- Colas cortadas: `crash` 1.6 s, `ohat` termina a −53 dB, `tomL`/`tomM` a −54/−56 dB, shakers pequeños entre −35 y −56 dB sin fundido.
+- Causa raíz: las reglas "un solo HTML" y "≤ 3 MB" (README §5.8 y regla 6.3).
+- Pads: PADsynth está bien para 0 KB; límites: bucle de 5.46 s (2^18 a 48 kHz) y timbres reales imitados.
+
+**Fuentes CC0 / dominio público verificadas:** Big Rusty Drums (CC0-1.0), SM Drums (dominio público), Virtuosity Drums (CC0), Frankensnare y Gogodze Phu (CC0), VCSL sin usar (cajón 5 fuerzas × 2 RR, shaker Double/Roll/Slap, hi-hat, platillos, sleigh bells, claves) y VSCO-2 CE (cuerdas). CC-BY (Naked Drums, DrumGizmo, Salamander) quedan fuera.
+
+**Propuesta de capas y variantes:** batería 3–4 capas × 3–4 RR, colas completas con fundido, 44.1/48 kHz, estéreo en platillos y shakers, normalizar por instrumento (no por archivo).
+
+**Plan de peso (recomendado, opción B):** núcleo actual embebido como respaldo + paquetes HD en AAC .m4a, en una caché propia del service worker que sobreviva a las actualizaciones, descargados con un botón y decodificados solo cuando se usan. Batería + percusión ≈ **5–10 MB**; el tope de 100 MB no hace falta y queda para un experimento de pads pre-generados (opción C, ~30–60 MB). El límite real es la memoria decodificada (~384 KB por segundo estéreo) y la banda de GitHub Pages (100 GB/mes).
 
 ## Reglas que no cambian
 - Solo CC0 / dominio público, registrado en `samples/CREDITS.md`.
