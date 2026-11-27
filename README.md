@@ -176,11 +176,11 @@ Actuales: `auto`, `corcheas`, `semicorcheas`, `galope`, `contra`, `tresillo`, `n
 ### 5.4 Dinámica por parte
 | Parte | `SEC_DYN` (batería) | `SEC_SHK` (percusión) | `SEC_PAD` (Hz del filtro del pad) |
 |---|---|---|---|
-| intro | 0.75 | 0.70 | 650 |
-| estrofa | 0.85 | 0.85 | 1000 |
-| coro | 1.00 | 1.00 | 2300 |
-| puente | 0.90 | 0.80 | 800 |
-| final | 1.00 | 1.00 | 2300 |
+| intro | 0.75 | 0.70 | 1900 |
+| estrofa | 0.85 | 0.85 | 2400 |
+| coro | 1.00 | 1.00 | 3400 |
+| puente | 0.90 | 0.80 | 2100 |
+| final | 1.00 | 1.00 | 3000 |
 
 **Partes de la canción (`PART_SEC`).** Cada tipo de parte suena con la dinámica, los patrones y los remates de una sección base: `intro`, `interludio`, `outro` → intro; `estrofa`, `precoro` → estrofa; `coro`, `instrumental`, `tag`, `vamp` → coro; `puente` → puente; `final` → final (al entrar, remate, platillo, el pad va a su primer acorde y se desvanece; la app se detiene). Las claves se guardan en las canciones: nunca las cambies.
 
@@ -209,6 +209,7 @@ clave: {
 **Cómo suena (PADsynth):** salvo los pads con `osc: true`, cada acorde se genera como un bucle estéreo sin costuras de unos 5.5 s con el algoritmo PADsynth (Nasca O. Paul, ZynAddSubFX), escrito desde cero en `src/engine.js`. Cada armónico de cada nota se vuelve una banda angosta de sonido, así el acorde suena a ensamble sin el batido regular de los osciladores desafinados. Las `layers` conservan su sentido: la onda da la serie de armónicos, la dispersión de `desafinación` da el ancho de banda y la ganancia da el nivel. Izquierda y derecha comparten parte de la fase: suena amplio en estéreo y sigue lleno si la mezcladora lo suma a mono.
 - Se generan los 6 acordes de la tonalidad (o el de quintas): el que suena primero (25 a 80 ms en computadora, 150 a 250 ms en un celular, siempre en el worker) y los demás uno tras otro. Si algo falla, el pad toca con osciladores.
 - Rango: los armónicos bajo 35 Hz se quitan y los de 35 a 50 Hz entran de a poco; arriba, nada pasa de 12 kHz (se atenúa desde 10.5 kHz). Lo que queda fuera no se oye en un celular ni en la mayoría de los parlantes y solo resta potencia o suena áspero.
+- **Brillo** (`S.padBright`, 0–100, desde 2.1.0) mueve el corte del filtro del pad hasta 1.5 octavas hacia abajo o hacia arriba, en vivo (`padCut`: `SEC_PAD[parte] × cutoff × 2^(0.4·Riqueza + 1.5·Brillo)`, entre 120 Hz y 16 kHz). En 50 quedan los valores de `SEC_PAD`, calibrados con `tools/padlab.mjs` para que en Estrofa la banda de 2–5 kHz quede entre −25 y −15 dB y la de 5–10 kHz bajo −30 dB ([auditoría](docs/auditorias/2026-11-27-pads.md)). Antes de 2.1.0 el filtro iba de 650 a 2300 Hz y cortaba casi todos los agudos.
 - **Movimiento** (`S.padMove`, 0–100) escala el vibrato y el barrido lento del filtro, en vivo. El barrido mueve el `detune` del filtro en cents (máx. ±900), así sube y baja en proporción al corte de cada pad y nunca cierra un pad oscuro.
 - `formant` en un pad PADsynth se aplica dentro del espectro (cada armónico pesa según su cercanía a los formantes, en octavas), no como filtros después de la mezcla. El coro no lleva vibrato rápido: un vibrato común a todo el bucle suena a una sola voz robótica; el ensamble sale del ancho de banda, más abierto en los armónicos altos. En osciladores sigue siendo la cadena de filtros paso banda. **Riqueza** (`S.padRich`, 0–100) ensancha las bandas, inclina los armónicos hacia arriba y abre un poco el filtro; regenera los bucles y entra con un fundido de 1.5 s al soltar el control. En 50 los dos dejan el pad como fue diseñado.
 | Grupo | Pads (`clave` → español / inglés) | Cómo está hecho |
@@ -219,6 +220,8 @@ clave: {
 | Himnos y gospel | `cuerdas` → Cuerdas / Strings, `coro` → Coro "Aah" / Choir Aahs, `organo` → Gospel B3 | ensamble de cuerdas con vibrato; filtros de formante tipo voz; órgano de barras armónicas |
 
 **Nombres:** el nombre comercial con el que se conoce ese sonido en teclados (lista General MIDI, Yamaha, Nord, Casio) o el término de síntesis que diga cómo está hecho (Supersaw, Swell, Senoidal). Se traduce solo cuando hay un término común en español (Cuerdas, Quintas). Nada genérico (Profundo, Brillante) ni referencias a artistas o canciones; el momento del servicio va en `group`. Nunca cambies la `clave` de un pad existente: las canciones guardadas la usan.
+
+**Medir un pad:** `node tools/padlab.mjs [--pads atmos,coro] [--part estrofa] [--bright 50] [--out carpeta]` toca cada pad en la app real, imprime su energía por banda (dB respecto al total) y, con `--out`, guarda el audio en WAV. Úsalo antes y después de tocar `PADS`, `SEC_PAD` o la cadena del pad.
 
 **Volumen parejo:** con la batería y la percusión apagadas, en Estrofa, cada pad nuevo debe medir entre −36 y −32 dB RMS en la salida (los pads oscuros pueden ir un poco más arriba, los brillantes un poco más abajo). Ajusta las ganancias de `layers` y `air`, no el volumen general. Para medir: `python3 tools/build.py && node tools/_loud.mjs` (imprime RMS, pico y si el pad sonó como PADsynth `ps` u osciladores `osc`).
 Modo `fifths` (*solo tónica y quinta*): toca tónica y quinta en varias octavas para que un solo pad sirva en toda la canción.
@@ -251,7 +254,7 @@ Desplazamiento de tiempo ±9 ms × h, velocidad ±20 % × h, notas fantasma de c
 | Clave | Contenido |
 |---|---|
 | `acomp` | objeto `S` completo (tempo, compás, parte `at`, estilo, pad, modo `padHand` y acordes `held`, mezcla `layers` con `on`/`vol`/`side` por canal, estructura `song`, `advance` (avanzar por la canción), `shkTone`, `clickLv` (fuerza de cada pulso del clic por compás: 3 fuerte, 2 normal, 1 suave, 0 silencio), idioma `lang`, `stats` (estadísticas anónimas, `true` por defecto); desde 2.0: `center` (`'pad'`, `'ens'` o `null` hasta la primera elección), `adv` (modo avanzado), `bank` (`'A'`/`'B'`), `ens` (`{ A: [9], B: [9] }` con claves de `ENS` o `null`), `tips` (consejo al abrir) y `tourDone`…) |
-| `acomp-songs` | lista `[{ name, bpm, meter, style, key, shaker, pad, padMode, padHand, padMove, padRich, shkSound, shkTone, advance, song }]` (las canciones viejas sin `padMove`/`padRich` cargan en 50; sin `song`, con `DEFAULT_SONG`) |
+| `acomp-songs` | lista `[{ name, bpm, meter, style, key, shaker, pad, padMode, padHand, padMove, padRich, padBright, shkSound, shkTone, advance, song }]` (las canciones viejas sin `padMove`/`padRich`/`padBright` cargan en 50; sin `song`, con `DEFAULT_SONG`) |
 | `acomp-tab` | última pantalla abierta: `pad`, `ens` o una sección de Ajustes (`ritmo`, `sonido`, `canciones`, `app`); los valores viejos (`tocar`) abren la vista en vivo |
 
 `S.layers` tiene `shaker`, `drums`, `pad` y `click`, cada uno `{ on, vol 0–100, side 'L'|'C'|'R' }`. Un estado guardado antes de 1.6.0 (sin `click`) arranca con los valores nuevos: solo el Pad encendido, todo al centro y el Clic a la izquierda; conserva sus volúmenes. La mezcla y el paneo son del equipo, no de cada canción: no se guardan en `acomp-songs`; tampoco la fuerza de los pulsos del clic.

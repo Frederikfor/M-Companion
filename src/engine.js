@@ -108,7 +108,10 @@
   const DRUMS = ['kick', 'snare', 'rim', 'hat', 'ohat'];
   const SEC_DYN = { intro: .75, estrofa: .85, coro: 1, puente: .9, final: 1 };
   const SEC_SHK = { intro: .7, estrofa: .85, coro: 1, puente: .8, final: 1 };
-  const SEC_PAD = { intro: 650, estrofa: 1000, coro: 2300, puente: 800, final: 2300 };
+  // Pad low-pass per part, before each pad's cutoff and the Brillo control (S.padBright, 50 = these values).
+  // Until 2.0 it was 650–2300 Hz: the 2–5 kHz band, where the ear is most sensitive, sat 30–60 dB down and
+  // the pads sounded dull, worse in a car (docs/auditorias/2026-11-27-pads.md). Parts still differ, by less.
+  const SEC_PAD = { intro: 1900, estrofa: 2400, coro: 3400, puente: 2100, final: 3000 };
   // ---------- Song structure ----------
   // A song is a list of parts played in order (S.song.seq); each kind of part is defined once (S.song.parts)
   // with its chords as [degree index, length in bars], 0.5 being half a bar. A part lasts its chords rounded up
@@ -154,14 +157,14 @@
   const PADS = {
     atmos:     { group: 'Worship', name: 'Supersaw', en: 'Supersaw', layers: [['sawtooth', [-9, 0, 9], 0, .035], ['sine', [0], 12, .029]], cutoff: 1, q: .7, attack: 2.2, release: 2.5, vib: [.25, 4], hall: .9, voicing: 'add9' },
     fundamento:{ group: 'Worship', name: 'Pad cálido', en: 'Warm Pad', layers: [['sawtooth', [-7, 7], 0, .016], ['triangle', [0], -12, .04], ['sine', [0], 12, .01]], cutoff: .7, q: .9, attack: 3, release: 3, vib: [.2, 3], hall: 1, voicing: 'sus2', air: [.032, 3500] },
-    aire:      { group: 'Worship', name: 'Pad respiro', en: 'Breath Pad', layers: [['triangle', [-5, 5], 0, .035], ['sine', [0], 12, .02]], cutoff: 1.2, q: .5, attack: 2.5, release: 3, vib: [.15, 4], hall: 1.1, voicing: 'open', air: [.12, 6000] },
+    aire:      { group: 'Worship', name: 'Pad respiro', en: 'Breath Pad', layers: [['triangle', [-5, 5], 0, .035], ['sine', [0], 12, .02]], cutoff: .7, q: .5, attack: 2.5, release: 3, vib: [.15, 4], hall: 1.1, voicing: 'open', air: [.12, 6000] },
     shimmer:   { group: 'Worship', name: 'Shimmer', en: 'Shimmer', layers: [['sine', [-4, 4], 12, .03], ['triangle', [0], 24, .01], ['sawtooth', [-10, 10], 0, .01]], cutoff: 1.6, q: .4, attack: 2.8, release: 3, vib: [.3, 5], hall: 1.2, voicing: 'open' },
-    amanecer:  { group: 'Worship', name: 'Swell', en: 'Swell', layers: [['sawtooth', [-14, -5, 5, 14], 0, .043], ['sawtooth', [0], 12, .017]], cutoff: 1.4, q: 1.2, attack: 4, release: 3, vib: [.2, 4], hall: 1, voicing: 'add9' },
+    amanecer:  { group: 'Worship', name: 'Swell', en: 'Swell', layers: [['sawtooth', [-14, -5, 5, 14], 0, .043], ['sawtooth', [0], 12, .017]], cutoff: .8, q: 1.2, attack: 4, release: 3, vib: [.2, 4], hall: 1, voicing: 'add9' },
     oracion:   { group: 'Oración y ministración', name: 'Senoidal', en: 'Sine', layers: [['sine', [-3, 3], 0, .033], ['triangle', [0], -12, .026]], cutoff: .5, q: .4, attack: 4, release: 4, vib: [.1, 3], hall: 1, voicing: 'sus2' },
-    quintas:   { group: 'Oración y ministración', name: 'Quintas', en: 'Power 5th', layers: [['sawtooth', [-6, 6], 0, .015], ['sine', [0], -12, .04]], cutoff: .6, q: .6, attack: 3, release: 3.5, vib: [.15, 3], hall: 1, voicing: 'power', air: [.028, 2500] },
+    quintas:   { group: 'Oración y ministración', name: 'Quintas', en: 'Power 5th', layers: [['sawtooth', [-6, 6], 0, .015], ['sine', [0], -12, .04]], cutoff: .75, q: .6, attack: 3, release: 3.5, vib: [.15, 3], hall: 1, voicing: 'power', air: [.028, 2500] },
     cristal:   { group: 'Oración y ministración', name: 'Halo', en: 'Halo', layers: [['sine', [0], 12, .034], ['sine', [0], 19, .011], ['triangle', [0], 0, .024]], cutoff: 2.2, q: .3, attack: .4, release: 3, vib: [.2, 4.5], hall: 1.2, voicing: 'open', trem: [3.5, .15] },
     calido:    { group: 'Alabanza', name: 'Triangular', en: 'Triangle', layers: [['triangle', [-6, 6], 0, .031], ['sine', [0], -12, .025]], cutoff: .75, q: .5, attack: 1.2, release: 1.8, vib: [.2, 3], hall: .5, voicing: 'triad' },
-    analogico: { group: 'Alabanza', name: 'Polisinte', en: 'Poly Synth', layers: [['sawtooth', [-12, 0, 12], 0, .029], ['square', [-6, 6], -12, .019]], cutoff: 1.1, q: 1.5, attack: .5, release: 1.2, vib: [.6, 6], hall: .5, voicing: 'triad' },
+    analogico: { group: 'Alabanza', name: 'Polisinte', en: 'Poly Synth', layers: [['sawtooth', [-12, 0, 12], 0, .029], ['square', [-6, 6], -12, .019]], cutoff: .95, q: 1.5, attack: .5, release: 1.2, vib: [.6, 6], hall: .5, voicing: 'triad' },
     teclas:    { group: 'Alabanza', name: 'Rhodes', en: 'Rhodes', layers: [['sine', [0], 0, .039], ['triangle', [-3, 3], 12, .01]], cutoff: 1.5, q: .3, attack: .15, release: 1.2, vib: [.1, 2], hall: .5, voicing: 'add9', trem: [4.5, .3], osc: true },
     cuerdas:   { group: 'Himnos y gospel', name: 'Cuerdas', en: 'Strings', layers: [['sawtooth', [-12, -4, 4, 12], 0, .048]], cutoff: .9, q: .6, attack: 1.4, release: 2, vib: [5, 6], hall: .7, voicing: 'triad' },
     coro:      { group: 'Himnos y gospel', name: 'Coro "Aah"', en: 'Choir Aahs', layers: [['sawtooth', [-8, 0, 8], 0, .046]], cutoff: 2.5, q: .3, attack: 1.2, release: 2, vib: [.2, 3], hall: .9, voicing: 'triad', bw: 30, spread: .6, tilt: 1, sections: [1, 1.15], formant: [[750, 6, 1], [1200, 7, .7], [2650, 9, .35], [3400, 10, .15]], air: [.012, 3000] },
@@ -211,8 +214,8 @@
       'mic.start': 'Escuchando. Toca unos compases para que mida tu tempo.', 'mic.wait': 'Escuchando…',
       'mic.read': (det, set) => `Detecto <b>${det}</b> BPM · marcado ${set}`, 'mic.fast': 'Te estás acelerando', 'mic.slow': 'Te estás frenando',
       'mic.adjusted': ' · ajusté el tempo', 'mic.suggest': ' · activa "La base me sigue" para que la base te siga', 'mic.ok': 'Vas a tempo.',
-      key: 'Tonalidad', 'key.opt': 'Tono', 'pad.sound': 'Sonido del pad', 'pad.fifths': 'Solo tónica y quinta', 'pad.move': 'Movimiento', 'pad.rich': 'Riqueza', names: 'Nombres de notas',
-      'pad.foot': 'Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Pad.',
+      key: 'Tonalidad', 'key.opt': 'Tono', 'pad.sound': 'Sonido del pad', 'pad.fifths': 'Solo tónica y quinta', 'pad.move': 'Movimiento', 'pad.rich': 'Riqueza', 'pad.bright': 'Brillo', names: 'Nombres de notas',
+      'pad.foot': 'Brillo abre o cierra los agudos al momento; Movimiento es cuánto ondula el pad; Riqueza, cuántos armónicos acumula y se aplica al soltar. En 50 % cada pad suena como viene. Tónica + 5ª y el modo Manual están en Pad.',
       mix: 'Mezcla', 'ch.shaker': 'Shaker', 'ch.drums': 'Batería', 'ch.pad': 'Pad', 'ch.click': 'Clic',
       'ch.mute': (c) => `Encender o apagar ${c}`, 'ch.vol': (c) => `Volumen ${c}`,
       pan: 'Paneo', 'pan.center': 'Todo al centro', 'pan.aria': (c) => `Lado de ${c}`, 'side.L': 'Izq', 'side.C': 'Centro', 'side.R': 'Der', 'tag.L': 'IZQ', 'tag.R': 'DER',
@@ -337,8 +340,8 @@
       'mic.start': 'Listening. Play a few bars so it can measure your tempo.', 'mic.wait': 'Listening…',
       'mic.read': (det, set) => `Hearing <b>${det}</b> BPM · set ${set}`, 'mic.fast': 'You are speeding up', 'mic.slow': 'You are slowing down',
       'mic.adjusted': ' · tempo adjusted', 'mic.suggest': ' · turn on "Backing follows me" so the backing follows you', 'mic.ok': 'You are on tempo.',
-      key: 'Key', 'key.opt': 'Key', 'pad.sound': 'Pad sound', 'pad.fifths': 'Root and fifth only', 'pad.move': 'Movement', 'pad.rich': 'Richness', names: 'Note names',
-      'pad.foot': 'Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed. Root + 5th and Manual mode are on Pad.',
+      key: 'Key', 'key.opt': 'Key', 'pad.sound': 'Pad sound', 'pad.fifths': 'Root and fifth only', 'pad.move': 'Movement', 'pad.rich': 'Richness', 'pad.bright': 'Brightness', names: 'Note names',
+      'pad.foot': 'Brightness opens or closes the highs right away; Movement is how much the pad sways; Richness is how many harmonics it stacks, applied when you let go. At 50 % each pad sounds as designed. Root + 5th and Manual mode are on Pad.',
       mix: 'Mix', 'ch.shaker': 'Shaker', 'ch.drums': 'Drums', 'ch.pad': 'Pad', 'ch.click': 'Click',
       'ch.mute': (c) => `Turn ${c} on or off`, 'ch.vol': (c) => `${c} volume`,
       pan: 'Pan', 'pan.center': 'All centred', 'pan.aria': (c) => `${c} side`, 'side.L': 'Left', 'side.C': 'Centre', 'side.R': 'Right', 'tag.L': 'L', 'tag.R': 'R',
@@ -490,7 +493,7 @@
     // nothing changes on its own. Moving through the song and Auto are one switch away.
     bpm: 72, meter: '4/4', at: 0, autoFill: 0, advance: false,
     key: 7, names: 'latin', chord: 0, style: 'balada44', shaker: 'auto', human: 40, countIn: true,
-    pad: 'atmos', padMode: 'fifths', padHand: 'manual', held: [0], padMove: 50, padRich: 50, shkSound: 'small', shkTone: 'normal',
+    pad: 'atmos', padMode: 'fifths', padHand: 'manual', held: [0], padMove: 50, padRich: 50, padBright: 50, shkSound: 'small', shkTone: 'normal',
     clickLv: CLICK0(),
     // Only the pad on by default; everything in the centre except the click, on the left (the musician's ear).
     layers: { shaker: { on: false, vol: 60, side: 'C' }, drums: { on: false, vol: 75, side: 'C' }, pad: { on: true, vol: 50, side: 'C' }, click: { on: false, vol: 60, side: 'L' } },
@@ -506,7 +509,7 @@
   if (!SHAKERS[S.shaker]) S.shaker = 'auto';
   if (!PADS[S.pad]) S.pad = 'atmos';
   const pct = (v) => (Number.isFinite(+v) ? Math.max(0, Math.min(100, Math.round(+v))) : 50);
-  S.padMove = pct(S.padMove); S.padRich = pct(S.padRich);
+  S.padMove = pct(S.padMove); S.padRich = pct(S.padRich); S.padBright = pct(S.padBright);
   if (!SHK_SETS[S.shkSound]) S.shkSound = 'small';
   if (!(S.shkTone in TONES)) S.shkTone = 'normal';
   S.advance = S.advance === true;
@@ -628,7 +631,7 @@
     const clickOut = ctx.createGain(); clickOut.gain.value = 0.9; pans.click.connect(clickOut); clickOut.connect(out);
     // The count-in always sounds, even with the click channel off, on the click's side.
     countBus = ctx.createGain(); countBus.connect(pans.click);
-    padFilter = ctx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = (SEC_PAD[secOf(S.at)] || 1000) * PADS[S.pad].cutoff; padFilter.Q.value = PADS[S.pad].q;
+    padFilter = ctx.createBiquadFilter(); padFilter.type = 'lowpass'; padFilter.frequency.value = padCut(); padFilter.Q.value = PADS[S.pad].q;
     padFilter.connect(buses.pad);
     rhythmIn = ctx.createChannelSplitter(4);
     rhythmIn.connect(buses.shaker, 0); rhythmIn.connect(buses.drums, 1); rhythmIn.connect(buses.click, 2); rhythmIn.connect(countBus, 3);
@@ -871,6 +874,7 @@
   const psCache = new Map();
   let psTodo = [], psMs = 0;
   const richF = () => (S.padRich - 50) / 50;
+  const brightF = () => (S.padBright - 50) / 50;
   const moveF = () => (S.padMove / 50) ** 1.5;
   const sweepCents = () => Math.min(900, 400 * moveF());
   const psKey = (notes) => [S.pad, S.padRich, notes.join(',')].join('|');
@@ -1121,7 +1125,12 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     hallSend.gain.setTargetAtTime(P.hall * 0.6, ctx.currentTime, 0.3);
     padBright();
   }
-  function padBright(t, sec = secOf(S.at)) { if (ctx) padFilter.frequency.setTargetAtTime(SEC_PAD[sec] * PADS[S.pad].cutoff * 2 ** (0.4 * richF()), Math.max(t || 0, ctx.currentTime), 0.6); }
+  // Brillo moves the cutoff up to 1.5 octaves either way; Riqueza still opens it a little more.
+  function padCut(sec = secOf(S.at)) {
+    const f = (SEC_PAD[sec] || SEC_PAD.estrofa) * PADS[S.pad].cutoff * 2 ** (0.4 * richF() + 1.5 * brightF());
+    return Math.max(120, Math.min(16000, f));
+  }
+  function padBright(t, sec = secOf(S.at), tc = 0.6) { if (ctx) padFilter.frequency.setTargetAtTime(padCut(sec), Math.max(t || 0, ctx.currentTime), tc); }
 
   // ---------- Scheduler ----------
   // The rhythm is rendered ahead as audio, in chunks of up to one phrase, and played by the
@@ -1987,6 +1996,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     shs.value = S.shkSound;
     $('padmove').value = S.padMove; $('padmoveval').textContent = S.padMove + ' %';
     $('padrich').value = S.padRich; $('padrichval').textContent = S.padRich + ' %';
+    $('padbright').value = S.padBright; $('padbrightval').textContent = S.padBright + ' %';
     const ids = Object.keys(PADS), P = PADS[S.pad];
     $('padname').textContent = NM(P);
     $('padsub').textContent = `${T('groups')[P.group] || P.group} · ${T('pad.of', ids.indexOf(S.pad) + 1, ids.length)}`;
@@ -2056,7 +2066,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
       load.addEventListener('click', () => {
         setBpm(sg.bpm); setMeter(sg.meter);
         S.style = sg.style; S.key = sg.key; S.shaker = sg.shaker || 'auto';
-        if (PADS[sg.pad]) S.pad = sg.pad; if (sg.padMode) S.padMode = sg.padMode; S.padMove = pct(sg.padMove); S.padRich = pct(sg.padRich); if (SHK_SETS[sg.shkSound]) S.shkSound = sg.shkSound;
+        if (PADS[sg.pad]) S.pad = sg.pad; if (sg.padMode) S.padMode = sg.padMode; S.padMove = pct(sg.padMove); S.padRich = pct(sg.padRich); S.padBright = pct(sg.padBright); if (SHK_SETS[sg.shkSound]) S.shkSound = sg.shkSound;
         if (sg.padHand === 'auto' || sg.padHand === 'manual') S.padHand = sg.padHand;
         if (sg.shkTone in TONES) { S.shkTone = sg.shkTone; $('shktone').value = sg.shkTone; }
         if (typeof sg.advance === 'boolean') { S.advance = sg.advance; setCountUi(); }
@@ -2080,7 +2090,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   $('savesong').addEventListener('click', () => {
     const name = $('songname').value.trim();
     if (!name) { $('songname').focus(); return; }
-    const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, padHand: S.padHand, padMove: S.padMove, padRich: S.padRich, shkSound: S.shkSound, shkTone: S.shkTone, advance: S.advance, song: JSON.parse(JSON.stringify(S.song)) };
+    const sg = { name, bpm: S.bpm, meter: S.meter, style: S.style, key: S.key, shaker: S.shaker, pad: S.pad, padMode: S.padMode, padHand: S.padHand, padMove: S.padMove, padRich: S.padRich, padBright: S.padBright, shkSound: S.shkSound, shkTone: S.shkTone, advance: S.advance, song: JSON.parse(JSON.stringify(S.song)) };
     const at = songs.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
     if (at >= 0) songs[at] = sg; else songs.push(sg);
     saveSongs(); renderSongs(); songTitle = name; $('songtitle').textContent = name;
@@ -2113,6 +2123,8 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
   $('padprev').addEventListener('click', () => stepPad(-1));
   $('padnext').addEventListener('click', () => stepPad(1));
   $('padmove').addEventListener('input', (e) => { S.padMove = +e.target.value; $('padmoveval').textContent = S.padMove + ' %'; save(); padMotion(); });
+  $('padbright').addEventListener('input', (e) => { S.padBright = +e.target.value; $('padbrightval').textContent = S.padBright + ' %'; padBright(0, undefined, 0.08); });
+  $('padbright').addEventListener('change', () => save());
   $('padrich').addEventListener('input', (e) => { $('padrichval').textContent = e.target.value + ' %'; });
   $('padrich').addEventListener('change', (e) => { S.padRich = +e.target.value; save(); padBright(); padPlay(0, true); });
   $('padmode').addEventListener('click', () => { S.padMode = S.padMode === 'fifths' ? 'chord' : 'fifths'; save(); paintWin(); padPlay(); });
@@ -2602,6 +2614,7 @@ onmessage = (e) => { const { id, P, notes, sr, N, r } = e.data, t0 = performance
     chunks: () => chunks.map((c) => [c.t0, c.t1]),
     diag: () => ({ late: diag.late, loops: diag.loops, cuts: [...diag.cuts], chunks: [...diag.chunks], pads: [...diag.pads], lag: cutLag }),
     pad: () => ({ kind: padVoices.length ? padVoices[padVoices.length - 1].kind : null, cached: psCache.size, ms: Math.round(psMs), notes: (curNotes() || []).length, voices: padVoices.length }),
+    cut: () => Math.round(padFilter.frequency.value),
     pan: () => CHANNELS.map((k) => (pans[k] && pans[k].pan ? Math.round(pans[k].pan.value * 100) / 100 : 0)),
     song: () => ({ at: S.at, pend: ui.pend, chord: S.chord, held: [...S.held], seq: [...S.song.seq] }),
     padLevel() {

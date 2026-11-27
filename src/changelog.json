@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.1.0",
+    "date": "2026-11-27",
+    "es": [
+      "Los pads suenan más brillantes y presentes: antes se cortaban casi todos los agudos, sobre todo en Intro y Estrofa.",
+      "Nuevo control Brillo en Ajustes › Sonido: abre o cierra los agudos del pad al momento y se guarda con cada canción."
+    ],
+    "en": [
+      "Pads sound brighter and more present: most of their highs used to be cut, above all in Intro and Verse.",
+      "New Brightness control in Settings › Sound: opens or closes the pad's highs right away and is saved with each song."
+    ]
+  },
+  {
     "version": "2.0.0",
     "date": "2026-11-24",
     "es": [

@@ -75,7 +75,7 @@ Capturas a 390 × 844 tomadas de `index.html` el 2026-11-23.
 |---|---|---|
 | **Tocar** | Canción · compás · estado · BPM → tempo (−5 − *Marcar tempo* + +5) → parte, posición y ↻ → mapa de partes → selector de pad `< Supersaw >` → panel de armonía (dial de tonalidad, ventana de 6 acordes, Auto/Manual, *Tónica + 5ª*, leyenda) → canales Shaker · Batería · Pad · Clic → Remate · Play · Siguiente | En 390×844 queda un **hueco de ~150 px** entre la armonía y los canales; en 430×932 más; en 375×667 ninguno. |
 | **Ritmo** | Estilo (estilo, patrón y sonido de shaker, tono) → Clic (fuerza por pulso) → Interpretación (toque humano, *Avanzar por la canción*, conteo, remate automático) → Micrófono beta (*Escuchar mi tempo*, *La base me sigue*) | |
-| **Sonido** | Pad (tonalidad, sonido, Movimiento, Riqueza, nombres de notas) → Mezcla (4 volúmenes, Paneo) → **Estructura de la canción** (Orden / Partes, editor de acordes) → App (idioma, versión, diagnóstico, estadísticas) → créditos | Mezcla cuatro temas distintos. |
+| **Sonido** | Pad (tonalidad, sonido, Brillo, Movimiento, Riqueza, nombres de notas) → Mezcla (4 volúmenes, Paneo) → **Estructura de la canción** (Orden / Partes, editor de acordes) → App (idioma, versión, diagnóstico, estadísticas) → créditos | Mezcla cuatro temas distintos. |
 | **Canciones** | Nombre + Guardar → lista de canciones (tocar carga, × dos veces borra) | |
 
 Ruta para cambiar los acordes de una parte hoy: **Sonido › bajar hasta Estructura › Partes › tocar la parte › editor**. Cuatro pasos y un desplazamiento, en una pestaña llamada "Sonido".

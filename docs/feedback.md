@@ -33,3 +33,11 @@ Fuente: captura de comentarios compartida por Frederik el 2026-11-23 (hilo del p
 
 ## 2026-11-23 · Frederik sobre el micrófono
 "Seguir tiempo y seguir ritmo: por el momento ocultémoslas, dado que no están en funcionamiento activo. ¿O sí?" → respuesta con evidencia en la [auditoría](auditorias/2026-11-23-codigo.md#1-micrófono-escuchar-mi-tempo-y-la-base-me-sigue). Estado: **en evaluación** (Fase 2).
+
+## 2026-11-26 · Frederik, escuchando en el carro
+Fuente: hilo del proyecto "Dar brillo y movimiento a los pads", 2026-11-26.
+
+| ID | Quién | Qué dijo (resumen fiel) | Lectura | Estado |
+|---|---|---|---|---|
+| F-2026-11-26-1 | Frederik | El pad no tiene cuerpo, casi no tiene armónicos ni envolvente; algunos suenan monótonos. | Medido: el cuerpo está, faltan 2–5 kHz por el filtro por parte; envolvente plana ([auditoría](auditorias/2026-11-27-pads.md)). | **planeado** (D-2026-11-27-2); F1 **hecho** 2.1.0 |
+| F-2026-11-26-2 | Frederik | El Rhodes suena muy simple. | Senoidal + triangular, sin armónicos 3–5, 7–9 ni caída. | **planeado**, F4 (Rhodes FM) |
