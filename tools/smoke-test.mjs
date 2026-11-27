@@ -207,6 +207,12 @@ await page.waitForTimeout(1500);
 const pad = await page.evaluate(() => window.acompTest.pad());
 if (pad.kind !== 'ps' || pad.cached < 6) errors.push(`pad should play a PADsynth loop with 6 chords ready, got ${JSON.stringify(pad)}`);
 if ((await page.textContent('#padrichval')).trim() !== '80 %') errors.push('Richness value is not shown');
+// Brightness moves the pad filter right away, 1.5 octaves either way, and shows its value.
+const bright = async (v) => { await page.$eval('#padbright', (r, v) => { r.value = v; r.dispatchEvent(new Event('input')); r.dispatchEvent(new Event('change')); }, v); await page.waitForTimeout(600); return page.evaluate(() => window.acompTest.cut()); };
+const cutLo = await bright(0), cutHi = await bright(100);
+if (!(cutHi > cutLo * 6)) errors.push(`Brightness should open the pad filter, got ${cutLo} Hz at 0 and ${cutHi} Hz at 100`);
+if ((await page.textContent('#padbrightval')).trim() !== '100 %') errors.push('Brightness value is not shown');
+await bright(50);
 // Movement at the top must sway a dark pad, never silence it (the filter sweep used to close Senoidal).
 // Avanzar goes off meanwhile: a part change in the middle of the 9 s window (Estrofa → Coro) changes the
 // brightness on purpose, and how much of it the window caught made this check pass or fail by timing alone.

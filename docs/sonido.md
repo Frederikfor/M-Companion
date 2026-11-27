@@ -28,6 +28,8 @@ Formatos y reglas: README §5.5 (pads), §5.8 (muestras). Licencias: [`samples/C
 - No existen buenas librerías de pads CC0 (búsqueda 2026-10-27); por eso se sintetizan.
 - Fuentes CC0 ya identificadas: VCSL (Steinway B, Kawai, órgano, más percusión), VSCO-2 CE (cuerdas). Salamander Grand Piano es CC-BY: **no** sirve.
 
+- **Brillo y espectro de los pads (2026-11-27):** los pads sonaban apagados porque el filtro por parte (`SEC_PAD`) cortaba en 650–2300 Hz. Desde 2.1.0 va de 1900 a 3400 Hz y hay control Brillo. Mediciones, gráficas y plan por fases (armónicos, movimiento, Rhodes FM): [auditorias/2026-11-27-pads.md](auditorias/2026-11-27-pads.md). Herramienta: `node tools/padlab.mjs`. El Rhodes real de referencia (jRhodes3c) es CC BY 4.0: no sirve para distribuir.
+
 ## Auditoría de calidad
 Detalle completo, mediciones y fuentes: [auditorias/2026-11-23-sonido.md](auditorias/2026-11-23-sonido.md). Decisión: [D-2026-11-23-4](decisiones.md) (pendiente).
 

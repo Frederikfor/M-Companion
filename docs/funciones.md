@@ -51,7 +51,7 @@ Sonidos: golpes Crash, Bombo + crash, Aplauso, Aro, Toms bajando, Corte (calla l
 ## Ajustes › Sonido (`#tab-sonido`)
 | Grupo | Controles | Estado |
 |---|---|---|
-| Pad | Tonalidad, Sonido del pad, Movimiento, Riqueza, Nombres de notas (Do/C) | estable |
+| Pad | Tonalidad, Sonido del pad, **Brillo** (2.1.0), Movimiento, Riqueza, Nombres de notas (Do/C) | estable |
 | Mezcla | Volumen y encendido por canal; **Paneo** plegable (Izq/Centro/Der) | estable |
 
 ## Ajustes › Canciones (`#tab-canciones`)
